@@ -1,4 +1,4 @@
-# 🥗 FoodNote
+# ![FoodNote aperçu](docs/logo-icon.png) FoodNote
 
 ![FoodNote aperçu](docs/foodnote-readme-fr.png)
 
