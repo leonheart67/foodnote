@@ -1,6 +1,6 @@
 # 🥗 FoodNote
 
-![FoodNote aperçu](docs/foodnote-readme-montage-fr.png)
+![FoodNote aperçu](docs/foodnote-readme-fr.png)
 
 **Application web self-hosted de suivi alimentaire avec SQLite, CIQUAL, OpenFoodFacts et IA optionnelle.**
 
