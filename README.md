@@ -1,4 +1,4 @@
-# ![FoodNote aperçu](docs/logo-icon.png) FoodNote
+#  <img src="docs/logo-icon.png" width="42" alt="FoodNote logo"> FoodNote
 
 ![FoodNote aperçu](docs/foodnote-readme-fr.png)
 
