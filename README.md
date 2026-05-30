@@ -1,5 +1,7 @@
 # 🥗 FoodNote
 
+![FoodNote aperçu](docs/foodnote-readme-montage-fr.png)
+
 **Application web self-hosted de suivi alimentaire avec SQLite, CIQUAL, OpenFoodFacts et IA optionnelle.**
 
 ![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)
