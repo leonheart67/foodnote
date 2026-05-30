@@ -1,0 +1,619 @@
+/* FoodNote beta 0.22.37 — Mobile Add Dedup
+   Composant mobile dédié : barre basse + bulle d'action.
+   Retouche robuste : les libellés restent lisibles sur la barre pastel,
+   sans modifier le comportement du + ni les moteurs FoodNote. */
+
+#foodnote-mobile-nav-shell {
+  --fn-nav-warm: #ffb26f;
+  --fn-nav-coral: #ff8a72;
+  --fn-nav-coral-2: #ff9f7a;
+  --fn-nav-magenta: #d77ab7;
+  --fn-nav-glow: color-mix(in srgb, var(--fn-nav-coral) 34%, transparent);
+  --fn-nav-line: color-mix(in srgb, var(--fn-nav-coral) 38%, var(--border2) 62%);
+  --fn-nav-surface: color-mix(in srgb, var(--card) 82%, #fff1dc 18%);
+  --fn-nav-surface-2: color-mix(in srgb, var(--bg2) 80%, #ffe2c2 20%);
+  --fn-nav-text: #5f4035;
+  --fn-nav-muted: #7b604b;
+  --fn-nav-active-text: #3f2b24;
+  --fn-nav-plus-text: #5f2448;
+  --fn-nav-plus-pill: rgba(255,255,255,.88);
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9800;
+  padding: 0 max(10px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-right, 0px));
+  pointer-events: none;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform .18s ease, opacity .18s ease;
+}
+
+#foodnote-mobile-nav-shell .fn-mobile-nav-bar,
+#foodnote-mobile-nav-shell .fn-mobile-bilan-sheet,
+#foodnote-mobile-nav-shell .fn-mobile-action-bubble,
+#foodnote-mobile-nav-shell .fn-mobile-bubble-backdrop,
+#foodnote-mobile-nav-shell .fn-mobile-nav-toast {
+  pointer-events: auto;
+}
+
+#foodnote-mobile-nav-shell.is-hidden {
+  opacity: 0;
+  transform: translateY(calc(100% + 18px));
+  pointer-events: none;
+}
+
+#foodnote-mobile-nav-shell.is-hidden * {
+  pointer-events: none !important;
+}
+
+.fn-mobile-nav-bar {
+  position: relative;
+  width: min(100%, 560px);
+  min-height: 68px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 80px 1fr 1fr;
+  align-items: end;
+  gap: 4px;
+  padding: 7px 8px 8px;
+  border-radius: 28px 28px 22px 22px;
+  border: 1px solid var(--fn-nav-line);
+  background:
+    radial-gradient(circle at 50% -10%, color-mix(in srgb, var(--fn-nav-warm) 28%, transparent), transparent 46%),
+    linear-gradient(180deg, var(--fn-nav-surface), var(--fn-nav-surface-2));
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.32),
+    0 0 0 1px color-mix(in srgb, #fff 8%, transparent) inset,
+    0 -5px 24px color-mix(in srgb, var(--fn-nav-warm) 14%, transparent);
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.fn-mobile-nav-bar::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fn-nav-coral) 62%, transparent), color-mix(in srgb, var(--fn-nav-magenta) 38%, transparent), transparent);
+  opacity: .9;
+}
+
+.fn-mobile-nav-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--fn-nav-muted);
+  min-width: 0;
+  height: 52px;
+  border-radius: 18px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 5px 3px;
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1.05;
+  font-weight: 850;
+  letter-spacing: -.01em;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform .12s ease, background .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.fn-mobile-nav-btn i,
+.fn-mobile-nav-btn .fn-mobile-nav-emoji {
+  font-size: 21px;
+  line-height: 1;
+  opacity: .92;
+}
+
+.fn-mobile-nav-btn .fn-mobile-nav-emoji { display: none; }
+
+.fn-mobile-nav-btn span {
+  display: block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--fn-nav-muted);
+  text-shadow: none;
+}
+
+.fn-mobile-nav-btn:not(.fn-mobile-nav-add) i,
+.fn-mobile-nav-btn:not(.fn-mobile-nav-add) .fn-mobile-nav-emoji {
+  color: color-mix(in srgb, var(--fn-nav-muted) 82%, var(--fn-nav-coral) 18%);
+}
+
+.fn-mobile-nav-btn:active {
+  transform: translateY(1px) scale(.98);
+}
+
+.fn-mobile-nav-btn.is-active {
+  color: var(--fn-nav-active-text);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fn-nav-warm) 19%, transparent), color-mix(in srgb, var(--fn-nav-coral) 10%, transparent));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fn-nav-coral) 18%, transparent);
+}
+
+.fn-mobile-nav-btn.is-active i,
+.fn-mobile-nav-btn.is-active .fn-mobile-nav-emoji {
+  color: color-mix(in srgb, var(--fn-nav-coral) 74%, #5d4637 26%);
+  opacity: 1;
+}
+.fn-mobile-nav-btn.is-active span {
+  color: var(--fn-nav-active-text);
+}
+
+.fn-mobile-nav-add {
+  position: relative;
+  height: 68px;
+  min-height: 68px;
+  width: 68px;
+  justify-self: center;
+  align-self: center;
+  margin-top: -28px;
+  margin-bottom: 2px;
+  border-radius: 25px;
+  color: #fff7ef;
+  background: linear-gradient(135deg, var(--fn-nav-coral), color-mix(in srgb, var(--fn-nav-magenta) 46%, var(--fn-nav-coral) 54%));
+  border: 1px solid color-mix(in srgb, #fff 28%, var(--fn-nav-coral) 72%);
+  box-shadow: 0 18px 38px var(--fn-nav-glow), 0 7px 18px rgba(0,0,0,.24);
+}
+
+.fn-mobile-nav-add::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 32px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fn-nav-coral) 24%, transparent), transparent 68%);
+  z-index: -1;
+}
+
+.fn-mobile-nav-add::after {
+  content: '+';
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 40px;
+  height: 40px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(255,255,255,.94);
+  border: 1px solid rgba(255,255,255,.72);
+  color: var(--fn-nav-plus-text);
+  font-size: 34px;
+  line-height: .9;
+  font-weight: 950;
+  text-shadow: none;
+  box-shadow: 0 8px 18px rgba(95,36,72,.24), inset 0 1px 0 rgba(255,255,255,.72);
+  z-index: 1;
+}
+
+.fn-mobile-nav-add i,
+.fn-mobile-nav-add .fn-mobile-nav-emoji {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  font-size: 31px;
+  color: transparent;
+  opacity: 0;
+}
+
+.fn-mobile-nav-add span:not(.fn-mobile-nav-emoji) {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16px;
+  max-width: 58px;
+  padding: 1px 6px 2px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 950;
+  color: var(--fn-nav-plus-text);
+  background: var(--fn-nav-plus-pill);
+  text-shadow: none;
+  box-shadow: 0 2px 8px rgba(95,36,72,.16);
+}
+
+.fn-mobile-bubble-backdrop {
+  position: fixed;
+  inset: 0;
+  display: none;
+  background: rgba(0,0,0,.20);
+  z-index: -1;
+}
+
+#foodnote-mobile-nav-shell.is-bilan-open .fn-mobile-bubble-backdrop,
+#foodnote-mobile-nav-shell.is-action-open .fn-mobile-bubble-backdrop {
+  display: block;
+}
+
+.fn-mobile-bilan-sheet,
+.fn-mobile-action-bubble {
+  position: fixed;
+  left: max(10px, env(safe-area-inset-left, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
+  bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+  width: min(calc(100vw - 20px), 520px);
+  margin: 0 auto;
+  padding: 10px;
+  display: none;
+  border-radius: 24px;
+  border: 1px solid var(--fn-nav-line);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--fn-nav-warm) 18%, transparent), transparent 42%),
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 88%, #fff2dc 12%), color-mix(in srgb, var(--bg2) 82%, #ffe2c2 18%));
+  box-shadow: 0 22px 56px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.fn-mobile-action-bubble {
+  width: min(calc(100vw - 22px), 520px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  padding: 12px;
+  border-radius: 28px;
+}
+
+.fn-mobile-bubble-tail {
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 18px;
+  height: 18px;
+  transform: translateX(-50%) rotate(45deg);
+  background: color-mix(in srgb, var(--bg2) 82%, #ffe2c2 18%);
+  border-right: 1px solid var(--fn-nav-line);
+  border-bottom: 1px solid var(--fn-nav-line);
+  border-radius: 4px;
+}
+
+#foodnote-mobile-nav-shell.is-bilan-open .fn-mobile-bilan-sheet,
+#foodnote-mobile-nav-shell.is-action-open .fn-mobile-action-bubble {
+  display: block;
+  animation: fnMobileBubbleIn .16s ease both;
+}
+
+@keyframes fnMobileBubbleIn {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#foodnote-mobile-nav-shell.is-action-open .fn-mobile-action-bubble {
+  animation: fnMobileActionIn .16s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes fnMobileActionIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.96); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.fn-mobile-bilan-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 5px 10px;
+}
+
+.fn-mobile-bilan-head strong {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.fn-mobile-bilan-head small {
+  display: block;
+  margin-top: 1px;
+  color: var(--text3);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.fn-mobile-bilan-close {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border2) 64%, transparent);
+  background: color-mix(in srgb, var(--bg2) 82%, transparent);
+  color: var(--text2);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.fn-mobile-bilan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.fn-mobile-bilan-choice,
+.fn-mobile-action-choice {
+  min-height: 78px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--fn-nav-line) 72%, transparent);
+  background: color-mix(in srgb, var(--bg) 74%, var(--bg2) 26%);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hub Ajouter mobile */
+.fn-mobile-add-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 6px 11px;
+}
+
+.fn-mobile-add-head strong {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: -.01em;
+}
+
+.fn-mobile-add-head small {
+  color: var(--text3);
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: right;
+  max-width: 230px;
+}
+
+.fn-mobile-add-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fn-mobile-action-choice {
+  width: 100%;
+  min-height: 68px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--bg) 80%, #fff0d9 20%), color-mix(in srgb, var(--bg2) 82%, #ffe5c8 18%));
+}
+
+.fn-mobile-action-choice.is-primary {
+  border-color: color-mix(in srgb, var(--fn-nav-coral) 44%, var(--border2) 56%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--fn-nav-warm) 24%, var(--bg) 76%), color-mix(in srgb, var(--fn-nav-coral) 18%, var(--bg2) 82%));
+}
+
+.fn-mobile-action-choice.fn-mobile-action-sport {
+  grid-column: 1 / -1;
+  min-height: 62px;
+  border-color: color-mix(in srgb, var(--green) 34%, var(--border2) 66%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 13%, var(--bg) 87%), color-mix(in srgb, var(--green) 8%, var(--bg2) 92%));
+}
+
+.fn-mobile-bilan-choice i,
+.fn-mobile-bilan-choice .fn-mobile-nav-emoji,
+.fn-mobile-action-choice i,
+.fn-mobile-action-choice .fn-mobile-nav-emoji {
+  font-size: 22px;
+  color: color-mix(in srgb, var(--fn-nav-coral) 72%, var(--green) 28%);
+}
+
+.fn-mobile-action-choice i,
+.fn-mobile-action-choice .fn-mobile-nav-emoji {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--fn-nav-warm) 16%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.fn-mobile-action-choice.fn-mobile-action-sport i,
+.fn-mobile-action-choice.fn-mobile-action-sport .fn-mobile-nav-emoji {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 13%, transparent);
+}
+
+.fn-mobile-bilan-choice .fn-mobile-nav-emoji,
+.fn-mobile-action-choice .fn-mobile-nav-emoji { display: none; }
+
+.fn-mobile-bilan-choice b,
+.fn-mobile-action-choice b {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 950;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fn-mobile-bilan-choice small,
+.fn-mobile-action-choice small {
+  display: block;
+  color: var(--text3);
+  font-size: 10px;
+  line-height: 1.18;
+  font-weight: 650;
+  margin-top: 2px;
+}
+
+.fn-mobile-bilan-choice:active,
+.fn-mobile-action-choice:active {
+  transform: translateY(1px) scale(.99);
+}
+
+.fn-mobile-nav-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(94px + env(safe-area-inset-bottom, 0px));
+  width: max-content;
+  max-width: calc(100vw - 36px);
+  transform: translateX(-50%) translateY(10px) scale(.98);
+  opacity: 0;
+  padding: 10px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--fn-nav-line);
+  background: color-mix(in srgb, var(--card) 90%, #fff0d9 10%);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 16px 36px rgba(0,0,0,.28);
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+#foodnote-mobile-nav-shell.is-toast-open .fn-mobile-nav-toast {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+
+
+/* 0.22.144 : sur mobile, le + bas devient l'entrée globale d'ajout.
+   Le hub "Capture alimentaire" du haut reste disponible desktop/tablette, mais il est masqué sur mobile pour éviter le doublon. */
+body.foodnote-mobile-nav-enabled #foodnote-capture-launcher {
+  display: none !important;
+}
+
+/* 0.22.37 : sur mobile, la barre basse devient l'unique entrée principale d'ajout.
+   On masque les anciens boutons Ajouter du journal uniquement quand le composant mobile est actif. */
+body.foodnote-mobile-nav-enabled .floating-add-food-btn,
+body.foodnote-mobile-nav-enabled .journal-bottom-actions.journal-add-only,
+body.foodnote-mobile-nav-enabled .journal-add-only,
+body.foodnote-mobile-nav-enabled .journal-add-dock-btn {
+  display: none !important;
+}
+
+@media (max-width: 820px) {
+  body.foodnote-mobile-nav-enabled #foodnote-mobile-nav-shell {
+    display: block;
+  }
+
+  body.foodnote-mobile-nav-enabled .main-wrap {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.food-add-modal-open #foodnote-mobile-nav-shell,
+  body.foodnote-camera-view-open #foodnote-mobile-nav-shell,
+  body.foodnote-crop-shell-open #foodnote-mobile-nav-shell,
+  body.foodnote-crop-camera-suspended #foodnote-mobile-nav-shell,
+  body.barcode-modal-open #foodnote-mobile-nav-shell,
+  body.capture-modal-open #foodnote-mobile-nav-shell {
+    opacity: 0;
+    transform: translateY(calc(100% + 18px));
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .fn-mobile-nav-bar {
+    grid-template-columns: 1fr 1fr 72px 1fr 1fr;
+    min-height: 64px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .fn-mobile-nav-btn {
+    font-size: 10px;
+  }
+  .fn-mobile-nav-btn i,
+  .fn-mobile-nav-btn .fn-mobile-nav-emoji {
+    font-size: 20px;
+  }
+  .fn-mobile-nav-add {
+    width: 62px;
+    height: 62px;
+    min-height: 62px;
+    border-radius: 23px;
+  }
+  .fn-mobile-nav-add::after {
+    top: 7px;
+    width: 36px;
+    height: 36px;
+    border-radius: 14px;
+    font-size: 31px;
+  }
+  .fn-mobile-nav-add i,
+  .fn-mobile-nav-add .fn-mobile-nav-emoji {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+  .fn-mobile-bilan-grid {
+    grid-template-columns: 1fr;
+  }
+  .fn-mobile-action-bubble {
+    width: min(calc(100vw - 18px), 360px);
+    padding: 10px;
+  }
+  .fn-mobile-add-grid {
+    gap: 7px;
+  }
+  .fn-mobile-action-choice {
+    min-height: 62px;
+    padding: 9px;
+  }
+  .fn-mobile-action-choice i,
+  .fn-mobile-action-choice .fn-mobile-nav-emoji {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 13px;
+  }
+  .fn-mobile-action-choice b {
+    font-size: 12px;
+  }
+  .fn-mobile-action-choice small {
+    font-size: 9.5px;
+  }
+  .fn-mobile-add-head small {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #foodnote-mobile-nav-shell,
+  .fn-mobile-nav-btn,
+  .fn-mobile-bilan-sheet,
+  .fn-mobile-action-bubble,
+  .fn-mobile-bilan-choice,
+  .fn-mobile-action-choice,
+  .fn-mobile-nav-toast {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 0.22.144 : suppression visuelle définitive des anciens boutons Ajouter desktop.
+   Les entrées gardées sont : hub Capture desktop, + repas contextuels, + bas mobile. */
+.floating-add-food-btn,
+.journal-bottom-actions.journal-add-only,
+.journal-add-only,
+.journal-add-dock-btn {
+  display: none !important;
+}

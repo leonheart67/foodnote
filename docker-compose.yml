@@ -1,0 +1,40 @@
+services:
+  foodnote:
+    image: ${FOODNOTE_IMAGE:-foodnote:0.22.179}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: foodnote
+    restart: unless-stopped
+    working_dir: /app
+    entrypoint:
+      - sh
+      - /app/start.sh
+    ports:
+      - "8085:3000"
+    environment:
+      - PORT=3000
+      - DATA_DIR=/data
+      - PUBLIC_DIR=/app/public
+      - NODE_PATH=/srv/node_modules:/app/node_modules
+      - FOODNOTE_APP_LABEL=FoodNote beta 0.22.179
+      - FOODNOTE_TZ=Europe/Paris
+      - FOODNOTE_CIQUAL_AUTO_DOWNLOAD=0
+      # Intégration Home Assistant / MQTT
+      # Active seulement si tu décommentes/configures ces lignes.
+      # - FOODNOTE_MQTT_ENABLED=1
+      # - FOODNOTE_MQTT_URL=mqtt://192.168.1.10:1883
+      # - FOODNOTE_MQTT_USERNAME=${FOODNOTE_MQTT_USERNAME}
+      # - FOODNOTE_MQTT_PASSWORD=${FOODNOTE_MQTT_PASSWORD}
+      # - FOODNOTE_MQTT_BASE_TOPIC=foodnote
+      # - FOODNOTE_MQTT_DISCOVERY=1
+      # - FOODNOTE_MQTT_DISCOVERY_PREFIX=homeassistant
+      # - FOODNOTE_MQTT_RETAIN=1
+      # Méthode recommandée : mets ta clé Groq dans .env puis décommente.
+      # - GROQ_API_KEY=${GROQ_API_KEY}
+      # Option pratique self-hosted : autorise la sauvegarde de la clé Groq dans SQLite depuis l’interface.
+      # Désactivé par défaut pour une publication GitHub plus propre.
+      # - FOODNOTE_ALLOW_UI_SECRET_STORAGE=${FOODNOTE_ALLOW_UI_SECRET_STORAGE:-0}
+    volumes:
+      - ${FOODNOTE_APP_DIR:-.}:/app:ro
+      - ${FOODNOTE_DATA_DIR:-./database}:/data

@@ -1,0 +1,57 @@
+# FoodNote - fichiers à ne jamais publier
+
+# secrets / configuration locale
+.env
+.env.*
+!.env.example
+
+# données persistantes / bases SQLite
+database/
+data/
+db/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# exports, imports lourds, données nutritionnelles locales
+ciqual_data.json
+openfoodfacts*.json
+openfoodfacts*.csv
+openfoodfacts*.sqlite
+alim.xml
+compo.xml
+grp.xml
+*.xml
+
+# dépendances / caches
+node_modules/
+.npm/
+npm-cache/
+.cache/
+__pycache__/
+*.pyc
+
+# logs / backups / archives
+*.log
+logs/
+tmp/
+temp/
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.bak
+*.backup
+*.old
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

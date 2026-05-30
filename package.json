@@ -1,0 +1,22 @@
+
+{
+  "name": "foodnote-server",
+  "version": "0.22.179",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "node -e \"try{console.log('tesseract.js', require.resolve('tesseract.js'))}catch(e){console.error('tesseract.js absent', e.message)}\"",
+    "check": "node scripts/foodnote-static-check.js",
+    "test": "npm run check"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.19.2",
+    "sql.js": "^1.10.3",
+    "html5-qrcode": "^2.3.8",
+    "tesseract.js": "^5.1.1",
+    "mqtt": "^5.10.4"
+  }
+}

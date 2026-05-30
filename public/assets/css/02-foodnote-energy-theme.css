@@ -1,0 +1,855 @@
+/* FoodNote beta 0.22.37 — Energy Theme Tokens
+   Couche globale : plus de couleur, gradients renforcés, objectifs plus visuels.
+   Aucun moteur JS n'est modifié par cette feuille. */
+
+:root {
+  --fn-energy-green: #74c984;
+  --fn-energy-mint: #58d5b2;
+  --fn-energy-orange: #ffb15f;
+  --fn-energy-coral: #ff7d6e;
+  --fn-energy-pink: #d77ac8;
+  --fn-energy-blue: #7bbff2;
+  --fn-energy-violet: #9d8cff;
+  --fn-energy-yellow: #f2cf66;
+  --fn-energy-glow-strong: 0 18px 46px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent);
+  --fn-energy-glow-soft: 0 14px 34px color-mix(in srgb, var(--fn-energy-green) 12%, transparent);
+}
+
+body[data-theme="light"] {
+  --fn-energy-page-1: #fff8ed;
+  --fn-energy-page-2: #eef8ef;
+  --fn-energy-page-3: #f4f1ff;
+  --fn-energy-card-tint: rgba(255,255,255,.80);
+  --fn-energy-border: rgba(95, 68, 42, .13);
+  --fn-energy-logo-bg: #fff4de;
+  --fn-energy-logo-ring: rgba(255, 177, 95, .42);
+}
+
+body:not([data-theme="light"]),
+body.dark,
+body[data-theme="dark"] {
+  --fn-energy-page-1: #201911;
+  --fn-energy-page-2: #10251b;
+  --fn-energy-page-3: #181d35;
+  --fn-energy-card-tint: rgba(37,45,38,.74);
+  --fn-energy-border: rgba(255, 197, 123, .16);
+  --fn-energy-logo-bg: rgba(255,177,95,.14);
+  --fn-energy-logo-ring: rgba(255, 126, 99, .32);
+}
+
+html { background: var(--bg) !important; }
+body {
+  background:
+    radial-gradient(circle at 8% -8%, color-mix(in srgb, var(--fn-energy-orange) 26%, transparent) 0, transparent 31vw),
+    radial-gradient(circle at 92% 3%, color-mix(in srgb, var(--fn-energy-pink) 18%, transparent) 0, transparent 28vw),
+    radial-gradient(circle at 52% 22%, color-mix(in srgb, var(--fn-energy-green) 13%, transparent) 0, transparent 34vw),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg) 82%, var(--fn-energy-page-1) 18%), color-mix(in srgb, var(--bg) 86%, var(--fn-energy-page-2) 14%) 48%, color-mix(in srgb, var(--bg) 90%, var(--fn-energy-page-3) 10%)) !important;
+}
+body[data-theme="light"] {
+  background:
+    radial-gradient(circle at 9% -8%, rgba(255, 194, 116, .72) 0, transparent 31vw),
+    radial-gradient(circle at 92% 3%, rgba(215, 122, 200, .28) 0, transparent 28vw),
+    radial-gradient(circle at 55% 16%, rgba(116, 201, 132, .42) 0, transparent 34vw),
+    linear-gradient(145deg, #fff9ee 0%, #f0f8ee 46%, #f6f1ff 100%) !important;
+}
+
+/* Header et identité : le logo ressort davantage. */
+.app-header {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 80%, var(--fn-energy-page-1) 20%), color-mix(in srgb, var(--bg) 54%, transparent)) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--fn-energy-orange) 13%, transparent) !important;
+}
+.sb-logo-icon,
+.fn-page-title-icon {
+  position: relative !important;
+  background:
+    radial-gradient(circle at 30% 18%, color-mix(in srgb, #fff 36%, transparent), transparent 42%),
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-energy-orange) 54%, var(--fn-energy-logo-bg)), color-mix(in srgb, var(--fn-energy-coral) 36%, var(--green-bg))) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 40%, var(--border2)) !important;
+  box-shadow: 0 10px 24px var(--fn-energy-logo-ring), inset 0 1px 0 rgba(255,255,255,.28) !important;
+}
+.sb-logo-icon img { filter: saturate(1.18) contrast(1.04) !important; }
+.app-title,
+.sb-logo-name {
+  background: linear-gradient(90deg, var(--text), color-mix(in srgb, var(--fn-energy-orange) 48%, var(--text)) 44%, color-mix(in srgb, var(--fn-energy-pink) 36%, var(--text))) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+.sb-logo-phase,
+#header-subtitle { color: color-mix(in srgb, var(--fn-energy-orange) 32%, var(--text3)) !important; }
+
+/* Surfaces globales : plus lumineuses et plus colorées, sans changer la structure. */
+.card,
+.hist-card,
+.macro-ref,
+.profile-hero,
+.stats-panel,
+.data-card,
+.quick-foods-card,
+.sport-box,
+.journal-meals-card,
+.journal-section-card,
+.journal-tile-card,
+.food-add-panel,
+.food-current-meal-card,
+.ocr-panel,
+.barcode-result,
+.recipe-ai-result,
+.fn-ui-surface,
+.fn-ui-panel,
+.fn-ui-card,
+.recap-card,
+.recap-smart-card,
+.stats-card,
+.stats-mini-card,
+.profile-kpi,
+.data-summary-card,
+.unit-weight-row,
+.anomaly-row {
+  border-color: color-mix(in srgb, var(--fn-energy-border) 70%, var(--calm-line) 30%) !important;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--fn-energy-orange) 9%, transparent) 0, transparent 48%),
+    linear-gradient(145deg, color-mix(in srgb, var(--calm-surface) 82%, var(--fn-energy-card-tint) 18%), color-mix(in srgb, var(--calm-surface) 88%, var(--fn-energy-green) 4%)) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.card-title,
+.fn-section-title,
+.stats-mini-title,
+.quick-foods-title,
+.journal-meals-title {
+  color: var(--text) !important;
+}
+.fn-section-icon,
+.journal-meals-icon,
+.fn-page-title-icon {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-energy-orange) 28%, var(--bg2)), color-mix(in srgb, var(--fn-energy-green) 20%, var(--bg2))) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 24%, var(--border2)) !important;
+}
+
+/* Boutons : le vert reste nutrition, mais avec un vrai relief. */
+.btn-primary,
+button.btn-primary,
+.journal-add-btn,
+.sport-add-btn,
+.fn-ui-button-primary {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-green) 72%, #1c6e3b 28%), color-mix(in srgb, var(--fn-energy-mint) 64%, var(--fn-energy-orange) 36%)) !important;
+  border-color: color-mix(in srgb, var(--fn-energy-green) 56%, var(--fn-energy-orange) 44%) !important;
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--fn-energy-green) 20%, transparent), 0 4px 14px color-mix(in srgb, var(--fn-energy-orange) 13%, transparent) !important;
+}
+button:hover,
+.fn-ui-button:hover {
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 22%, var(--border2)) !important;
+}
+
+/* Navigation desktop : actif plus coloré, sans transformer le menu en sapin. */
+.sb-item.active,
+.sb-sub-item.active {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-green) 21%, var(--bg2)), color-mix(in srgb, var(--fn-energy-orange) 12%, transparent)) !important;
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 24%, var(--green) 24%) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.11), 0 8px 20px color-mix(in srgb, var(--fn-energy-green) 8%, transparent) !important;
+}
+.sb-item:hover,
+.sb-sub-item:hover {
+  background: color-mix(in srgb, var(--fn-energy-orange) 8%, var(--bg2)) !important;
+}
+
+/* Journal : hero et macros plus vivants. */
+.journal-hero {
+  background:
+    radial-gradient(circle at 12% 2%, color-mix(in srgb, var(--fn-energy-green) 30%, transparent) 0, transparent 260px),
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--fn-energy-orange) 26%, transparent) 0, transparent 280px),
+    radial-gradient(circle at 62% 85%, color-mix(in srgb, var(--fn-energy-pink) 12%, transparent) 0, transparent 270px),
+    linear-gradient(135deg, color-mix(in srgb, var(--bg2) 78%, var(--fn-energy-page-1) 22%), color-mix(in srgb, var(--bg2) 80%, var(--fn-energy-page-2) 20%)) !important;
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 21%, var(--green) 18%) !important;
+}
+.journal-main-macros .macro-cell {
+  border-color: color-mix(in srgb, var(--macro-accent, var(--green)) 18%, var(--calm-line)) !important;
+  background:
+    radial-gradient(circle at 94% 0%, color-mix(in srgb, var(--macro-accent, var(--green)) 19%, transparent) 0, transparent 62%),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg2) 77%, transparent), color-mix(in srgb, var(--macro-accent, var(--green)) 7%, var(--bg2))) !important;
+}
+.journal-main-macros .macro-cell-kcal { --macro-accent: var(--fn-energy-green); }
+.journal-main-macros .macro-cell-prot { --macro-accent: var(--fn-energy-blue); }
+.journal-main-macros .macro-cell-gluc { --macro-accent: var(--fn-energy-orange); }
+.journal-main-macros .macro-cell-lip { --macro-accent: var(--fn-energy-yellow); }
+.journal-main-macros .macro-cell-kcal::after { background: linear-gradient(90deg, var(--fn-energy-green), var(--fn-energy-mint)) !important; }
+.journal-main-macros .macro-cell-prot::after { background: linear-gradient(90deg, var(--fn-energy-blue), var(--fn-energy-violet)) !important; }
+.journal-main-macros .macro-cell-gluc::after { background: linear-gradient(90deg, var(--fn-energy-orange), var(--fn-energy-coral)) !important; }
+.journal-main-macros .macro-cell-lip::after { background: linear-gradient(90deg, var(--fn-energy-yellow), var(--fn-energy-orange)) !important; }
+.meal-group {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--bg2) 64%, transparent), color-mix(in srgb, var(--fn-energy-green) 4%, transparent)) !important;
+}
+.meal-group-head {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--fn-energy-green) 7%, transparent), color-mix(in srgb, var(--fn-energy-orange) 5%, transparent)) !important;
+}
+
+/* Objectifs : la page devient une destination visuelle, pas un formulaire gris. */
+#page-objectif.objectif-page {
+  position: relative !important;
+}
+#page-objectif .profile-summary-main {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 164px !important;
+  border-radius: 34px !important;
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 28%, var(--green) 18%) !important;
+  background:
+    radial-gradient(circle at 16% 12%, color-mix(in srgb, var(--fn-energy-green) 34%, transparent) 0, transparent 250px),
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--fn-energy-orange) 32%, transparent) 0, transparent 260px),
+    radial-gradient(circle at 70% 96%, color-mix(in srgb, var(--fn-energy-pink) 16%, transparent) 0, transparent 230px),
+    linear-gradient(135deg, color-mix(in srgb, var(--bg2) 74%, var(--fn-energy-page-2) 26%), color-mix(in srgb, var(--bg2) 78%, var(--fn-energy-page-1) 22%)) !important;
+  box-shadow: var(--fn-energy-glow-strong), var(--calm-shadow-soft) !important;
+}
+#page-objectif .profile-summary-main::after {
+  content: "" !important;
+  position: absolute !important;
+  right: -42px !important;
+  top: -42px !important;
+  width: 172px !important;
+  height: 172px !important;
+  border-radius: 999px !important;
+  background:
+    conic-gradient(from 210deg, color-mix(in srgb, var(--fn-energy-green) 64%, transparent), color-mix(in srgb, var(--fn-energy-orange) 70%, transparent), color-mix(in srgb, var(--fn-energy-pink) 55%, transparent), color-mix(in srgb, var(--fn-energy-green) 64%, transparent));
+  opacity: .28 !important;
+  filter: blur(.2px) !important;
+  pointer-events: none !important;
+}
+#page-objectif .profile-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: fit-content !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  color: color-mix(in srgb, var(--text) 84%, var(--fn-energy-orange) 16%) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-orange) 22%, var(--bg2)), color-mix(in srgb, var(--fn-energy-green) 12%, var(--bg2))) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 32%, var(--border2)) !important;
+}
+#page-objectif .profile-name {
+  margin-top: 10px !important;
+  font-size: clamp(30px, 4.2vw, 52px) !important;
+  line-height: .96 !important;
+  letter-spacing: -.07em !important;
+  font-weight: 950 !important;
+  background: linear-gradient(90deg, var(--text), color-mix(in srgb, var(--fn-energy-green) 40%, var(--text)), color-mix(in srgb, var(--fn-energy-orange) 48%, var(--text))) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+#page-objectif .profile-muted { max-width: 62ch !important; color: var(--text2) !important; }
+#page-objectif .objectif-method-card,
+#page-objectif .stats-commercial-card {
+  position: relative !important;
+  overflow: hidden !important;
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 17%, var(--calm-line)) !important;
+}
+#page-objectif .objectif-method-card::before,
+#page-objectif .stats-commercial-card::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 18px !important;
+  right: 18px !important;
+  top: 0 !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--fn-energy-green), var(--fn-energy-orange), var(--fn-energy-pink)) !important;
+  opacity: .72 !important;
+  pointer-events: none !important;
+}
+#page-objectif .objectif-method-box,
+#page-objectif .fn-ui-calc-box,
+#page-objectif .fn-ui-phase-step,
+#page-objectif .fn-ui-phase-zone,
+#page-objectif .fn-ui-row {
+  border-color: color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 22%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--phase-color, var(--fn-energy-orange)) 12%, transparent) 0, transparent 56%),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg2) 76%, transparent), color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 6%, var(--bg2))) !important;
+}
+#page-objectif .fn-ui-phase-segments {
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--fn-energy-green) 35%, transparent), color-mix(in srgb, var(--fn-energy-orange) 32%, transparent), color-mix(in srgb, var(--fn-energy-pink) 24%, transparent)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 10px 22px color-mix(in srgb, var(--fn-energy-orange) 10%, transparent) !important;
+}
+#page-objectif .stats-commercial-grid { gap: 14px !important; }
+
+/* Récap : on conserve la direction qui fonctionne, on renforce juste les couleurs. */
+.recap-badge-compact,
+.journal-dashboard-badge {
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--badge-accent) 24%, transparent) 0, transparent 60%),
+    linear-gradient(135deg, color-mix(in srgb, var(--fn-badge-surface-strong) 80%, var(--badge-accent) 8%), color-mix(in srgb, var(--fn-badge-surface) 86%, var(--badge-accent) 5%)) !important;
+  border-color: color-mix(in srgb, var(--badge-accent) 26%, var(--fn-badge-border)) !important;
+}
+.recap-badge-track span { filter: saturate(1.18) !important; }
+
+/* Barre mobile : elle reste bien détachée du reste du design. */
+#foodnote-mobile-nav-shell {
+  --fn-nav-warm: var(--fn-energy-orange) !important;
+  --fn-nav-coral: var(--fn-energy-coral) !important;
+  --fn-nav-coral-2: #ffa172 !important;
+  --fn-nav-magenta: var(--fn-energy-pink) !important;
+}
+.fn-mobile-nav-bar {
+  background:
+    radial-gradient(circle at 50% -14%, color-mix(in srgb, var(--fn-energy-orange) 46%, transparent), transparent 50%),
+    radial-gradient(circle at 14% 8%, color-mix(in srgb, var(--fn-energy-pink) 14%, transparent), transparent 38%),
+    linear-gradient(180deg, color-mix(in srgb, var(--fn-nav-surface) 72%, var(--fn-energy-page-1) 28%), color-mix(in srgb, var(--fn-nav-surface-2) 78%, var(--fn-energy-orange) 8%)) !important;
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 42%, var(--border2)) !important;
+  box-shadow: 0 20px 52px rgba(0,0,0,.34), 0 -5px 24px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+.fn-mobile-nav-add {
+  background: linear-gradient(135deg, var(--fn-energy-coral), color-mix(in srgb, var(--fn-energy-pink) 52%, var(--fn-energy-orange) 48%)) !important;
+}
+.fn-mobile-action-bubble,
+.fn-mobile-bilan-sheet {
+  border-color: color-mix(in srgb, var(--fn-energy-orange) 24%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--fn-energy-orange) 17%, transparent), transparent 50%),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg2) 84%, var(--fn-energy-page-1) 16%), color-mix(in srgb, var(--bg2) 88%, var(--fn-energy-page-2) 12%)) !important;
+}
+
+@media (max-width: 700px) {
+  body {
+    background:
+      radial-gradient(circle at 8% -4%, color-mix(in srgb, var(--fn-energy-orange) 25%, transparent) 0, transparent 54vw),
+      radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--fn-energy-pink) 18%, transparent) 0, transparent 48vw),
+      linear-gradient(160deg, color-mix(in srgb, var(--bg) 84%, var(--fn-energy-page-1) 16%), color-mix(in srgb, var(--bg) 88%, var(--fn-energy-page-2) 12%)) !important;
+  }
+  #page-objectif .profile-summary-main { min-height: 142px !important; border-radius: 28px !important; }
+  #page-objectif .profile-name { font-size: 34px !important; }
+}
+
+
+/* FoodNote beta 0.22.37 — Theme Lab
+   Objectif : garder l'énergie, mais rendre l'accueil plus lisible.
+   - fond global allégé ;
+   - badges/gradients plus expressifs ;
+   - calories mieux intégrées ;
+   - dépassement calories = alerte visuelle ;
+   - protéines atteintes = vraie victoire.
+*/
+
+/* Fond global : moins de nappes colorées massives, plus d'air. */
+body {
+  background:
+    radial-gradient(circle at 8% -10%, color-mix(in srgb, var(--fn-energy-orange) 14%, transparent) 0, transparent 28vw),
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--fn-energy-pink) 8%, transparent) 0, transparent 26vw),
+    radial-gradient(circle at 54% 18%, color-mix(in srgb, var(--fn-energy-green) 7%, transparent) 0, transparent 32vw),
+    linear-gradient(145deg, color-mix(in srgb, var(--bg) 92%, var(--fn-energy-page-1) 8%), color-mix(in srgb, var(--bg) 94%, var(--fn-energy-page-2) 6%) 52%, color-mix(in srgb, var(--bg) 96%, var(--fn-energy-page-3) 4%)) !important;
+}
+body[data-theme="light"] {
+  background:
+    radial-gradient(circle at 9% -10%, rgba(255, 194, 116, .32) 0, transparent 29vw),
+    radial-gradient(circle at 94% 0%, rgba(215, 122, 200, .13) 0, transparent 26vw),
+    radial-gradient(circle at 55% 16%, rgba(116, 201, 132, .20) 0, transparent 32vw),
+    linear-gradient(145deg, #fffaf1 0%, #f6faf2 48%, #f8f5ff 100%) !important;
+}
+@media (max-width: 700px) {
+  body {
+    background:
+      radial-gradient(circle at 8% -6%, color-mix(in srgb, var(--fn-energy-orange) 13%, transparent) 0, transparent 52vw),
+      radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--fn-energy-pink) 8%, transparent) 0, transparent 46vw),
+      linear-gradient(160deg, color-mix(in srgb, var(--bg) 92%, var(--fn-energy-page-1) 8%), color-mix(in srgb, var(--bg) 94%, var(--fn-energy-page-2) 6%)) !important;
+  }
+}
+
+/* Badges : gradients plus assumés, mais dans leurs propres cartes. */
+.recap-badge-compact,
+.journal-dashboard-badge {
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--badge-accent) 38%, transparent) 0, transparent 62%),
+    radial-gradient(circle at 4% 0%, rgba(255,255,255,.18) 0, transparent 44%),
+    linear-gradient(135deg, color-mix(in srgb, var(--fn-badge-surface-strong) 68%, var(--badge-accent) 15%), color-mix(in srgb, var(--fn-badge-surface) 76%, var(--badge-accent) 11%)) !important;
+  border-color: color-mix(in srgb, var(--badge-accent) 42%, var(--fn-badge-border)) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--badge-accent) 13%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.recap-badge-icon,
+.journal-dashboard-icon {
+  filter: saturate(1.18) contrast(1.05) !important;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--badge-accent) 19%, transparent) !important;
+}
+.recap-badge-track span,
+.journal-dashboard-track span {
+  filter: saturate(1.35) contrast(1.06) !important;
+}
+
+/* Accueil : titre non rogné, donc plus de "bjectif". */
+#page-journal .fn-orbit-kicker {
+  display: inline-block !important;
+  padding-left: 2px !important;
+  margin-left: 0 !important;
+  overflow: visible !important;
+  letter-spacing: .105em !important;
+}
+
+/* Carte nutrition : garde le glass, mais avec plus de qualité visuelle. */
+#page-journal .fn-orbit-nutrition-card {
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--fn-energy-green) 15%, transparent), transparent 38%),
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--fn-energy-orange) 14%, transparent), transparent 40%),
+    linear-gradient(145deg, color-mix(in srgb, var(--calm-surface) 86%, var(--fn-energy-card-tint) 14%), color-mix(in srgb, var(--calm-surface) 92%, var(--fn-energy-green) 4%)) !important;
+}
+
+/* Grand bloc Calories : icône + vraie valeur verte, pas noir brutal. */
+#page-journal .fn-calorie-ring {
+  --fn-kcal-good: color-mix(in srgb, var(--fn-energy-green) 82%, #23784b 18%) !important;
+  --fn-kcal-warn: color-mix(in srgb, var(--fn-energy-orange) 80%, #b86c20 20%) !important;
+  --fn-kcal-bad:  color-mix(in srgb, var(--fn-energy-coral) 72%, #b86c20 28%) !important;
+  --fn-kcal-over: color-mix(in srgb, var(--fn-energy-coral) 78%, #e4573f 22%) !important;
+  --fn-kcal-neutral: color-mix(in srgb, var(--text3, #647066) 70%, transparent) !important;
+  --macro-color: var(--fn-kcal-good) !important;
+}
+#page-journal .fn-calorie-ring #m-kcal,
+#page-journal .fn-calorie-ring .macro-val {
+  color: var(--fn-kcal-good) !important;
+  text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-green) 18%, transparent) !important;
+}
+/* État WARN : 60-80% ou 108-120% — couleur ambrée, alerte douce */
+#page-journal .fn-calorie-ring.macro-state-warn {
+  --macro-color: var(--fn-kcal-warn) !important;
+}
+#page-journal .fn-calorie-ring.macro-state-warn #m-kcal,
+#page-journal .fn-calorie-ring.macro-state-warn .macro-val {
+  color: var(--fn-kcal-warn) !important;
+  text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent) !important;
+}
+/* État BAD : <60% — couleur corail/orange, signale un manque significatif */
+#page-journal .fn-calorie-ring.macro-state-bad {
+  --macro-color: var(--fn-kcal-bad) !important;
+}
+#page-journal .fn-calorie-ring.macro-state-bad #m-kcal,
+#page-journal .fn-calorie-ring.macro-state-bad .macro-val {
+  color: var(--fn-kcal-bad) !important;
+  text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-coral) 16%, transparent) !important;
+}
+/* État NEUTRAL : pas encore de saisie — gris discret */
+#page-journal .fn-calorie-ring.macro-state-neutral {
+  --macro-color: var(--fn-kcal-neutral) !important;
+}
+#page-journal .fn-calorie-ring.macro-state-neutral #m-kcal,
+#page-journal .fn-calorie-ring.macro-state-neutral .macro-val {
+  color: var(--text3) !important;
+  text-shadow: none !important;
+}
+#page-journal .fn-calorie-ring.macro-state-over {
+  --macro-color: var(--fn-kcal-over) !important;
+}
+#page-journal .fn-calorie-ring.macro-state-over #m-kcal,
+#page-journal .fn-calorie-ring.macro-state-over .macro-val {
+  color: color-mix(in srgb, var(--fn-energy-coral) 88%, #9b2f23 12%) !important;
+  text-shadow: 0 10px 30px color-mix(in srgb, var(--fn-energy-coral) 22%, transparent) !important;
+}
+#page-journal .fn-calorie-ring-visual {
+  background:
+    conic-gradient(var(--macro-color) var(--macro-pct, 0%), color-mix(in srgb, var(--macro-color) 13%, var(--fn-ring-track)) 0) !important;
+}
+#page-journal .fn-calorie-ring-visual::after {
+  content: "🔥" !important;
+  position: absolute !important;
+  top: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 3 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 999px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 17px !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,.62), transparent 42%),
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-energy-orange) 54%, var(--card)), color-mix(in srgb, var(--fn-energy-coral) 34%, var(--card))) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 42%, transparent) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--fn-energy-orange) 20%, transparent) !important;
+}
+@media (max-width: 390px) {
+  #page-journal .fn-calorie-ring-visual::after { top: 18px !important; width: 30px !important; height: 30px !important; font-size: 15px !important; }
+}
+
+/* Le bloc texte à droite des calories reprend le glass, plus de pavé gris pâle. */
+#page-journal .fn-calorie-ring .macro-head,
+#page-journal .fn-calorie-ring .macro-target {
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) 15%, transparent), transparent 55%),
+    linear-gradient(145deg, rgba(255,255,255,.12), color-mix(in srgb, var(--macro-color) 8%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--macro-color) 20%, var(--border2)) !important;
+  backdrop-filter: blur(14px) saturate(1.08) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.08) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+#page-journal .fn-calorie-ring .macro-head {
+  border-bottom: 0 !important;
+  border-radius: 20px 20px 8px 8px !important;
+}
+#page-journal .fn-calorie-ring .macro-target {
+  border-top: 0 !important;
+  border-radius: 8px 8px 20px 20px !important;
+}
+#page-journal .fn-calorie-ring .macro-head .macro-icon {
+  font-size: 0 !important;
+}
+#page-journal .fn-calorie-ring .macro-head .macro-icon::before {
+  content: "🔥" !important;
+  font-size: 18px !important;
+}
+
+/* Dépassement calories : la pilule devient une alerte orange/rouge. */
+#page-journal .fn-orbit-status-over,
+#page-journal .fn-orbit-nutrition-card:has(.macro-cell-kcal.macro-state-over) .fn-orbit-status {
+  color: #fff7ed !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-coral) 86%, #b42318 14%), color-mix(in srgb, var(--fn-energy-orange) 62%, var(--fn-energy-coral) 38%)) !important;
+  border-color: color-mix(in srgb, var(--fn-energy-coral) 62%, var(--fn-energy-orange) 38%) !important;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--fn-energy-coral) 22%, transparent) !important;
+}
+#page-journal .fn-orbit-status-over::before,
+#page-journal .fn-orbit-nutrition-card:has(.macro-cell-kcal.macro-state-over) .fn-orbit-status::before {
+  content: "⚠️ " !important;
+}
+#page-journal .fn-orbit-status-ok::before { content: "✓ " !important; }
+
+/* Protéines atteintes : vraie victoire visuelle. */
+#page-journal .macro-cell-prot.macro-state-ok .macro-target {
+  color: color-mix(in srgb, var(--fn-energy-green) 72%, var(--text) 28%) !important;
+  font-weight: 900 !important;
+}
+#page-journal .macro-cell-prot.macro-state-ok .macro-target::before {
+  content: "✓" !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 6px !important;
+  border-radius: 999px !important;
+  color: white !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  background: linear-gradient(135deg, var(--fn-energy-green), var(--fn-energy-mint)) !important;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--fn-energy-green) 24%, transparent) !important;
+  vertical-align: -2px !important;
+}
+
+/* Objectifs : logo/header plus assumés + barres colorisées plus visibles. */
+#page-objectif .profile-summary-main::before {
+  content: "🎯" !important;
+  position: absolute !important;
+  right: 28px !important;
+  bottom: 24px !important;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 28px !important;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.48), transparent 45%),
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-energy-orange) 62%, var(--bg2)), color-mix(in srgb, var(--fn-energy-pink) 34%, var(--green-bg))) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 44%, var(--border2)) !important;
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--fn-energy-orange) 20%, transparent) !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+#page-objectif .profile-summary-main > * { position: relative !important; z-index: 2 !important; }
+#page-objectif .objectif-method-card::before,
+#page-objectif .stats-commercial-card::before {
+  height: 5px !important;
+  left: 16px !important;
+  right: 16px !important;
+  opacity: .95 !important;
+  background: linear-gradient(90deg, var(--fn-energy-green), var(--fn-energy-mint), var(--fn-energy-orange), var(--fn-energy-pink)) !important;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent) !important;
+}
+#page-objectif .fn-ui-phase-segments {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--fn-energy-green) 52%, transparent), color-mix(in srgb, var(--fn-energy-orange) 48%, transparent), color-mix(in srgb, var(--fn-energy-pink) 38%, transparent)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 26px color-mix(in srgb, var(--fn-energy-orange) 16%, transparent) !important;
+}
+
+/* FoodNote beta 0.22.37 — Theme Lab live preview
+   Les couleurs Badge kcal/prot/gluc/lip pilotent maintenant directement les vrais gradients. */
+:root,
+body {
+  --fn-badge-gradient-spot: 38%;
+  --fn-badge-gradient-strong: 15%;
+  --fn-badge-gradient-soft: 11%;
+  --fn-badge-border-strength: 42%;
+  --fn-badge-shadow-strength: 13%;
+  --fn-badge-track-strength: 72%;
+}
+
+.journal-dashboard-badge.macro-kcal,
+.recap-badge-compact.macro-kcal,
+.fn-smart-chip.macro-kcal,
+.fn-ui-smart-badge.fn-ui-macro-kcal { --badge-accent: var(--fn-badge-kcal, var(--green)) !important; }
+.journal-dashboard-badge.macro-prot,
+.recap-badge-compact.macro-prot,
+.fn-smart-chip.macro-prot,
+.fn-ui-smart-badge.fn-ui-macro-prot { --badge-accent: var(--fn-badge-prot, var(--blue)) !important; }
+.journal-dashboard-badge.macro-gluc,
+.recap-badge-compact.macro-gluc,
+.fn-smart-chip.macro-gluc,
+.fn-ui-smart-badge.fn-ui-macro-gluc { --badge-accent: var(--fn-badge-gluc, var(--orange)) !important; }
+.journal-dashboard-badge.macro-lip,
+.recap-badge-compact.macro-lip,
+.fn-smart-chip.macro-lip,
+.fn-ui-smart-badge.fn-ui-macro-lip { --badge-accent: var(--fn-badge-lip, #7c83d6) !important; }
+.journal-dashboard-badge.is-ok,
+.recap-badge-compact.is-ok,
+.fn-smart-chip.is-ok,
+.fn-ui-smart-badge.fn-ui-is-ok { --badge-accent: var(--fn-badge-good, var(--green)) !important; }
+.journal-dashboard-badge.is-warn,
+.recap-badge-compact.is-warn,
+.fn-smart-chip.is-warn,
+.fn-ui-smart-badge.fn-ui-is-warn { --badge-accent: var(--fn-badge-warn, var(--orange)) !important; }
+
+.journal-dashboard-badge,
+.recap-badge-compact,
+.fn-smart-chip,
+.fn-ui-smart-badge {
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--badge-accent, var(--green)) var(--fn-badge-gradient-spot, 38%), transparent) 0, transparent 62%),
+    radial-gradient(circle at 4% 0%, rgba(255,255,255,.18) 0, transparent 44%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--fn-badge-surface-strong, var(--bg2)) 68%, var(--badge-accent, var(--green)) var(--fn-badge-gradient-strong, 15%)),
+      color-mix(in srgb, var(--fn-badge-surface, var(--bg2)) 76%, var(--badge-accent, var(--green)) var(--fn-badge-gradient-soft, 11%))) !important;
+  border-color: color-mix(in srgb, var(--badge-accent, var(--green)) var(--fn-badge-border-strength, 42%), var(--fn-badge-border, var(--border2))) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--badge-accent, var(--green)) var(--fn-badge-shadow-strength, 13%), transparent),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.journal-dashboard-track span,
+.recap-badge-track span,
+.fn-chip-progress i,
+.fn-ui-smart-progress i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent, var(--green)) var(--fn-badge-track-strength, 72%), #fff 6%), var(--badge-accent, var(--green))) !important;
+}
+
+/* FoodNote beta 0.22.56 — CORE final : Accueil macros piloté par tokens, pas par anciens aplats Energy. */
+:root {
+  --fn-home-macro-surface: var(--card, #fffdf7);
+  --fn-home-macro-surface-2: var(--bg2, #fff7ec);
+  --fn-home-macro-signature: var(--fn-energy-green, #74c984);
+  --fn-home-macro-aura-strength: 11%;
+  --fn-home-macro-category-aura-strength: 7%;
+  --fn-home-macro-icon-surface: rgba(255,255,255,.74);
+  --fn-home-icon-text: var(--fn-home-macro-value-text, var(--text, #111827));
+  --fn-home-macro-label-text: var(--text2, #3f463f);
+  --fn-home-macro-value-text: var(--text, #111827);
+  --fn-home-macro-sub-text: var(--text3, #667066);
+  --fn-home-macro-status-text: #fffdf7;
+  --fn-home-kcal-label-text: var(--fn-home-macro-label-text);
+  --fn-home-prot-label-text: var(--fn-home-macro-label-text);
+  --fn-home-gluc-label-text: var(--fn-home-macro-label-text);
+  --fn-home-lip-label-text: var(--fn-home-macro-label-text);
+  --fn-home-kcal-value-text: var(--fn-home-macro-value-text);
+  --fn-home-prot-value-text: var(--fn-home-macro-value-text);
+  --fn-home-gluc-value-text: var(--fn-home-macro-value-text);
+  --fn-home-lip-value-text: var(--fn-home-macro-value-text);
+  --fn-home-kcal-sub-text: var(--fn-home-macro-sub-text);
+  --fn-home-prot-sub-text: var(--fn-home-macro-sub-text);
+  --fn-home-gluc-sub-text: var(--fn-home-macro-sub-text);
+  --fn-home-lip-sub-text: var(--fn-home-macro-sub-text);
+  --fn-home-status-neutral: color-mix(in srgb, var(--text3, #667066) 70%, transparent);
+  --fn-home-status-ok: var(--fn-badge-good, #74c984);
+  --fn-home-status-warn: var(--fn-badge-warn, #ffb15f);
+  --fn-home-status-bad: var(--red, #d96060);
+  --fn-home-status-over: var(--fn-kcal-over, var(--red, #d96060));
+  --fn-home-status-neutral-text: var(--fn-home-macro-status-text);
+  --fn-home-status-ok-text: var(--fn-home-macro-status-text);
+  --fn-home-status-warn-text: var(--fn-home-macro-status-text);
+  --fn-home-status-bad-text: var(--fn-home-macro-status-text);
+  --fn-home-status-over-text: var(--fn-home-macro-status-text);
+}
+
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
+#page-journal .fn-orbit-macros.fn-home-macro-grid,
+#page-journal .journal-main-macros.fn-orbit-macros.fn-home-macro-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(142px, 1fr)) !important;
+  grid-template-areas: none !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+#page-journal .fn-home-macro-grid .macro-cell-kcal { --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, #74c984)) !important; --macro-label-text: var(--fn-home-kcal-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-kcal-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-kcal-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-prot { --macro-color: var(--fn-macro-prot, #63b77b) !important; --macro-label-text: var(--fn-home-prot-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-prot-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-prot-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-gluc { --macro-color: var(--fn-macro-gluc, #d89442) !important; --macro-label-text: var(--fn-home-gluc-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-gluc-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-gluc-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-lip { --macro-color: var(--fn-macro-lip, #8b8ee8) !important; --macro-label-text: var(--fn-home-lip-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-lip-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-lip-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+
+#page-journal .fn-home-macro-grid .fn-macro-home-card {
+  --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, #667066) 70%, transparent));
+  --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, #fffdf7));
+  grid-area: auto !important;
+  min-height: 132px !important;
+  min-width: 0 !important;
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: 50px minmax(0, 1fr) !important;
+  grid-template-rows: auto 1fr auto !important;
+  align-items: start !important;
+  gap: 10px 12px !important;
+  padding: 16px 15px 15px !important;
+  border-radius: 26px !important;
+  text-align: left !important;
+  background:
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 58%),
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-home-macro-surface, var(--card, #fff)) 92%, white 5%), color-mix(in srgb, var(--fn-home-macro-surface-2, var(--bg2, #fff7ec)) 94%, var(--fn-home-macro-signature, #74c984) 6%)) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 22%, var(--border2, rgba(0,0,0,.08))) !important;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 12%, transparent), inset 0 1px 0 rgba(255,255,255,.55) !important;
+  backdrop-filter: blur(14px) saturate(1.05) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.05) !important;
+}
+#page-journal .fn-home-macro-grid .fn-macro-home-card::before,
+#page-journal .fn-home-macro-grid .fn-macro-home-card::after,
+#page-journal .fn-home-macro-grid .macro-target::before { display: none !important; content: none !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-neutral { --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, #667066) 70%, transparent)) !important; --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-state-ok { --macro-status-color: var(--fn-home-status-ok, #74c984) !important; --macro-status-text: var(--fn-home-status-ok-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-state-warn { --macro-status-color: var(--fn-home-status-warn, #ffb15f) !important; --macro-status-text: var(--fn-home-status-warn-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-state-bad { --macro-status-color: var(--fn-home-status-bad, #d96060) !important; --macro-status-text: var(--fn-home-status-bad-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-state-over { --macro-status-color: var(--fn-home-status-over, #d96060) !important; --macro-status-text: var(--fn-home-status-over-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+
+#page-journal .fn-home-macro-grid .fn-macro-icon-bubble,
+#page-journal .fn-home-macro-grid .fn-mini-ring {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  border-radius: 18px !important;
+  display: grid !important;
+  place-items: center !important;
+  position: relative !important;
+  background:
+    radial-gradient(circle at 32% 20%, rgba(255,255,255,.72), transparent 40%),
+    color-mix(in srgb, var(--macro-color) 22%, var(--fn-home-macro-icon-surface, rgba(255,255,255,.74))) !important;
+  border: 1px solid color-mix(in srgb, var(--macro-color) 34%, rgba(255,255,255,.36)) !important;
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--macro-color) 18%, transparent) !important;
+}
+#page-journal .fn-home-macro-grid .fn-mini-ring::before { display: none !important; content: none !important; }
+#page-journal .fn-home-macro-grid .fn-mini-ring span { position: relative !important; z-index: 1 !important; font-size: 20px !important; line-height: 1 !important; color: var(--fn-home-icon-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important; }
+
+#page-journal .fn-home-macro-grid .fn-macro-copy { grid-column: 2 !important; grid-row: 1 / span 2 !important; min-width: 0 !important; padding-right: 34px !important; }
+#page-journal .fn-home-macro-grid .macro-head { margin: 0 0 7px !important; padding: 0 !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; box-shadow: none !important; }
+#page-journal .fn-home-macro-grid .macro-lbl { font-size: 11px !important; line-height: 1.1 !important; letter-spacing: .075em !important; text-transform: uppercase !important; font-weight: 950 !important; color: var(--macro-label-text, var(--fn-home-macro-label-text, var(--text2, #3f463f))) !important; }
+#page-journal .fn-home-macro-grid .macro-val { font-size: clamp(23px, 4.2vw, 34px) !important; line-height: .98 !important; font-weight: 1000 !important; letter-spacing: -.055em !important; color: var(--macro-value-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important; text-shadow: none !important; }
+#page-journal .fn-home-macro-grid .macro-target { margin-top: 7px !important; padding: 0 !important; min-height: 0 !important; display: block !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-size: 11px !important; line-height: 1.25 !important; font-weight: 750 !important; color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3, #667066))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-status-badge { position: absolute !important; z-index: 3 !important; top: 13px !important; right: 13px !important; width: 28px !important; height: 28px !important; border-radius: 999px !important; display: grid !important; place-items: center !important; font-size: 14px !important; line-height: 1 !important; font-weight: 1000 !important; color: var(--macro-status-text, var(--fn-home-macro-status-text, #fffdf7)) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color) 86%, white 14%), var(--macro-status-color)) !important; border: 1px solid color-mix(in srgb, var(--macro-status-color) 52%, white 42%) !important; box-shadow: 0 8px 18px color-mix(in srgb, var(--macro-status-color) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important; }
+#page-journal .fn-home-macro-grid .macro-progress { display: block !important; grid-column: 1 / -1 !important; position: absolute !important; z-index: 2 !important; left: 15px !important; right: 15px !important; bottom: 13px !important; height: 6px !important; border-radius: 999px !important; overflow: hidden !important; background: color-mix(in srgb, var(--text, #111827) 10%, transparent) !important; box-shadow: inset 0 1px 2px rgba(0,0,0,.08) !important; }
+#page-journal .fn-home-macro-grid .macro-progress-fill { display: block !important; height: 100% !important; min-width: 8px !important; border-radius: inherit !important; background: linear-gradient(90deg, color-mix(in srgb, var(--macro-status-color) 76%, white 18%), var(--macro-status-color)) !important; box-shadow: 0 0 18px color-mix(in srgb, var(--macro-status-color) 28%, transparent) !important; }
+#page-journal .fn-home-macro-grid .macro-state-neutral .macro-progress-fill { min-width: 0 !important; }
+
+body.dark #page-journal .fn-home-macro-grid .fn-macro-home-card,
+body[data-theme="dark"] #page-journal .fn-home-macro-grid .fn-macro-home-card,
+body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-card {
+  --fn-home-macro-surface: rgba(31,38,34,.80);
+  --fn-home-macro-surface-2: rgba(18,23,20,.82);
+  --fn-home-macro-icon-surface: rgba(255,255,255,.075);
+  background:
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 60%),
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
+    linear-gradient(145deg, rgba(38,48,41,.80), rgba(19,24,21,.78)) !important;
+  border-color: color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 20%, rgba(255,255,255,.08)) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+@media (max-width: 980px) {
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
+  #page-journal .fn-orbit-macros.fn-home-macro-grid,
+  #page-journal .journal-main-macros.fn-orbit-macros.fn-home-macro-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 520px) {
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
+  #page-journal .fn-orbit-macros.fn-home-macro-grid,
+  #page-journal .journal-main-macros.fn-orbit-macros.fn-home-macro-grid { grid-template-columns: 1fr !important; }
+  #page-journal .fn-home-macro-grid .fn-macro-home-card { min-height: 118px !important; border-radius: 23px !important; padding: 14px 14px 15px !important; }
+  #page-journal .fn-home-macro-grid .fn-macro-copy { padding-right: 32px !important; }
+  #page-journal .fn-home-macro-grid .macro-val { font-size: clamp(25px, 8vw, 32px) !important; }
+}
+
+
+/* FoodNote beta 0.22.69 — Programme de phases : la frise est générée par classes,
+   sans couleur sur le wrapper et sans barre décorative sous le titre. */
+#page-objectif #objectif-programme::before,
+#page-objectif #objectif-programme-builder::before {
+  content: none !important;
+  display: none !important;
+}
+#page-objectif .fn-ui-program-panel {
+  overflow: hidden !important;
+}
+#page-objectif .fn-ui-program-builder {
+  position: relative !important;
+}
+#page-objectif .fn-ui-phase-bar {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+#page-objectif .fn-ui-phase-segments {
+  height: 12px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+}
+#page-objectif .fn-ui-phase-segments i {
+  height: 100% !important;
+}
+
+
+/* FoodNote beta 0.22.70 — Programme de phases : frise lisible, sans debug visuel parasite.
+   La couleur vit uniquement dans les segments; le wrapper reste une piste neutre. */
+#page-objectif #objectif-programme::before,
+#page-objectif #objectif-programme-builder::before {
+  content: none !important;
+  display: none !important;
+}
+#page-objectif .fn-ui-program-panel { overflow: hidden !important; }
+#page-objectif .fn-ui-phase-bar {
+  display: grid !important;
+  gap: 7px !important;
+  margin-top: 12px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#page-objectif .fn-ui-phase-segments {
+  height: 22px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  background: color-mix(in srgb, var(--text) 6%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 58%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.34) !important;
+}
+#page-objectif .fn-ui-phase-segments i {
+  height: 100% !important;
+  background: color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 42%, transparent) !important;
+  border-right: 1px solid color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 48%, transparent) !important;
+  color: color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 86%, var(--text)) !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+}
+#page-objectif .fn-ui-phase-segments i span {
+  padding: 0 6px !important;
+}
+@media (max-width: 700px) {
+  #page-objectif .fn-ui-phase-segments { height: 20px !important; }
+  #page-objectif .fn-ui-phase-segments i { font-size: 9px !important; }
+}

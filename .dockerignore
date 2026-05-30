@@ -1,0 +1,47 @@
+# FoodNote - évite d'envoyer les données persistantes au build Docker
+# Très important avec Dockge / build local : sans ça le contexte peut faire plusieurs Go.
+
+# données persistantes / bases
+/database/
+/data/
+/db/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+ciqual_data.json
+openfoodfacts*.json
+openfoodfacts*.csv
+*.xml
+
+# dépendances et caches
+/node_modules/
+/srv/
+.npm/
+npm-cache/
+.cache/
+__pycache__/
+*.pyc
+
+# archives / sauvegardes / gros fichiers
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.bak
+*.backup
+*.old
+*.log
+logs/
+tmp/
+temp/
+
+# fichiers système / IDE
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

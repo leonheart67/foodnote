@@ -1,0 +1,447 @@
+/* FoodNote beta 0.22.113 — SUGGESTIONS_TINT_POLISH
+   Passe UX sûre : cartes suggestions/résultats unifiées, différenciées par fond.
+   CSS majoritaire, sans observation continue du DOM. */
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.fn-food-add-managed .food-add-dialog,
+body > #food-add-modal.food-add-modal.fn-add-component-v02218.fn-food-add-managed .food-add-dialog {
+  width: min(980px, calc(100vw - 48px)) !important;
+  max-width: 980px !important;
+}
+
+@media (min-width: 1180px) {
+  body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.fn-food-add-managed .food-add-dialog,
+  body > #food-add-modal.food-add-modal.fn-add-component-v02218.fn-food-add-managed .food-add-dialog {
+    padding: 12px !important;
+  }
+
+  #food-add-modal.fn-add-component-v02218 .quick-foods-list,
+  #food-add-modal.fn-add-v0160 .quick-foods-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    max-height: min(35dvh, 340px) !important;
+  }
+
+  #food-add-modal.fn-add-component-v02218 #db-suggestions.visible,
+  #food-add-modal.fn-add-v0160 #db-suggestions.visible {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    max-height: min(38dvh, 360px) !important;
+    padding: 8px !important;
+  }
+
+  #food-add-modal.fn-add-component-v02218 #db-suggestions.visible .db-status,
+  #food-add-modal.fn-add-component-v02218 #db-suggestions.visible .fn-suggestion-empty,
+  #food-add-modal.fn-add-v0160 #db-suggestions.visible .db-status,
+  #food-add-modal.fn-add-v0160 #db-suggestions.visible .fn-suggestion-empty {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* Le bouton de validation au repos devient une consigne, pas un faux bouton. */
+#food-add-modal.fn-add-component-v02218 .food-add-actions.fn-add-confirm-bar .journal-add-btn.fn-add-confirm-disabled,
+#food-add-modal.fn-add-component-v02218 .food-add-actions.fn-add-confirm-bar .journal-add-btn[disabled],
+#food-add-modal.fn-add-component-v02218 .food-add-actions.fn-add-confirm-bar .journal-add-btn[aria-disabled="true"],
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.food-intent-search .food-add-actions.fn-add-confirm-bar #food-main-action-btn.fn-add-confirm-disabled,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.food-intent-search .food-add-actions.fn-add-confirm-bar #food-main-action-btn[disabled],
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.food-intent-search .food-add-actions.fn-add-confirm-bar #food-main-action-btn[aria-disabled="true"] {
+  min-height: 34px !important;
+  height: auto !important;
+  padding: 6px 8px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text3) !important;
+  opacity: .9 !important;
+  cursor: default !important;
+  font-weight: 780 !important;
+  letter-spacing: 0 !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .food-add-actions.fn-add-confirm-bar .journal-add-btn.fn-add-confirm-disabled::before,
+#food-add-modal.fn-add-component-v02218 .food-add-actions.fn-add-confirm-bar .journal-add-btn[disabled]::before,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.food-intent-search .food-add-actions.fn-add-confirm-bar #food-main-action-btn.fn-add-confirm-disabled::before,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.food-intent-search .food-add-actions.fn-add-confirm-bar #food-main-action-btn[disabled]::before {
+  content: '↑ ' !important;
+  color: var(--text4) !important;
+  font-weight: 900 !important;
+}
+
+/* Sources : actif = plein et évident ; inactif = contour léger. */
+#food-add-modal.fn-add-component-v02218 .food-source-chip,
+#food-add-modal.fn-add-v0160 .food-source-chip {
+  border: 1px solid color-mix(in srgb, var(--border2) 76%, transparent) !important;
+  background: transparent !important;
+  color: var(--text3) !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .food-source-chip.active,
+#food-add-modal.fn-add-v0160 .food-source-chip.active {
+  border-color: color-mix(in srgb, var(--green) 70%, var(--border2)) !important;
+  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 82%, var(--green-dark) 18%)) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 15px color-mix(in srgb, var(--green) 14%, transparent) !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .food-source-chip:not(.active),
+#food-add-modal.fn-add-v0160 .food-source-chip:not(.active) {
+  background: color-mix(in srgb, var(--bg) 72%, transparent) !important;
+  color: var(--text4) !important;
+}
+
+/* Suggestions rapides : première lecture = nom + quantité + calories. Les détails P/G/L restent accessibles au survol/focus desktop. */
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-card,
+#food-add-modal.fn-add-v0160 .fn-suggestion-card {
+  background: color-mix(in srgb, var(--card) 94%, var(--bg2) 6%) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 54%, transparent) !important;
+  box-shadow: none !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-main,
+#food-add-modal.fn-add-v0160 .fn-suggestion-main {
+  min-height: 58px !important;
+  gap: 4px !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-name,
+#food-add-modal.fn-add-v0160 .fn-suggestion-name {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-meta,
+#food-add-modal.fn-add-v0160 .fn-suggestion-meta {
+  color: var(--text3) !important;
+  font-weight: 720 !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-tag,
+#food-add-modal.fn-add-v0160 .fn-suggestion-tag {
+  padding: 2px 6px !important;
+  border: 1px solid color-mix(in srgb, var(--green) 22%, var(--border2)) !important;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--green) 56%, var(--text2)) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-macros,
+#food-add-modal.fn-add-v0160 .fn-suggestion-macros {
+  gap: 7px !important;
+  color: var(--text4) !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-macros b,
+#food-add-modal.fn-add-v0160 .fn-suggestion-macros b,
+#food-add-modal.fn-add-component-v02218 .db-suggestion-macros .nutri-chip,
+#food-add-modal.fn-add-v0160 .db-suggestion-macros .nutri-chip {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: color-mix(in srgb, var(--nutri-color, var(--text3)) 64%, var(--text2)) !important;
+  font-weight: 820 !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-macros b:not(.macro-kcal),
+#food-add-modal.fn-add-v0160 .fn-suggestion-macros b:not(.macro-kcal) {
+  display: none !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #food-add-modal.fn-add-component-v02218 .fn-suggestion-main:hover .fn-suggestion-macros b:not(.macro-kcal),
+  #food-add-modal.fn-add-component-v02218 .fn-suggestion-main:focus-visible .fn-suggestion-macros b:not(.macro-kcal),
+  #food-add-modal.fn-add-v0160 .fn-suggestion-main:hover .fn-suggestion-macros b:not(.macro-kcal),
+  #food-add-modal.fn-add-v0160 .fn-suggestion-main:focus-visible .fn-suggestion-macros b:not(.macro-kcal) {
+    display: inline-flex !important;
+  }
+}
+
+/* Résultats de recherche : mêmes chips macros plus calmes. */
+#food-add-modal.fn-add-component-v02218 .db-suggestion,
+#food-add-modal.fn-add-v0160 .db-suggestion {
+  border-radius: 15px !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .db-suggestion-macros,
+#food-add-modal.fn-add-v0160 .db-suggestion-macros {
+  gap: 8px !important;
+  color: var(--text4) !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .db-suggestion-macros .nutri-chip:not(.macro-kcal):not(:last-child),
+#food-add-modal.fn-add-v0160 .db-suggestion-macros .nutri-chip:not(.macro-kcal):not(:last-child) {
+  opacity: .74 !important;
+}
+
+/* L'étoile reste utile, mais elle ne doit plus attirer plus l'œil que l'aliment. */
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-fav,
+#food-add-modal.fn-add-v0160 .fn-suggestion-fav {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--text4) !important;
+}
+
+#food-add-modal.fn-add-component-v02218 .fn-suggestion-fav.is-fav,
+#food-add-modal.fn-add-v0160 .fn-suggestion-fav.is-fav {
+  background: color-mix(in srgb, #d59c35 11%, transparent) !important;
+  border-color: color-mix(in srgb, #d59c35 24%, transparent) !important;
+  color: color-mix(in srgb, #d59c35 72%, var(--text)) !important;
+}
+
+@media (max-width: 760px) {
+  body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.fn-food-add-managed .food-add-dialog,
+  body > #food-add-modal.food-add-modal.fn-add-component-v02218.fn-food-add-managed .food-add-dialog {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #food-add-modal.fn-add-component-v02218 .food-source-chip,
+  #food-add-modal.fn-add-v0160 .food-source-chip {
+    min-width: auto !important;
+  }
+}
+
+
+/* 0.22.108 — polish sûr : micro-ajustements CSS uniquement. */
+#food-add-modal.fn-food-add-ux-safe-polish .food-add-dialog {
+  overflow: hidden !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish .food-add-body,
+#food-add-modal.fn-food-add-ux-safe-polish .food-add-panel {
+  min-width: 0 !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish #db-suggestions.visible .db-suggestion {
+  min-width: 0 !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish #db-suggestions.visible .db-suggestion-name {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish .db-suggestion-meta,
+#food-add-modal.fn-food-add-ux-safe-polish .fn-suggestion-meta {
+  opacity: .86 !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish .db-suggestion:hover,
+#food-add-modal.fn-food-add-ux-safe-polish .fn-suggestion-card:hover {
+  border-color: color-mix(in srgb, var(--green) 30%, var(--border2)) !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish .food-add-actions.fn-add-confirm-bar {
+  border-top-color: color-mix(in srgb, var(--border2) 54%, transparent) !important;
+}
+
+#food-add-modal.fn-food-add-ux-safe-polish .food-add-actions.fn-add-confirm-bar #food-main-action-btn:not([disabled]):not([aria-disabled="true"]):not(.fn-add-confirm-disabled) {
+  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 84%, var(--green-dark) 16%)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--green) 18%, transparent) !important;
+}
+
+@media (max-width: 520px) {
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-actions.fn-add-confirm-bar .journal-add-btn[disabled],
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-actions.fn-add-confirm-bar .journal-add-btn[aria-disabled="true"],
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-actions.fn-add-confirm-bar .journal-add-btn.fn-add-confirm-disabled {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+}
+
+/* 0.22.109 — taille stable sur desktop : le popup ne change plus de largeur/hauteur à chaque passage recherche/suggestions/quantité. */
+@media (min-width: 900px) and (min-height: 700px) {
+  body > #food-add-modal.food-add-modal.fn-add-v0160.fn-add-component-v02218.fn-food-add-managed .food-add-dialog,
+  body > #food-add-modal.food-add-modal.fn-add-component-v02218.fn-food-add-managed .food-add-dialog,
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-dialog {
+    width: min(980px, calc(100vw - 56px)) !important;
+    max-width: 980px !important;
+    min-width: min(980px, calc(100vw - 56px)) !important;
+    height: min(760px, calc(100dvh - 56px)) !important;
+    max-height: calc(100dvh - 56px) !important;
+    min-height: min(640px, calc(100dvh - 56px)) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-body,
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-main,
+  #food-add-modal.fn-food-add-ux-safe-polish .food-add-panel {
+    min-width: 0 !important;
+  }
+}
+
+/* En mode recherche, les prédictions ont le droit d'être affichées par leur moteur historique.
+   Le contrôleur ne les force plus à display:none. */
+#food-add-modal.fn-food-add-managed.fn-modal-mode-search.fn-suggestions-open #quick-foods-card.fn-suggestions-card {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* 0.22.113 — unification visuelle sûre : résultats/prédictions et suggestions partagent la même structure.
+   La différence se fait uniquement par une teinte de fond légère, sans JS continu. */
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card {
+  min-width: 0 !important;
+  min-height: 72px !important;
+  border-radius: 15px !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 52%, transparent) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  padding: 9px !important;
+  transition: border-color .14s ease, background .14s ease, transform .14s ease !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--card, var(--bg2)) 94%, var(--bg) 6%),
+    color-mix(in srgb, var(--bg2) 86%, transparent)) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--green) 13%, var(--card, var(--bg2)) 87%),
+    color-mix(in srgb, var(--green) 9%, var(--bg) 91%)) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion:hover,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion:focus-visible,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card:hover,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card:focus-within {
+  border-color: color-mix(in srgb, var(--green) 32%, var(--border2)) !important;
+  transform: translateY(-1px) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-top,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-topline {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-name,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-name {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  line-height: 1.18 !important;
+  font-weight: 900 !important;
+  color: var(--text) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-meta,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-unit-hint,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-meta {
+  margin-top: 4px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  color: var(--text3) !important;
+  font-weight: 700 !important;
+  opacity: .9 !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-macros,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-macros {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 7px !important;
+  font-size: 10px !important;
+  line-height: 1.15 !important;
+  color: var(--text4) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-macros .nutri-chip,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion-macros span,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-macros b {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  white-space: nowrap !important;
+  font-weight: 820 !important;
+  color: color-mix(in srgb, var(--nutri-color, var(--text3)) 64%, var(--text2)) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-main {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-tag {
+  flex: 0 0 auto !important;
+  max-width: 86px !important;
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--green) 18%, var(--border2)) !important;
+  background: color-mix(in srgb, var(--green) 7%, transparent) !important;
+  color: color-mix(in srgb, var(--green) 54%, var(--text2)) !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-fav {
+  align-self: stretch !important;
+  width: 30px !important;
+  min-width: 30px !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--bg) 60%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 42%, transparent) !important;
+  color: var(--text4) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-fav.is-fav {
+  background: color-mix(in srgb, #d59c35 12%, var(--bg) 88%) !important;
+  border-color: color-mix(in srgb, #d59c35 28%, var(--border2)) !important;
+  color: color-mix(in srgb, #d59c35 72%, var(--text)) !important;
+}
+
+@media (max-width: 760px) {
+  body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout #db-suggestions.visible .db-suggestion,
+  body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card {
+    min-height: 62px !important;
+    padding: 8px !important;
+    transform: none !important;
+  }
+}
+
+
+/* 0.22.113 — suggestions tint polish : fond suggestion un peu plus prononcé, même structure visuelle. */
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--green) 13%, var(--card, var(--bg2)) 87%),
+    color-mix(in srgb, var(--green) 9%, var(--bg) 91%)) !important;
+  border-color: color-mix(in srgb, var(--green) 24%, var(--border2)) !important;
+}
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card:hover,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-food-add-ux-safe-polish.fn-food-add-unified-suggestion-layout .quick-foods-card.fn-suggestions-card .fn-suggestion-card:focus-within {
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--green) 17%, var(--card, var(--bg2)) 83%),
+    color-mix(in srgb, var(--green) 12%, var(--bg) 88%)) !important;
+  border-color: color-mix(in srgb, var(--green) 34%, var(--border2)) !important;
+}
