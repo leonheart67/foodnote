@@ -13,6 +13,15 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--t
   --red-bg: #fbebeb; --red: #b65c5c; --red-dark: #8e3333;
   --blue-bg: #e6f1f4; --blue: #4e7890; --blue-dark: #31566d;
   --pill-bg: rgba(78,88,78,.08);
+
+  /* FoodNote — Journal food rows theme tokens
+     Ces variables pilotent seulement les lignes d’aliments du Journal.
+     Le thème clair garde une identité verte douce ; le thème sombre reste neutre. */
+  --fn-journal-food-row-bg: #edf7ee;
+  --fn-journal-food-row-bg-hover: #e3f1e5;
+  --fn-journal-food-row-border: rgba(79, 127, 91, .24);
+  --fn-journal-food-row-accent: rgba(79, 127, 91, .62);
+  --fn-journal-food-row-shadow: 0 8px 22px rgba(79, 127, 91, .07);
 }
 
 .nav { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 1.5rem; height: 52px; overflow-x: auto; }
@@ -8039,29 +8048,128 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
 }
 .qty-mode-select option { color:initial; }
 
-/* FoodNote 0.18.2 — carrousel de date simplifié */
-#page-journal .journal-day-row-carousel,
-#page-sport .sport-day-row-carousel {
-  grid-template-columns: 34px minmax(0,1fr) 34px 0 38px !important;
-  gap: 7px !important;
-  align-items: center !important;
+/* FoodNote beta 0.22.186 — carrousel date centré, picker déplacé
+   Le picker n'est plus une colonne du carrousel : il vit dans l'en-tête.
+   Le carrousel Journal et Sport partage la même structure à 3 colonnes :
+   flèche gauche / 5 jours centrés / flèche droite. */
+#page-journal .journal-page-heading {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
 }
+
+#page-journal .journal-date-actions,
+#page-sport .sport-date-actions {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+#page-journal .journal-date-actions .journal-date-box-hidden,
+#page-sport .sport-date-actions .journal-date-box-hidden {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 1px !important;
+  max-width: 1px !important;
+  min-width: 1px !important;
+  height: 1px !important;
+  max-height: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#page-journal .journal-day-row-carousel,
+#page-sport .journal-day-row-carousel,
+#page-sport .sport-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 820px) 34px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#page-journal .journal-day-carousel-wrap,
+#page-sport .journal-day-carousel-wrap,
+#page-sport .sport-day-carousel-wrap {
+  grid-column: 2 !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
 #page-journal .journal-day-carousel,
+#page-sport .journal-day-carousel,
 #page-sport .sport-day-carousel {
-  grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   gap: 6px !important;
   align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
 }
+
+#page-journal .journal-day-nav-prev,
+#page-sport .journal-day-nav-prev,
+#page-sport .sport-day-nav-prev {
+  grid-column: 1 !important;
+}
+
+#page-journal .journal-day-nav-next,
+#page-sport .journal-day-nav-next,
+#page-sport .sport-day-nav-next {
+  grid-column: 3 !important;
+}
+
 #page-journal .journal-day-nav,
-#page-journal .journal-date-launch,
-#page-sport .journal-day-nav,
-#page-sport .journal-date-launch {
+#page-sport .journal-day-nav {
   min-height: 58px !important;
   height: 58px !important;
   border-radius: 15px !important;
   box-shadow: none !important;
   font-size: 20px !important;
 }
+
+#page-journal .journal-date-launch-heading,
+#page-sport .journal-date-launch-heading {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 15px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text2) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 78%, transparent) !important;
+  background: color-mix(in srgb, var(--bg) 86%, transparent) !important;
+  box-shadow: none !important;
+  flex: 0 0 36px !important;
+}
+
 #page-journal .journal-simple-day-card,
 #page-sport .journal-simple-day-card {
   min-height: 58px !important;
@@ -8079,16 +8187,19 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   background: color-mix(in srgb, var(--bg) 88%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--border2) 70%, transparent) !important;
 }
+
 #page-journal .journal-simple-day-card.active,
 #page-sport .journal-simple-day-card.active {
   background: color-mix(in srgb, var(--green) 13%, var(--bg)) !important;
   border-color: color-mix(in srgb, var(--green) 60%, var(--border2)) !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 18%, transparent) !important;
 }
+
 #page-journal .journal-simple-day-card.is-today:not(.active),
 #page-sport .journal-simple-day-card.is-today:not(.active) {
   border-color: color-mix(in srgb, var(--green) 36%, var(--border2)) !important;
 }
+
 .journal-simple-weekday {
   font-size: 10px !important;
   line-height: 1 !important;
@@ -8140,16 +8251,28 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   font-size: 10px !important;
   line-height: 1 !important;
 }
+
 @media (max-width: 560px) {
+  #page-journal .journal-page-heading {
+    align-items: center !important;
+  }
+  #page-journal .journal-date-launch-heading,
+  #page-sport .journal-date-launch-heading {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    flex-basis: 32px !important;
+    font-size: 14px !important;
+  }
   #page-journal .journal-day-row-carousel,
+  #page-sport .journal-day-row-carousel,
   #page-sport .sport-day-row-carousel {
-    grid-template-columns: 28px minmax(0,1fr) 28px 0 32px !important;
+    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
     gap: 5px !important;
   }
   #page-journal .journal-day-nav,
-  #page-journal .journal-date-launch,
-  #page-sport .journal-day-nav,
-  #page-sport .journal-date-launch {
+  #page-sport .journal-day-nav {
     min-height: 52px !important;
     height: 52px !important;
     border-radius: 13px !important;
@@ -8513,3 +8636,594 @@ body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-resul
 .objectif-rules-table-wrap{display:none!important;}
 @media(max-width:760px){.objectif-rules-list{grid-template-columns:1fr;gap:7px;}.objectif-rule-card{padding:9px;border-radius:14px;}.objectif-rule-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}.objectif-rule-metrics dd{font-size:10px;}}
 
+
+/* =========================================================
+   FoodNote beta 0.22.181 — thème maître final
+   Même bloc dans style-light.css et style-dark.css.
+   Les couleurs viennent uniquement des variables du fichier chargé.
+========================================================= */
+:root,
+html.foodnote-theme-light,
+html.foodnote-theme-dark,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  --card: var(--bg2);
+  --surface: var(--bg2);
+  --surface-soft: var(--bg3);
+  --line: var(--border2);
+  --muted: var(--text3);
+  --calm-surface: var(--bg2);
+  --calm-surface-2: var(--bg);
+  --calm-line: var(--border2);
+  --fn-energy-page-1: var(--bg);
+  --fn-energy-page-2: var(--bg2);
+  --fn-energy-page-3: var(--bg3);
+  --fn-energy-card-tint: transparent;
+  --fn-energy-green: var(--green);
+  --fn-energy-orange: var(--orange);
+  --fn-energy-pink: var(--red);
+  --fn-energy-border: var(--border2);
+  --fn-page-card-bg: var(--bg2);
+  --fn-page-soft-bg: var(--bg3);
+  --fn-nav-surface: var(--bg2);
+  --fn-nav-surface-2: var(--bg);
+  --fn-nav-text: var(--text2);
+  --fn-nav-active-text: var(--text);
+  --fn-nav-line: var(--border2);
+  --fn-home-panel-surface: var(--bg2);
+  --fn-home-panel-surface-2: var(--bg);
+  --fn-home-panel-border: var(--border2);
+  --fn-home-calorie-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-backdrop: var(--bg2);
+  --fn-home-macro-label-text: var(--text3);
+  --fn-home-macro-value-text: var(--text);
+  --fn-add-surface: var(--bg2);
+  --fn-add-soft: var(--bg);
+}
+
+html,
+body,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.app-layout,
+.main-content,
+.page,
+.page.active,
+.page-content,
+.content,
+.view,
+.screen {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.sidebar,
+.app-sidebar,
+aside,
+.nav,
+.topbar,
+.app-header,
+header {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.sb-item,
+.sb-sub-item,
+.nav-tab,
+.sidebar a,
+.sidebar button {
+  color: var(--text2) !important;
+}
+
+.sb-item.active,
+.sb-sub-item.active,
+.nav-tab.active,
+.sidebar .active,
+.side-nav .active {
+  background: var(--bg3) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.card,
+.panel,
+.fn-ui-panel,
+.fn-ui-card,
+.fn-ui-surface,
+.fn-ui-chart-tile,
+.data-card,
+.stats-card,
+.stats-panel,
+.stats-mini-card,
+.recap-card,
+.recap-smart-card,
+.hist-card,
+.journal-section-card,
+.journal-meals-card,
+.journal-tile-card,
+.database-card,
+.table-card,
+.settings-card,
+.profile-summary-main,
+.recap-hero,
+.stats-hero,
+.journal-hero,
+.theme-lab-card,
+.theme-lab-ui-panel,
+.recipe-block-panel,
+.recipe-summary-panel,
+.capture-card,
+.capture-panel,
+.food-add-dialog,
+.quick-foods-card,
+#food-add-modal .journal-add-row,
+#food-add-modal .food-add-head {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row,
+.food-card-v2,
+.food-row,
+.ingredient-row,
+.db-row,
+.table-row,
+.data-row,
+.list-row,
+.recipe-suggestion,
+.recipe-ingredient-row,
+.fn-ui-badge-edit-row,
+.fn-ui-food-row,
+.fn-ui-list-row,
+tbody tr {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row:hover,
+.food-card-v2:hover,
+.food-row:hover,
+.ingredient-row:hover,
+.db-row:hover,
+.table-row:hover,
+.data-row:hover,
+.list-row:hover,
+.recipe-suggestion:hover,
+.recipe-ingredient-row:hover,
+tbody tr:hover {
+  background: var(--bg3) !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+thead,
+th {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+}
+
+input,
+select,
+textarea,
+.export-box,
+.macro-ref,
+.sport-box,
+.deficit-bar,
+.add-form,
+.food-action-menu,
+.dropdown,
+.modal,
+.modal-content,
+.drawer {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text4) !important;
+}
+
+label,
+small,
+.muted,
+.subtitle,
+.hint,
+.help,
+.card-title,
+.sec-label,
+.add-lbl,
+.qty-unit,
+.macro-lbl,
+.macro-target,
+.food-macro-line,
+.hist-macros,
+.empty-state {
+  color: var(--text3) !important;
+}
+
+.macro-pill,
+.chip,
+.badge,
+.tag,
+.pill,
+.recipe-count-pill,
+.fn-ui-chip,
+.fn-ui-total-pill {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+  border-color: var(--border2) !important;
+}
+
+button,
+.btn,
+.icon-btn,
+.round-btn,
+.food-action-btn {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+button:hover,
+.btn:hover,
+.icon-btn:hover,
+.round-btn:hover,
+.food-action-btn:hover {
+  background: var(--bg3) !important;
+}
+
+.btn-primary,
+.fn-ui-button-primary,
+.capture-footer .btn-primary {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: var(--bg) !important;
+}
+
+.btn-danger,
+.food-action-delete {
+  color: var(--red) !important;
+}
+
+a { color: var(--green-dark) !important; }
+
+
+/* FoodNote beta 0.22.179 — Journal title flow fix
+   Le titre "Aujourd'hui" ne doit plus être injecté via .journal-hero::before :
+   le pseudo-élément redevient un simple effet décoratif, et le titre réel
+   occupe sa place dans le flux avant le carrousel. */
+#page-journal .journal-hero::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, transparent, var(--fn-card-sheen, rgba(255,255,255,.16)), transparent) !important;
+}
+
+#page-journal .journal-page-heading {
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 0 clamp(10px, 1.6vw, 16px) !important;
+  padding: 0 !important;
+}
+
+#page-journal .journal-page-title {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: clamp(28px, 3.35vw, 44px) !important;
+  line-height: .98 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.065em !important;
+}
+
+#page-journal .journal-day-row-carousel,
+#page-journal .journal-floating-macro-card {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 700px) {
+  #page-journal .journal-page-heading {
+    margin-bottom: 10px !important;
+  }
+  #page-journal .journal-page-title {
+    font-size: clamp(32px, 9vw, 50px) !important;
+  }
+}
+
+
+/* Journal : lignes aliment non cochables
+   La ligne reste une entrée de repas active, mais elle n'a plus d'affordance de sélection/suppression par clic.
+   Suppression volontaire uniquement via le bouton ✕.
+
+   Thème clair : on conserve l’identité verte douce des lignes d’aliments,
+   sans réactiver le comportement de sélection. */
+#page-journal .food-row-compact,
+#page-journal .aliment-row.food-row-compact {
+  cursor: default !important;
+  user-select: text;
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left: 3px solid var(--fn-journal-food-row-accent) !important;
+  box-shadow: var(--fn-journal-food-row-shadow) !important;
+}
+#page-journal .food-row-compact:hover,
+#page-journal .aliment-row.food-row-compact:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+  border-color: color-mix(in srgb, var(--fn-journal-food-row-accent) 56%, var(--fn-journal-food-row-border)) !important;
+}
+#page-journal .food-row-compact .aliment-check,
+#page-journal .food-row-compact .chk-mark {
+  display: none !important;
+}
+#page-journal .food-row-compact.selected {
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left-color: var(--fn-journal-food-row-accent) !important;
+  border-width: 0.5px !important;
+  border-left-width: 3px !important;
+}
+#page-journal .food-row-compact.selected:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+}
+#page-journal .food-row-compact.selected .aliment-name {
+  color: var(--text) !important;
+  font-weight: 720 !important;
+}
+#page-journal .food-row-compact:not(.selected) .food-compact-qty {
+  opacity: 1 !important;
+}
+/* =========================================================
+   FoodNote beta 0.22.185 — Mobile : barres macros pleine largeur
+   Corrige le décalage à droite du correctif précédent.
+   La barre reste pleine largeur en bas de la carte, avec assez
+   d'espace réservé pour ne plus recouvrir “manque Xg · cible Yg”.
+========================================================= */
+@media (max-width: 720px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    position: relative !important;
+    min-height: 46px !important;
+    padding-bottom: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy {
+    min-width: 0 !important;
+    padding-bottom: 4px !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    display: block !important;
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.08 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    display: block !important;
+    position: absolute !important;
+    grid-column: 1 / -1 !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: 4px !important;
+    width: auto !important;
+    height: 2.5px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    z-index: 1 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    min-height: 42px !important;
+    padding-bottom: 12px !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    line-height: 1.02 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    left: 5px !important;
+    right: 5px !important;
+    bottom: 3px !important;
+    height: 2px !important;
+  }
+}
+
+/* =========================================================
+   FoodNote beta 0.22.179 — badges nutrition page principale
+   Alignement réel sur le composant Objectif : mêmes variables,
+   mêmes intensités d'effet, couleurs macro plus lisibles.
+   Pas de changement structurel : uniquement teinte/rendu visuel.
+========================================================= */
+:root {
+  --fn-badge-kcal: #f59e0b !important;
+  --fn-badge-prot: #22c55e !important;
+  --fn-badge-gluc: #f97316 !important;
+  --fn-badge-lip: #60a5fa !important;
+}
+
+#page-journal {
+  --fn-main-macro-kcal: var(--fn-badge-kcal);
+  --fn-main-macro-prot: var(--fn-badge-prot);
+  --fn-main-macro-gluc: var(--fn-badge-gluc);
+  --fn-main-macro-lip: var(--fn-badge-lip);
+}
+
+#page-journal .macro-cell-kcal,
+#page-journal .fn-ui-macro-kcal {
+  --badge-accent: var(--fn-main-macro-kcal) !important;
+  --chip-accent: var(--fn-main-macro-kcal) !important;
+  --macro-accent: var(--fn-main-macro-kcal) !important;
+  --macro-color: var(--fn-main-macro-kcal) !important;
+}
+
+#page-journal .macro-cell-prot,
+#page-journal .fn-ui-macro-prot {
+  --badge-accent: var(--fn-main-macro-prot) !important;
+  --chip-accent: var(--fn-main-macro-prot) !important;
+  --macro-accent: var(--fn-main-macro-prot) !important;
+  --macro-color: var(--fn-main-macro-prot) !important;
+}
+
+#page-journal .macro-cell-gluc,
+#page-journal .fn-ui-macro-gluc {
+  --badge-accent: var(--fn-main-macro-gluc) !important;
+  --chip-accent: var(--fn-main-macro-gluc) !important;
+  --macro-accent: var(--fn-main-macro-gluc) !important;
+  --macro-color: var(--fn-main-macro-gluc) !important;
+}
+
+#page-journal .macro-cell-lip,
+#page-journal .fn-ui-macro-lip {
+  --badge-accent: var(--fn-main-macro-lip) !important;
+  --chip-accent: var(--fn-main-macro-lip) !important;
+  --macro-accent: var(--fn-main-macro-lip) !important;
+  --macro-color: var(--fn-main-macro-lip) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 42%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--badge-accent) 38%, transparent) 0, transparent 62%),
+    radial-gradient(circle at 4% 0%, rgba(255,255,255,.14) 0, transparent 44%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--bg2) 68%, var(--badge-accent) 15%),
+      color-mix(in srgb, var(--bg2) 76%, var(--badge-accent) 11%)
+    ) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--badge-accent) 13%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -35% -25% auto auto !important;
+  width: 60% !important;
+  height: 75% !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--badge-accent) 32%, transparent), transparent 68%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#page-journal .fn-home-objectif-icon,
+#page-journal .fn-calorie-flame.fn-home-objectif-icon,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 15px !important;
+  background: color-mix(in srgb, var(--badge-accent) 20%, var(--bg2)) !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 34%, var(--border2)) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+#page-journal .fn-calorie-flame.fn-home-objectif-icon {
+  margin: 0 auto 4px !important;
+}
+
+#page-journal .fn-home-objectif-icon::before,
+#page-journal .fn-home-objectif-icon::after {
+  display: none !important;
+  content: none !important;
+}
+
+#page-journal .fn-home-macro-row .macro-progress-fill,
+#page-journal .fn-calorie-summary-card .macro-progress-fill,
+#page-journal .fn-home-macro-row .fn-ui-smart-progress i,
+#page-journal .fn-calorie-summary-card .fn-ui-smart-progress i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent) 72%, #fff 6%), var(--badge-accent)) !important;
+}
+
+@media (max-width: 620px) {
+  #page-journal .fn-home-objectif-icon,
+  #page-journal .fn-calorie-flame.fn-home-objectif-icon,
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    border-radius: 13px !important;
+    font-size: 15px !important;
+  }
+}

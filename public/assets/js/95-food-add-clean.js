@@ -54,23 +54,6 @@
     setTimeout(() => runAfterPaint(fn), delay);
   }
 
-  function ensureComponentStylesheet(){
-    const href = 'assets/css/30-food-add-component.css?v=' + BUILD;
-    let link = document.getElementById('foodnote-add-component-v02218-css');
-    if (!link) {
-      link = document.createElement('link');
-      link.id = 'foodnote-add-component-v02218-css';
-      link.rel = 'stylesheet';
-      link.href = href;
-      document.head.appendChild(link);
-      return;
-    }
-    if (!String(link.href || '').includes(BUILD)) link.href = href;
-    // La feuille composant doit rester après les anciens styles injectés.
-    if (link.parentElement === document.head && document.head.lastElementChild !== link) {
-      try { document.head.appendChild(link); } catch(e) {}
-    }
-  }
 
   function quantityFlowActive(){
     try {
@@ -891,7 +874,6 @@
 
   function ensureUI(){
     injectStyles();
-    ensureComponentStylesheet();
     const modal = $('food-add-modal');
     const panel = q('#food-add-modal .food-add-panel');
     if (!modal || !panel) return;
@@ -1289,7 +1271,6 @@
       }
     `;
     document.head.appendChild(style);
-    ensureComponentStylesheet();
   }
 
   function ensureConfirmBarPlacement(){

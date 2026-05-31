@@ -1,17 +1,26 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scrollbar-gutter: stable; }
 body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-/* ── Thème clair (défaut) ── */
+/* ── Thème sombre ── */
 :root {
-  --bg: #141614; --bg2: #1e211e; --bg3: #252825; --bg4: #2e322e;
-  --text: #e8eae4; --text2: #b0b4aa; --text3: #6a6e62; --text4: #464a42;
-  --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.12);
-  --green-bg: #1a2e25; --green-mid: #2a5040; --green: #3aaa80; --green-dark: #5dcaa5;
-  --orange-bg: #2a1e08; --orange: #e0a830; --orange-dark: #f0c060;
-  --red-bg: #2a1010; --red: #d96060; --red-dark: #f09090;
-  --blue-bg: #0f2030; --blue: #5b9fd4; --blue-dark: #5b9fd4;
-  --pill-bg: #252825;
-}
+  /* Thème sombre FoodNote — palette noir sobre, presque sans teinte */
+  --bg: #08090a; --bg2: #0d0f10; --bg3: #141618; --bg4: #1b1e21;
+  --text: #e1e1da; --text2: #b1b4ad; --text3: #858a83; --text4: #5f655f;
+  --border: rgba(242,242,238,0.075); --border2: rgba(242,242,238,0.13);
+  --green-bg: rgba(181,137,72,0.10); --green-mid: rgba(181,137,72,0.18); --green: #b58948; --green-dark: #d6ad6a;
+  --orange-bg: rgba(198,125,54,0.13); --orange: #c98645; --orange-dark: #e2a86a;
+  --red-bg: rgba(196,86,86,0.13); --red: #ca6666; --red-dark: #ec9292;
+  --blue-bg: rgba(111,139,166,0.13); --blue: #7894ad; --blue-dark: #9db3c7;
+  --pill-bg: #141618;
+
+
+  /* FoodNote — Journal food rows theme tokens
+     Thème sombre : lignes alimentaires neutres, sans retour de dominante verte. */
+  --fn-journal-food-row-bg: #111315;
+  --fn-journal-food-row-bg-hover: #15181a;
+  --fn-journal-food-row-border: rgba(255, 255, 255, .085);
+  --fn-journal-food-row-accent: rgba(255, 255, 255, .12);
+  --fn-journal-food-row-shadow: none;}
 
 .nav { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 0 1.5rem; display: flex; align-items: center; gap: 1.5rem; height: 52px; overflow-x: auto; }
 .nav-title { font-size: 15px; font-weight: 500; white-space: nowrap; }
@@ -29,14 +38,14 @@ input[type=text], input[type=number], input[type=date], textarea, select {
   border-radius: 8px; font-size: 14px; font-family: inherit;
   background: var(--bg2); color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
 }
-input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(42,125,95,0.1); }
+input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 2px rgba(181,137,72,0.14); }
 textarea { resize: vertical; min-height: 80px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .field { margin-bottom: 12px; }
 button { padding: 9px 18px; border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; border: 0.5px solid rgba(255,255,255,0.15); background: transparent; color: inherit; transition: background 0.15s; }
 button:hover { background: var(--bg3); }
-.btn-primary { background: var(--green); color: #1e211e; border-color: var(--green); }
+.btn-primary { background: var(--green); color: #08090a; border-color: var(--green); }
 .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
 
 .btn-danger { border-color: #d96060; color: #d96060; }
@@ -44,8 +53,8 @@ button:hover { background: var(--bg3); }
 .aliment-list { display: flex; flex-direction: column; gap: 4px; }
 .aliment-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 0.5px solid var(--border); transition: all 0.12s; user-select: none; background: var(--bg2); }
 .aliment-row:hover { background: var(--bg3); }
-.aliment-row.selected { background: #1c3828; border-color: #3aaa80; border-width: 1.5px; }
-.aliment-row.selected .aliment-name { color: #5dcaa5; font-weight: 600; }
+.aliment-row.selected { background: var(--green-bg); border-color: var(--green); border-width: 1.5px; }
+.aliment-row.selected .aliment-name { color: var(--green-dark); font-weight: 600; }
 .aliment-row.no-data { background: rgba(255, 193, 7, 0.06); border-left: 2px solid #ffc107; }
 .aliment-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .aliment-row.selected .aliment-check, .food-card-v2.selected .aliment-check { background: var(--green); border-color: var(--green); }
@@ -73,7 +82,7 @@ button:hover { background: var(--bg3); }
 .food-action-groq { color: var(--blue); background: var(--blue-bg); border-color: rgba(44,95,138,.2); }
 .food-action-ciq { color:#5b9fd4; background:rgba(91,141,217,.14); border-color:rgba(91,141,217,.28); }
 .food-action-off { color:#e0a830; background:rgba(231,124,0,.12); border-color:rgba(231,124,0,.25); }
-.food-action-edit { color:var(--green-dark); background:var(--green-bg); border-color:rgba(29,158,117,.25); }
+.food-action-edit { color:var(--green-dark); background:var(--green-bg); border-color:rgba(181,137,72,.25); }
 .food-action-delete { color:var(--red); background:var(--red-bg); border-color:rgba(226,75,74,.22); }
 .food-actions-visible { flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
 .food-more-wrap { position: relative; }
@@ -91,7 +100,7 @@ button:hover { background: var(--bg3); }
 .food-action-menu button.danger { color: var(--red); }
 .food-action-menu button.danger:hover { background: var(--red-bg); color: var(--red-dark); }
 .edit-btn { color: var(--text4); }
-.edit-btn:hover { color: #3aaa80; background: rgba(29,158,117,0.1); }
+.edit-btn:hover { color: var(--green-dark); background: var(--green-bg); }
 .edit-row { display: none; flex-wrap: wrap; gap: 6px; padding: 8px 10px; border-radius: 8px; border: 0.5px solid var(--green); background: var(--green-bg); margin-top: 2px; align-items: center; }
 .edit-row input { padding: 4px 6px !important; font-size: 13px !important; border-radius: 6px !important; }
 .edit-lbl { font-size: 11px; color: var(--green-dark); white-space: nowrap; }
@@ -101,7 +110,7 @@ button:hover { background: var(--bg3); }
 .macro-val { font-size: 20px; font-weight: 500; }
 .macro-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
 .macro-target { font-size: 11px; color: var(--text4); }
-.ok { color: #3aaa80; } .warn { color: #ba7517; } .bad { color: #d96060; }
+.ok { color: var(--green-dark); } .warn { color: var(--orange-dark); } .bad { color: var(--red); }
 .tag-ok { background: var(--green-bg); color: var(--green-dark); font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 .tag-warn { background: var(--orange-bg); color: var(--orange-dark); font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 .tag-bad { background: var(--red-bg); color: var(--red-dark); font-size: 11px; padding: 2px 8px; border-radius: 4px; }
@@ -252,7 +261,7 @@ tr:last-child td { border-bottom: none; }
 /* ── App Header ───────────────────────────────────────── */
 .app-header {
   background: var(--bg2); border-bottom: 0.5px solid var(--border);
-  color: #1e211e;
+  color: #101214;
   padding: 0;
   position: sticky;
   top: 0;
@@ -285,7 +294,7 @@ tr:last-child td { border-bottom: none; }
 .sidebar { width: 220px; background: var(--bg2); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200; overflow: hidden; }
 .sb-header { padding: 14px 14px 12px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
 .sb-logo { display: flex; align-items: center; gap: 8px; }
-.sb-logo-icon { width: 30px; height: 30px; border-radius: 7px; background: #3aaa80; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sb-logo-icon { width: 30px; height: 30px; border-radius: 7px; background: #b58948; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .sb-logo-name { font-size: 15px; font-weight: 600; color: var(--text); }
 .sb-logo-phase { font-size: 11px; color: var(--text4); }
 .sb-nav { flex: 1; padding: 6px 0; overflow-y: auto; display: flex; flex-direction: column; }
@@ -317,7 +326,7 @@ tr:last-child td { border-bottom: none; }
 
 /* ── Profil amélioré ───────────────────────────────────── */
 .profile-hero { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:14px; align-items:stretch; }
-.profile-summary { background:linear-gradient(135deg, rgba(29,158,117,0.18), rgba(29,158,117,0.04)); border:0.5px solid rgba(29,158,117,0.35); border-radius:14px; padding:16px; }
+.profile-summary { background:linear-gradient(135deg, rgba(181,137,72,0.18), rgba(181,137,72,0.04)); border:0.5px solid rgba(181,137,72,0.35); border-radius:14px; padding:16px; }
 .profile-name { font-size:24px; font-weight:700; color:var(--text); line-height:1.1; }
 .profile-muted { font-size:13px; color:var(--text3); line-height:1.45; }
 .profile-kpi-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:8px; }
@@ -359,7 +368,7 @@ tr:last-child td { border-bottom: none; }
   background:var(--bg); border:0.5px solid var(--border2); border-radius:14px;
   padding:12px; display:flex; flex-direction:column; justify-content:space-between;
 }
-.stats-tile::after { content:''; position:absolute; right:-22px; top:-22px; width:66px; height:66px; border-radius:50%; background:rgba(29,158,117,0.08); }
+.stats-tile::after { content:''; position:absolute; right:-22px; top:-22px; width:66px; height:66px; border-radius:50%; background:rgba(181,137,72,0.08); }
 .stats-tile-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; position:relative; z-index:1; }
 .stats-tile-icon { width:32px; height:32px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:var(--bg2); border:0.5px solid var(--border2); font-size:16px; flex-shrink:0; }
 .stats-tile-label { font-size:11px; color:var(--text4); text-transform:uppercase; letter-spacing:.05em; font-weight:650; }
@@ -370,7 +379,7 @@ tr:last-child td { border-bottom: none; }
 .stats-delta.up { background:var(--orange-bg); color:var(--orange-dark); }
 .stats-delta.down { background:var(--green-bg); color:var(--green-dark); }
 .stats-delta.neutral { background:var(--pill-bg); color:var(--text3); }
-.stats-tile.ok { border-color:rgba(29,158,117,0.35); }
+.stats-tile.ok { border-color:rgba(181,137,72,0.35); }
 .stats-tile.warn { border-color:rgba(186,117,23,0.35); }
 .stats-tile.bad { border-color:rgba(226,75,74,0.35); }
 .stats-tile.wide { grid-column: span 2; }
@@ -474,7 +483,7 @@ tr:last-child td { border-bottom: none; }
 .recap-alert-icon { width:32px; height:32px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:var(--bg2); border:0.5px solid var(--border2); flex-shrink:0; }
 .recap-alert-title { font-size:13px; font-weight:700; color:var(--text); }
 .recap-alert-text { font-size:12px; color:var(--text3); margin-top:2px; line-height:1.35; }
-.recap-alert.ok { border-color:rgba(29,158,117,.25); }
+.recap-alert.ok { border-color:rgba(181,137,72,.25); }
 .recap-alert.warn { border-color:rgba(186,117,23,.35); }
 .recap-alert.bad { border-color:rgba(226,75,74,.35); }
 .recap-week-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
@@ -483,7 +492,7 @@ tr:last-child td { border-bottom: none; }
 .recap-mini-label { font-size:11px; color:var(--text4); margin-top:2px; }
 
 /* ── Données premium ─────────────────────────────────────── */
-.data-hero-card { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; background:linear-gradient(135deg, rgba(29,158,117,0.15), rgba(29,158,117,0.03)); border:0.5px solid rgba(29,158,117,0.25); border-radius:16px; padding:16px; margin-bottom:12px; }
+.data-hero-card { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; background:linear-gradient(135deg, rgba(181,137,72,0.15), rgba(181,137,72,0.03)); border:0.5px solid rgba(181,137,72,0.25); border-radius:16px; padding:16px; margin-bottom:12px; }
 .data-summary-grid { margin-bottom:10px; }
 .data-status { font-size:13px; color:var(--text4); margin:10px 0 14px; padding:9px 10px; border-radius:10px; background:var(--bg); border:0.5px solid var(--border2); }
 .data-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
@@ -497,9 +506,9 @@ tr:last-child td { border-bottom: none; }
 
 .journal-premium-page { max-width: 940px; }
 .journal-hero {
-  background: linear-gradient(180deg, #1e211e 0%, #252825 100%);
-  border: 1px solid rgba(26, 34, 26, 0.06);
-  box-shadow: 0 10px 30px rgba(21, 28, 21, 0.06);
+  background: linear-gradient(180deg, #0f1112 0%, #111417 100%);
+  border: 1px solid rgba(242,242,238,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
   border-radius: 20px;
   padding: 18px;
   position: relative;
@@ -511,10 +520,10 @@ tr:last-child td { border-bottom: none; }
   inset: 0 auto auto 0;
   width: 100%;
   height: 4px;
-  background: linear-gradient(90deg, rgba(29,158,117,0.85), rgba(29,158,117,0.16));
+  background: linear-gradient(90deg, rgba(181,137,72,0.55), rgba(181,137,72,0.08));
 }
 .journal-hero input, .journal-hero select {
-  background: #1e211e;
+  background: #101214;
   border-color: rgba(22, 28, 22, 0.10);
   color: var(--text);
   box-shadow: none;
@@ -637,8 +646,8 @@ tr:last-child td { border-bottom: none; }
 .journal-last-added {
   display:none;
   margin-top:10px;
-  background:rgba(29,158,117,0.06);
-  border:1px solid rgba(29,158,117,0.12);
+  background:rgba(181,137,72,0.06);
+  border:1px solid rgba(181,137,72,0.12);
   color:var(--text2);
   border-radius:14px;
   padding:10px 12px;
@@ -703,11 +712,11 @@ tr:last-child td { border-bottom: none; }
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 .food-card-v2.selected {
-  background: #1c3828 !important;
-  border-color: #3aaa80 !important;
+  background: #17130f !important;
+  border-color: #b58948 !important;
   border-width: 1.5px !important;
 }
-.food-card-v2.selected .aliment-name { color: #5dcaa5; font-weight: 600; }
+.food-card-v2.selected .aliment-name { color: #d6ad6a; font-weight: 600; }
 
 .food-main-v2 {
   display: flex;
@@ -727,7 +736,7 @@ tr:last-child td { border-bottom: none; }
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 4px;
-  background: #1e211e8e1;
+  background: rgba(181,137,72,0.12);
   color: #9a6c00;
   border: 0.5px solid #ffd54f;
   white-space: nowrap;
@@ -798,7 +807,7 @@ tr:last-child td { border-bottom: none; }
 .journal-foods-headline { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px; }
 .meal-helper { font-size:12px; margin-top:3px; }
 .meal-toggle { display:inline-flex; align-items:center; gap:7px; padding:6px 9px; border-radius:999px; background:var(--bg); border:0.5px solid var(--border2); color:var(--text3); font-size:12px; cursor:pointer; user-select:none; white-space:nowrap; }
-.meal-toggle input { width:auto; accent-color:#3aaa80; }
+.meal-toggle input { width:auto; accent-color:#b58948; }
 .food-meal-select { border:none; background:var(--bg); color:var(--text3); font-size:11px; padding:5px 8px; border-radius:999px; max-width:150px; cursor:pointer; }
 .food-meal-select:focus { outline:0.5px solid var(--green); }
 .meal-group { border:0.5px solid var(--border2); border-radius:14px; background:rgba(0,0,0,0.015); margin-bottom:10px; overflow:hidden; }
@@ -982,7 +991,7 @@ tr:last-child td { border-bottom: none; }
 .food-mini-btn.edit {
   color: var(--green-dark) !important;
   background: var(--green-bg) !important;
-  border-color: rgba(42,125,95,.32) !important;
+  border-color: rgba(181,137,72,.32) !important;
 }
 .food-mini-btn.delete {
   color: var(--red) !important;
@@ -1274,7 +1283,7 @@ tr:last-child td { border-bottom: none; }
 }
 .food-row-compact.editing {
   border-color: var(--green) !important;
-  box-shadow: 0 0 0 2px rgba(58,170,128,0.12);
+  box-shadow: 0 0 0 2px rgba(181,137,72,0.12);
 }
 .food-row-compact.editing .food-mini-btn {
   height: 25px !important;
@@ -1488,7 +1497,7 @@ tr:last-child td { border-bottom: none; }
 .sb-logo-icon {
   overflow: hidden;
   background: rgba(255,255,255,0.92) !important;
-  border: 1px solid rgba(58,170,128,0.22);
+  border: 1px solid rgba(181,137,72,0.22);
 }
 .sb-logo-icon img {
   width: 100%;
@@ -1546,7 +1555,7 @@ tr:last-child td { border-bottom: none; }
   outline: none;
 }
 .qty-equivalent.hidden { display:none; }
-.edit-row input[id^="ei-w-"] { border-color: rgba(29,158,117,0.35); }
+.edit-row input[id^="ei-w-"] { border-color: rgba(181,137,72,0.35); }
 
 /* UX v10.20 — gestion SQLite des poids par unité */
 .unit-weight-list{display:flex;flex-direction:column;gap:7px}
@@ -1568,9 +1577,9 @@ tr:last-child td { border-bottom: none; }
    Zéro dépendance lourde, CSS only, mobile friendly.
    ───────────────────────────────────────────── */
 :root {
-  --fn-glow-green: rgba(58,170,128,.18);
-  --fn-glow-orange: rgba(224,168,48,.16);
-  --fn-card-sheen: rgba(255,255,255,.045);
+  --fn-glow-green: rgba(255,255,255,.012);
+  --fn-glow-orange: rgba(181,137,72,.022);
+  --fn-card-sheen: rgba(242,240,234,.055);
 }
 
 body::before {
@@ -1581,7 +1590,7 @@ body::before {
   background:
     radial-gradient(circle at 18% 8%, var(--fn-glow-green), transparent 34%),
     radial-gradient(circle at 92% 18%, var(--fn-glow-orange), transparent 28%);
-  opacity: .42;
+  opacity: .10;
   z-index: -1;
 }
 
@@ -1637,7 +1646,7 @@ button:hover,
 }
 
 .btn-primary {
-  box-shadow: 0 8px 20px rgba(58,170,128,.18);
+  box-shadow: 0 8px 20px rgba(181,170,120,.12);
 }
 
 .btn-primary:active,
@@ -1646,7 +1655,7 @@ button:active {
 }
 
 .sb-logo-icon {
-  box-shadow: 0 10px 28px rgba(58,170,128,.18);
+  box-shadow: 0 10px 28px rgba(181,137,72,.18);
 }
 .sb-logo-name {
   letter-spacing: -.02em;
@@ -1661,7 +1670,7 @@ button:active {
   width: 30px;
   height: 30px;
   border-radius: 10px;
-  filter: drop-shadow(0 8px 16px rgba(58,170,128,.18));
+  filter: drop-shadow(0 8px 16px rgba(181,137,72,.18));
 }
 
 .card-title-with-badge {
@@ -1690,7 +1699,7 @@ button:active {
 }
 .fn-source-pill.ciqual { color:#5b9fd4; background:rgba(91,141,217,.14); border-color:rgba(91,141,217,.25); }
 .fn-source-pill.off { color:#e0a830; background:rgba(231,124,0,.12); border-color:rgba(231,124,0,.25); }
-.fn-source-pill.local { color:var(--green-dark); background:var(--green-bg); border-color:rgba(58,170,128,.25); }
+.fn-source-pill.local { color:var(--green-dark); background:var(--green-bg); border-color:rgba(181,137,72,.25); }
 
 .journal-ux-pills span,
 .source-badge,
@@ -1750,9 +1759,9 @@ button:active {
   animation: fn-save-feedback .55s ease both;
 }
 @keyframes fn-save-feedback {
-  0% { box-shadow: 0 0 0 0 rgba(58,170,128,.0); }
-  35% { box-shadow: 0 0 0 5px rgba(58,170,128,.13); }
-  100% { box-shadow: 0 0 0 0 rgba(58,170,128,.0); }
+  0% { box-shadow: 0 0 0 0 rgba(181,137,72,.0); }
+  35% { box-shadow: 0 0 0 5px rgba(181,137,72,.13); }
+  100% { box-shadow: 0 0 0 0 rgba(181,137,72,.0); }
 }
 
 .food-mini-btn.off .btn-label {
@@ -1845,7 +1854,7 @@ button:active {
 .backup-status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:8px}
 .backup-status-pill{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
 .backup-status-pill strong{display:block;font-size:18px;color:var(--text);line-height:1.1}.backup-status-pill span{font-size:11px;color:var(--text4)}
-.backup-warning{color:var(--orange);font-weight:600}.backup-ok{color:#1d9e75;font-weight:600}.backup-error{color:#e24b4a;font-weight:600}
+.backup-warning{color:var(--orange);font-weight:600}.backup-ok{color:#b58948;font-weight:600}.backup-error{color:#e24b4a;font-weight:600}
 
 
 /* v10.44 - Historique renforcé */
@@ -1861,7 +1870,7 @@ button:active {
 .history-filter-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin-bottom:14px}
 .history-filter-grid label{font-size:12px;color:var(--text3);display:flex;flex-direction:column;gap:6px}
 .history-filter-grid input,.history-filter-grid select{width:100%;padding:10px 11px;border-radius:14px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:14px;outline:none}
-.history-filter-grid input:focus,.history-filter-grid select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.12)}
+.history-filter-grid input:focus,.history-filter-grid select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(181,137,72,.12)}
 .history-summary-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .history-summary-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:10px;min-height:62px}
 .history-summary-card strong{display:block;font-size:18px;color:var(--text);line-height:1.1}
@@ -2194,15 +2203,15 @@ body > #barcode-scan-panel.barcode-inline-panel canvas {
   border: 0;
   border-radius: 999px;
   color: #fff;
-  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 72%, #2dd4bf));
-  box-shadow: 0 16px 38px rgba(29,158,117,.34), 0 4px 14px rgba(0,0,0,.24);
+  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 72%, #d6ad6a));
+  box-shadow: 0 16px 38px rgba(181,137,72,.34), 0 4px 14px rgba(0,0,0,.24);
   cursor: pointer;
   font-weight: 800;
   letter-spacing: .01em;
   -webkit-tap-highlight-color: transparent;
   transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
 }
-.floating-add-food-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 46px rgba(29,158,117,.40), 0 5px 18px rgba(0,0,0,.28); }
+.floating-add-food-btn:hover { transform: translateY(-2px); box-shadow: 0 20px 46px rgba(181,137,72,.40), 0 5px 18px rgba(0,0,0,.28); }
 .floating-add-food-btn:active { transform: translateY(0) scale(.98); }
 .floating-add-food-btn.is-hidden { opacity: 0; pointer-events: none; transform: translateY(12px); }
 .floating-add-food-btn .fab-plus { font-size: 28px; line-height: 1; margin-top: -2px; }
@@ -2516,8 +2525,8 @@ body.sidebar-collapsed .journal-bottom-actions {
   border: 0 !important;
   color: #fff !important;
   font-weight: 850 !important;
-  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 72%, #2dd4bf)) !important;
-  box-shadow: 0 10px 24px rgba(29,158,117,.30) !important;
+  background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green) 72%, #d6ad6a)) !important;
+  box-shadow: 0 10px 24px rgba(181,137,72,.30) !important;
 }
 .journal-bottom-actions .journal-save-day-btn {
   min-width: 132px !important;
@@ -2716,9 +2725,9 @@ body.sidebar-collapsed .journal-add-only {
   font-weight: 850 !important;
   letter-spacing: .01em !important;
   color: #fff !important;
-  border: 1px solid color-mix(in srgb, var(--green) 62%, #0f5132) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 94%, #0b7664), color-mix(in srgb, var(--green) 70%, #22d3ee)) !important;
-  box-shadow: 0 14px 34px rgba(29,158,117,.24), 0 3px 10px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 62%, #2a1d12) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 94%, #8f6a3a), color-mix(in srgb, var(--green) 70%, #d6ad6a)) !important;
+  box-shadow: 0 14px 34px rgba(181,137,72,.24), 0 3px 10px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.12) !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -2879,8 +2888,8 @@ body > #food-add-modal.food-add-modal .food-add-side {
 .food-ai-mode-btn.active {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0b7664), color-mix(in srgb, var(--green) 66%, #22d3ee)) !important;
-  box-shadow: 0 8px 22px rgba(29,158,117,.22) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #8f6a3a), color-mix(in srgb, var(--green) 66%, #d6ad6a)) !important;
+  box-shadow: 0 8px 22px rgba(181,137,72,.22) !important;
 }
 .food-add-modal.food-add-ai-mode .food-source-chip {
   opacity: .52 !important;
@@ -3269,7 +3278,7 @@ body > #food-add-modal.food-add-modal .food-ai-mode-btn {
 body > #food-add-modal.food-add-modal.food-add-ai-mode .food-add-kicker {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 56%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #0b7664), color-mix(in srgb, var(--green) 66%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #8f6a3a), color-mix(in srgb, var(--green) 66%, #d6ad6a)) !important;
 }
 @media (max-width: 720px) {
   body > #food-add-modal.food-add-modal .food-add-dialog {
@@ -3679,7 +3688,7 @@ body > #food-add-modal.food-add-modal .ocr-camera-actions button {
 .ocr-camera-actions #ocr-auto-btn.active {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #0b7664), color-mix(in srgb, var(--green) 62%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #8f6a3a), color-mix(in srgb, var(--green) 62%, #d6ad6a)) !important;
 }
 
 
@@ -3693,7 +3702,7 @@ body > #food-add-modal.food-add-modal .ocr-camera-actions button {
 body > #food-add-modal.food-add-modal .ocr-camera-actions #ocr-auto-btn.active {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0b7664), color-mix(in srgb, var(--green) 66%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #8f6a3a), color-mix(in srgb, var(--green) 66%, #d6ad6a)) !important;
 }
 
 
@@ -3786,7 +3795,7 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-hint {
 body.barcode-modal-open > .barcode-inline-panel .barcode-frame,
 body > #food-add-modal.food-add-modal .ocr-frame {
   border-color: rgba(255,255,255,.95) !important;
-  box-shadow: 0 0 0 999px rgba(0,0,0,.34), 0 0 0 1px rgba(29,158,117,.45) !important;
+  box-shadow: 0 0 0 999px rgba(0,0,0,.34), 0 0 0 1px rgba(181,137,72,.45) !important;
 }
 .barcode-ocr-hint::after,
 .ocr-unified-note::after {
@@ -3821,9 +3830,9 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-btn.barcode-ocr-fab
   font-size: 30px !important;
   line-height: 1 !important;
   color: #fff !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #0b7664), color-mix(in srgb, var(--green) 62%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #8f6a3a), color-mix(in srgb, var(--green) 62%, #d6ad6a)) !important;
   border: 2px solid rgba(255,255,255,.85) !important;
-  box-shadow: 0 16px 36px rgba(0,0,0,.38), 0 0 0 8px rgba(29,158,117,.16) !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,.38), 0 0 0 8px rgba(181,137,72,.16) !important;
 }
 body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-btn.barcode-ocr-fab:active {
   transform: translateX(-50%) scale(.96) !important;
@@ -3936,8 +3945,8 @@ body:not(.sidebar-open) #page-journal .journal-sticky-summary,
 .journal-day-chip.active {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #0b7664), color-mix(in srgb, var(--green) 62%, #22d3ee)) !important;
-  box-shadow: 0 8px 24px rgba(29,158,117,.22) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #8f6a3a), color-mix(in srgb, var(--green) 62%, #d6ad6a)) !important;
+  box-shadow: 0 8px 24px rgba(181,137,72,.22) !important;
 }
 .journal-day-chip.active b { color: #fff !important; }
 .journal-day-chip.has-entry:not(.active)::after {
@@ -4382,7 +4391,7 @@ body > #food-add-modal.food-add-modal .food-quick-mode-btn {
 }
 body > #food-add-modal.food-add-modal .food-quick-mode-btn.active {
   color: #fff !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #0b7664), color-mix(in srgb, var(--green) 58%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #8f6a3a), color-mix(in srgb, var(--green) 58%, #d6ad6a)) !important;
   border-color: color-mix(in srgb, var(--green) 64%, transparent) !important;
 }
 body > #food-add-modal.food-add-modal.food-add-quick-mode .db-search-wrap,
@@ -4462,13 +4471,13 @@ body > #food-add-modal.food-add-modal .food-inline-filters .food-source-chip.act
   color: #fff !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--green) 95%, #047857), color-mix(in srgb, var(--green) 62%, #22c55e)) !important;
   border-color: color-mix(in srgb, var(--green) 78%, transparent) !important;
-  box-shadow: 0 8px 18px rgba(29,158,117,.22) !important;
+  box-shadow: 0 8px 18px rgba(181,137,72,.22) !important;
 }
 body > #food-add-modal.food-add-modal .food-meal-chip.active {
   color: #fff !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0f766e), color-mix(in srgb, var(--green) 55%, #0ea5e9)) !important;
   border-color: color-mix(in srgb, var(--green) 72%, transparent) !important;
-  box-shadow: 0 8px 18px rgba(29,158,117,.22) !important;
+  box-shadow: 0 8px 18px rgba(181,137,72,.22) !important;
   transform: translateY(-1px) !important;
 }
 body > #food-add-modal.food-add-modal .food-meal-chip:not(.active),
@@ -4486,9 +4495,9 @@ body > #food-add-modal.food-add-modal .food-tools-inline .food-ai-mode-btn.activ
 body > #food-add-modal.food-add-modal .food-tools-inline .food-recipe-mode-btn.active,
 body > #food-add-modal.food-add-modal .food-tools-inline .food-quick-mode-btn.active {
   color: #fff !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #0b7664), color-mix(in srgb, var(--green) 58%, #22d3ee)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #8f6a3a), color-mix(in srgb, var(--green) 58%, #d6ad6a)) !important;
   border-color: color-mix(in srgb, var(--green) 66%, transparent) !important;
-  box-shadow: 0 8px 18px rgba(29,158,117,.22) !important;
+  box-shadow: 0 8px 18px rgba(181,137,72,.22) !important;
 }
 body > #food-add-modal.food-add-modal .food-add-controls .food-filter-section,
 body > #food-add-modal.food-add-modal .food-source-inline {
@@ -4573,7 +4582,7 @@ body > #food-add-modal.food-add-modal .food-source-inline {
   transform: scale(1) !important;
   opacity: 1 !important;
   border-color: color-mix(in srgb, var(--green) 72%, var(--border2)) !important;
-  box-shadow: 0 18px 32px rgba(29,158,117,.18), inset 0 0 0 1px rgba(29,158,117,.16) !important;
+  box-shadow: 0 18px 32px rgba(181,137,72,.18), inset 0 0 0 1px rgba(181,137,72,.16) !important;
   background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 96%, white 6%), color-mix(in srgb, var(--green) 6%, var(--bg2))) !important;
 }
 .journal-day-card-top {
@@ -4588,7 +4597,7 @@ body > #food-add-modal.food-add-modal .food-source-inline {
   border-radius: 999px !important;
   display: inline-block !important;
 }
-.journal-day-status-dot { background: linear-gradient(180deg, #7df3c4, var(--green)) !important; box-shadow: 0 0 0 4px rgba(29,158,117,.12) !important; }
+.journal-day-status-dot { background: linear-gradient(180deg, #7df3c4, var(--green)) !important; box-shadow: 0 0 0 4px rgba(181,137,72,.12) !important; }
 .journal-day-status-empty { background: color-mix(in srgb, var(--border2) 74%, transparent) !important; }
 .journal-day-sport-badge {
   display: inline-flex !important;
@@ -5729,7 +5738,7 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
   height:calc(18px * var(--h, .16)) !important;
   min-height:5px !important;
   border-radius:8px 8px 3px 3px !important;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--green) 70%, #22d3ee), color-mix(in srgb, var(--green) 90%, #10b981)) !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--green) 70%, #d6ad6a), color-mix(in srgb, var(--green) 90%, #10b981)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.28) !important;
 }
 #page-sport .sport-day-activity-bar.is-empty { opacity:.35 !important; }
@@ -6492,7 +6501,7 @@ body.foodnote-meal-drag-active .meal-group.meal-drop-target {
 }
 body.foodnote-meal-drag-active .meal-group.meal-drop-active {
   transform: translateY(-2px) !important;
-  box-shadow: 0 14px 30px rgba(29,158,117,.12) !important;
+  box-shadow: 0 14px 30px rgba(181,137,72,.12) !important;
 }
 body.foodnote-meal-drag-active .meal-group.meal-drop-active .meal-group-head::after {
   animation: foodnoteDropPillPulse .8s ease-in-out infinite alternate !important;
@@ -6788,10 +6797,10 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
    - Lipides : violet lavande — remplace #2563eb (bleu trop vif)
 */
 :root {
-  --fn-macro-kcal: #5d8d68;
-  --fn-macro-prot: #5DCAA5;
-  --fn-macro-gluc: #EF9F27;
-  --fn-macro-lip: #7F77DD;
+  --fn-macro-kcal: #d2a85c;
+  --fn-macro-prot: #8fb8c8;
+  --fn-macro-gluc: #c8954f;
+  --fn-macro-lip: #a99acb;
 }
 #page-journal .journal-floating-macro-card {
   width: min(100%, 940px) !important;
@@ -7567,7 +7576,7 @@ body > #food-add-modal.food-add-modal.food-add-recipe-camera #recipe-ocr-read-bt
   border-radius: 999px !important;
   font-size: 14px !important;
   font-weight: 950 !important;
-  box-shadow: 0 12px 30px rgba(29,158,117,.28) !important;
+  box-shadow: 0 12px 30px rgba(181,137,72,.28) !important;
 }
 body > #food-add-modal.food-add-modal.food-add-recipe-camera .ocr-camera-actions {
   justify-content: center !important;
@@ -7651,13 +7660,13 @@ body > #food-add-modal.food-add-modal .recipe-crop-selection {
   box-sizing:border-box !important;
   border:2px solid color-mix(in srgb, var(--green) 80%, white 10%) !important;
   border-radius:14px !important;
-  background:rgba(29,158,117,.10) !important;
+  background:rgba(181,137,72,.10) !important;
   box-shadow:0 0 0 9999px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.28) !important;
   cursor:move !important;
   touch-action:none !important;
 }
 body > #food-add-modal.food-add-modal .recipe-crop-selection.dragging {
-  background:rgba(29,158,117,.16) !important;
+  background:rgba(181,137,72,.16) !important;
 }
 body > #food-add-modal.food-add-modal .recipe-crop-selection::before {
   content:'zone ingrédients' !important;
@@ -8032,34 +8041,133 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
 }
 .edit-row .edit-hint {
   flex:1 1 220px;
-  color:#1d9e75;
+  color:#b58948;
   font-size:11px;
 }
 .qty-mode-select option { color:initial; }
 
-/* FoodNote 0.18.2 — carrousel de date simplifié */
-#page-journal .journal-day-row-carousel,
-#page-sport .sport-day-row-carousel {
-  grid-template-columns: 34px minmax(0,1fr) 34px 0 38px !important;
-  gap: 7px !important;
-  align-items: center !important;
+/* FoodNote beta 0.22.186 — carrousel date centré, picker déplacé
+   Le picker n'est plus une colonne du carrousel : il vit dans l'en-tête.
+   Le carrousel Journal et Sport partage la même structure à 3 colonnes :
+   flèche gauche / 5 jours centrés / flèche droite. */
+#page-journal .journal-page-heading {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
 }
+
+#page-journal .journal-date-actions,
+#page-sport .sport-date-actions {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+#page-journal .journal-date-actions .journal-date-box-hidden,
+#page-sport .sport-date-actions .journal-date-box-hidden {
+  position: absolute !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 1px !important;
+  max-width: 1px !important;
+  min-width: 1px !important;
+  height: 1px !important;
+  max-height: 1px !important;
+  min-height: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#page-journal .journal-day-row-carousel,
+#page-sport .journal-day-row-carousel,
+#page-sport .sport-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 820px) 34px !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#page-journal .journal-day-carousel-wrap,
+#page-sport .journal-day-carousel-wrap,
+#page-sport .sport-day-carousel-wrap {
+  grid-column: 2 !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
 #page-journal .journal-day-carousel,
+#page-sport .journal-day-carousel,
 #page-sport .sport-day-carousel {
-  grid-template-columns: repeat(5, minmax(0,1fr)) !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   gap: 6px !important;
   align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
 }
+
+#page-journal .journal-day-nav-prev,
+#page-sport .journal-day-nav-prev,
+#page-sport .sport-day-nav-prev {
+  grid-column: 1 !important;
+}
+
+#page-journal .journal-day-nav-next,
+#page-sport .journal-day-nav-next,
+#page-sport .sport-day-nav-next {
+  grid-column: 3 !important;
+}
+
 #page-journal .journal-day-nav,
-#page-journal .journal-date-launch,
-#page-sport .journal-day-nav,
-#page-sport .journal-date-launch {
+#page-sport .journal-day-nav {
   min-height: 58px !important;
   height: 58px !important;
   border-radius: 15px !important;
   box-shadow: none !important;
   font-size: 20px !important;
 }
+
+#page-journal .journal-date-launch-heading,
+#page-sport .journal-date-launch-heading {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  font-size: 15px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--text2) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 78%, transparent) !important;
+  background: color-mix(in srgb, var(--bg) 86%, transparent) !important;
+  box-shadow: none !important;
+  flex: 0 0 36px !important;
+}
+
 #page-journal .journal-simple-day-card,
 #page-sport .journal-simple-day-card {
   min-height: 58px !important;
@@ -8077,16 +8185,19 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   background: color-mix(in srgb, var(--bg) 88%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--border2) 70%, transparent) !important;
 }
+
 #page-journal .journal-simple-day-card.active,
 #page-sport .journal-simple-day-card.active {
   background: color-mix(in srgb, var(--green) 13%, var(--bg)) !important;
   border-color: color-mix(in srgb, var(--green) 60%, var(--border2)) !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 18%, transparent) !important;
 }
+
 #page-journal .journal-simple-day-card.is-today:not(.active),
 #page-sport .journal-simple-day-card.is-today:not(.active) {
   border-color: color-mix(in srgb, var(--green) 36%, var(--border2)) !important;
 }
+
 .journal-simple-weekday {
   font-size: 10px !important;
   line-height: 1 !important;
@@ -8138,16 +8249,28 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   font-size: 10px !important;
   line-height: 1 !important;
 }
+
 @media (max-width: 560px) {
+  #page-journal .journal-page-heading {
+    align-items: center !important;
+  }
+  #page-journal .journal-date-launch-heading,
+  #page-sport .journal-date-launch-heading {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    flex-basis: 32px !important;
+    font-size: 14px !important;
+  }
   #page-journal .journal-day-row-carousel,
+  #page-sport .journal-day-row-carousel,
   #page-sport .sport-day-row-carousel {
-    grid-template-columns: 28px minmax(0,1fr) 28px 0 32px !important;
+    grid-template-columns: 28px minmax(0, 1fr) 28px !important;
     gap: 5px !important;
   }
   #page-journal .journal-day-nav,
-  #page-journal .journal-date-launch,
-  #page-sport .journal-day-nav,
-  #page-sport .journal-date-launch {
+  #page-sport .journal-day-nav {
     min-height: 52px !important;
     height: 52px !important;
     border-radius: 13px !important;
@@ -8511,3 +8634,765 @@ body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-resul
 .objectif-rules-table-wrap{display:none!important;}
 @media(max-width:760px){.objectif-rules-list{grid-template-columns:1fr;gap:7px;}.objectif-rule-card{padding:9px;border-radius:14px;}.objectif-rule-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}.objectif-rule-metrics dd{font-size:10px;}}
 
+
+/* =========================================================
+   FoodNote beta 0.22.181 — thème maître final
+   Même bloc dans style-light.css et style-dark.css.
+   Les couleurs viennent uniquement des variables du fichier chargé.
+========================================================= */
+:root,
+html.foodnote-theme-light,
+html.foodnote-theme-dark,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  --card: var(--bg2);
+  --surface: var(--bg2);
+  --surface-soft: var(--bg3);
+  --line: var(--border2);
+  --muted: var(--text3);
+  --calm-surface: var(--bg2);
+  --calm-surface-2: var(--bg);
+  --calm-line: var(--border2);
+  --fn-energy-page-1: var(--bg);
+  --fn-energy-page-2: var(--bg2);
+  --fn-energy-page-3: var(--bg3);
+  --fn-energy-card-tint: transparent;
+  --fn-energy-green: var(--green);
+  --fn-energy-orange: var(--orange);
+  --fn-energy-pink: var(--red);
+  --fn-energy-border: var(--border2);
+  --fn-page-card-bg: var(--bg2);
+  --fn-page-soft-bg: var(--bg3);
+  --fn-nav-surface: var(--bg2);
+  --fn-nav-surface-2: var(--bg);
+  --fn-nav-text: var(--text2);
+  --fn-nav-active-text: var(--text);
+  --fn-nav-line: var(--border2);
+  --fn-home-panel-surface: var(--bg2);
+  --fn-home-panel-surface-2: var(--bg);
+  --fn-home-panel-border: var(--border2);
+  --fn-home-calorie-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-backdrop: var(--bg2);
+  --fn-home-macro-label-text: var(--text3);
+  --fn-home-macro-value-text: #d7d7cf;
+  --fn-add-surface: var(--bg2);
+  --fn-add-soft: var(--bg);
+}
+
+html,
+body,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.app-layout,
+.main-content,
+.page,
+.page.active,
+.page-content,
+.content,
+.view,
+.screen {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.sidebar,
+.app-sidebar,
+aside,
+.nav,
+.topbar,
+.app-header,
+header {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.sb-item,
+.sb-sub-item,
+.nav-tab,
+.sidebar a,
+.sidebar button {
+  color: var(--text2) !important;
+}
+
+.sb-item.active,
+.sb-sub-item.active,
+.nav-tab.active,
+.sidebar .active,
+.side-nav .active {
+  background: var(--bg3) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.card,
+.panel,
+.fn-ui-panel,
+.fn-ui-card,
+.fn-ui-surface,
+.fn-ui-chart-tile,
+.data-card,
+.stats-card,
+.stats-panel,
+.stats-mini-card,
+.recap-card,
+.recap-smart-card,
+.hist-card,
+.journal-section-card,
+.journal-meals-card,
+.journal-tile-card,
+.database-card,
+.table-card,
+.settings-card,
+.profile-summary-main,
+.recap-hero,
+.stats-hero,
+.journal-hero,
+.theme-lab-card,
+.theme-lab-ui-panel,
+.recipe-block-panel,
+.recipe-summary-panel,
+.capture-card,
+.capture-panel,
+.food-add-dialog,
+.quick-foods-card,
+#food-add-modal .journal-add-row,
+#food-add-modal .food-add-head {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row,
+.food-card-v2,
+.food-row,
+.ingredient-row,
+.db-row,
+.table-row,
+.data-row,
+.list-row,
+.recipe-suggestion,
+.recipe-ingredient-row,
+.fn-ui-badge-edit-row,
+.fn-ui-food-row,
+.fn-ui-list-row,
+tbody tr {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row:hover,
+.food-card-v2:hover,
+.food-row:hover,
+.ingredient-row:hover,
+.db-row:hover,
+.table-row:hover,
+.data-row:hover,
+.list-row:hover,
+.recipe-suggestion:hover,
+.recipe-ingredient-row:hover,
+tbody tr:hover {
+  background: var(--bg3) !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+thead,
+th {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+}
+
+input,
+select,
+textarea,
+.export-box,
+.macro-ref,
+.sport-box,
+.deficit-bar,
+.add-form,
+.food-action-menu,
+.dropdown,
+.modal,
+.modal-content,
+.drawer {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text4) !important;
+}
+
+label,
+small,
+.muted,
+.subtitle,
+.hint,
+.help,
+.card-title,
+.sec-label,
+.add-lbl,
+.qty-unit,
+.macro-lbl,
+.macro-target,
+.food-macro-line,
+.hist-macros,
+.empty-state {
+  color: var(--text3) !important;
+}
+
+.macro-pill,
+.chip,
+.badge,
+.tag,
+.pill,
+.recipe-count-pill,
+.fn-ui-chip,
+.fn-ui-total-pill {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+  border-color: var(--border2) !important;
+}
+
+button,
+.btn,
+.icon-btn,
+.round-btn,
+.food-action-btn {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+button:hover,
+.btn:hover,
+.icon-btn:hover,
+.round-btn:hover,
+.food-action-btn:hover {
+  background: var(--bg3) !important;
+}
+
+.btn-primary,
+.fn-ui-button-primary,
+.capture-footer .btn-primary {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: var(--bg) !important;
+}
+
+.btn-danger,
+.food-action-delete {
+  color: var(--red) !important;
+}
+
+a { color: var(--green-dark) !important; }
+
+
+/* FoodNote beta 0.22.179 — Journal title flow fix
+   Le titre "Aujourd'hui" ne doit plus être injecté via .journal-hero::before :
+   le pseudo-élément redevient un simple effet décoratif, et le titre réel
+   occupe sa place dans le flux avant le carrousel. */
+#page-journal .journal-hero::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, transparent, var(--fn-card-sheen, rgba(255,255,255,.16)), transparent) !important;
+}
+
+#page-journal .journal-page-heading {
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 0 clamp(10px, 1.6vw, 16px) !important;
+  padding: 0 !important;
+}
+
+#page-journal .journal-page-title {
+  margin: 0 !important;
+  color: #d7d7cf !important;
+  font-size: clamp(28px, 3.35vw, 44px) !important;
+  line-height: .98 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.055em !important;
+}
+
+#page-journal .journal-day-row-carousel,
+#page-journal .journal-floating-macro-card {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 700px) {
+  #page-journal .journal-page-heading {
+    margin-bottom: 10px !important;
+  }
+  #page-journal .journal-page-title {
+    font-size: clamp(32px, 9vw, 50px) !important;
+  }
+}
+
+/* =========================================================
+   FoodNote beta 0.22.182 — thème sombre : panneau Journal noir
+   Objectif : supprimer le panneau “Objectif du jour” trop clair/verdâtre.
+   Le thème sombre reste graphite/noir ; les couleurs macros restent en accents.
+========================================================= */
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
+  --fn-home-panel-surface: #0a0b0c !important;
+  --fn-home-panel-surface-2: #070809 !important;
+  --fn-home-panel-border: rgba(255,255,255,.105) !important;
+  --fn-home-calorie-surface: #101113 !important;
+  --fn-home-calorie-card-surface: #101113 !important;
+  --fn-home-calorie-card-opacity: 100% !important;
+  --fn-home-calorie-border: rgba(255,255,255,.115) !important;
+  --fn-home-calorie-card-border-opacity: 100% !important;
+  --fn-home-calorie-ring-inner-surface: #101113 !important;
+  --fn-home-calorie-ring-inner-backdrop: #101113 !important;
+  --fn-home-calorie-ring-inner-opacity: 100% !important;
+  --fn-home-calorie-ring-inner-alpha: 1 !important;
+  --fn-home-progress-track: rgba(255,255,255,.13) !important;
+  background: linear-gradient(145deg, #0c0d0e 0%, #070809 100%) !important;
+  border-color: rgba(255,255,255,.105) !important;
+  box-shadow: 0 22px 58px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+  background: linear-gradient(145deg, #111214 0%, #0b0c0d 100%) !important;
+  border-color: rgba(255,255,255,.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after {
+  background: #101113 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+body.dark #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row,
+body.foodnote-theme-dark #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row,
+body[data-theme="dark"] #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  background:
+    radial-gradient(circle at 99% 0%, color-mix(in srgb, var(--macro-color) 8%, transparent) 0, transparent 54%),
+    linear-gradient(145deg, #111214 0%, #0b0c0d 100%) !important;
+  border-color: color-mix(in srgb, var(--macro-color) 18%, rgba(255,255,255,.10)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+body.dark #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+body.dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+body.dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+body.foodnote-theme-dark #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+body[data-theme="dark"] #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+  background: rgba(255,255,255,.14) !important;
+}
+
+
+/* =========================================================
+   FoodNote beta 0.22.183 — thème sombre : contraste texte adouci
+   Objectif : éviter les blancs trop durs sur fond quasi noir.
+========================================================= */
+body.dark,
+body.foodnote-theme-dark,
+body[data-theme="dark"] {
+  --text: #e1e1da;
+  --text2: #b1b4ad;
+  --text3: #858a83;
+  --text4: #5f655f;
+  --fn-home-macro-value-text: #d7d7cf;
+}
+
+body.dark #page-journal .journal-page-title,
+body.foodnote-theme-dark #page-journal .journal-page-title,
+body[data-theme="dark"] #page-journal .journal-page-title {
+  color: #d7d7cf !important;
+  font-weight: 900 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: none !important;
+}
+
+body.dark .fn-section-title,
+body.dark .fn-section-label,
+body.dark .quick-foods-title,
+body.dark .journal-meals-title,
+body.dark .sport-date-title,
+body.dark .fn-section-name,
+body.foodnote-theme-dark .fn-section-title,
+body.foodnote-theme-dark .fn-section-label,
+body.foodnote-theme-dark .quick-foods-title,
+body.foodnote-theme-dark .journal-meals-title,
+body.foodnote-theme-dark .sport-date-title,
+body.foodnote-theme-dark .fn-section-name,
+body[data-theme="dark"] .fn-section-title,
+body[data-theme="dark"] .fn-section-label,
+body[data-theme="dark"] .quick-foods-title,
+body[data-theme="dark"] .journal-meals-title,
+body[data-theme="dark"] .sport-date-title,
+body[data-theme="dark"] .fn-section-name {
+  color: #d2d3cc !important;
+  font-weight: 850 !important;
+}
+
+body.dark #page-journal .journal-floating-macro-card h1,
+body.dark #page-journal .journal-floating-macro-card h2,
+body.dark #page-journal .journal-floating-macro-card h3,
+body.dark #page-journal .journal-floating-macro-card .macro-val,
+body.dark #page-journal .journal-floating-macro-card .fn-calorie-value,
+body.dark #page-journal .journal-floating-macro-card .fn-calorie-main,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card h1,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card h2,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card h3,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card .macro-val,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card .fn-calorie-value,
+body.foodnote-theme-dark #page-journal .journal-floating-macro-card .fn-calorie-main,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card h1,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card h2,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card h3,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card .macro-val,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card .fn-calorie-value,
+body[data-theme="dark"] #page-journal .journal-floating-macro-card .fn-calorie-main {
+  color: #d7d7cf !important;
+}
+
+body.dark .card-title,
+body.dark .journal-eyebrow,
+body.dark .macro-lbl,
+body.dark .macro-target,
+body.dark small,
+body.foodnote-theme-dark .card-title,
+body.foodnote-theme-dark .journal-eyebrow,
+body.foodnote-theme-dark .macro-lbl,
+body.foodnote-theme-dark .macro-target,
+body.foodnote-theme-dark small,
+body[data-theme="dark"] .card-title,
+body[data-theme="dark"] .journal-eyebrow,
+body[data-theme="dark"] .macro-lbl,
+body[data-theme="dark"] .macro-target,
+body[data-theme="dark"] small {
+  color: #858a83 !important;
+}
+
+
+/* Journal : lignes aliment non cochables
+   La ligne reste une entrée de repas active, mais elle n'a plus d'affordance de sélection/suppression par clic.
+   Suppression volontaire uniquement via le bouton ✕.
+
+   Thème sombre : mêmes règles de structure que le thème clair,
+   mais palette neutre pour éviter le retour du vert. */
+#page-journal .food-row-compact,
+#page-journal .aliment-row.food-row-compact {
+  cursor: default !important;
+  user-select: text;
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left: 3px solid var(--fn-journal-food-row-accent) !important;
+  box-shadow: var(--fn-journal-food-row-shadow) !important;
+}
+#page-journal .food-row-compact:hover,
+#page-journal .aliment-row.food-row-compact:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+}
+#page-journal .food-row-compact .aliment-check,
+#page-journal .food-row-compact .chk-mark {
+  display: none !important;
+}
+#page-journal .food-row-compact.selected {
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left-color: var(--fn-journal-food-row-accent) !important;
+  border-width: 0.5px !important;
+  border-left-width: 3px !important;
+}
+#page-journal .food-row-compact.selected:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+}
+#page-journal .food-row-compact.selected .aliment-name {
+  color: var(--text) !important;
+  font-weight: 720 !important;
+}
+#page-journal .food-row-compact:not(.selected) .food-compact-qty {
+  opacity: 1 !important;
+}
+/* =========================================================
+   FoodNote beta 0.22.185 — Mobile : barres macros pleine largeur
+   Corrige le décalage à droite du correctif précédent.
+   La barre reste pleine largeur en bas de la carte, avec assez
+   d'espace réservé pour ne plus recouvrir “manque Xg · cible Yg”.
+========================================================= */
+@media (max-width: 720px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    position: relative !important;
+    min-height: 46px !important;
+    padding-bottom: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy {
+    min-width: 0 !important;
+    padding-bottom: 4px !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    display: block !important;
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.08 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    display: block !important;
+    position: absolute !important;
+    grid-column: 1 / -1 !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: 4px !important;
+    width: auto !important;
+    height: 2.5px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    z-index: 1 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    min-height: 42px !important;
+    padding-bottom: 12px !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    line-height: 1.02 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    left: 5px !important;
+    right: 5px !important;
+    bottom: 3px !important;
+    height: 2px !important;
+  }
+}
+
+/* =========================================================
+   FoodNote beta 0.22.179 — badges nutrition page principale
+   Alignement réel sur le composant Objectif : mêmes variables,
+   mêmes intensités d'effet, couleurs macro plus lisibles.
+   Pas de changement structurel : uniquement teinte/rendu visuel.
+========================================================= */
+:root {
+  --fn-badge-kcal: #f59e0b !important;
+  --fn-badge-prot: #22c55e !important;
+  --fn-badge-gluc: #f97316 !important;
+  --fn-badge-lip: #60a5fa !important;
+}
+
+#page-journal {
+  --fn-main-macro-kcal: var(--fn-badge-kcal);
+  --fn-main-macro-prot: var(--fn-badge-prot);
+  --fn-main-macro-gluc: var(--fn-badge-gluc);
+  --fn-main-macro-lip: var(--fn-badge-lip);
+}
+
+#page-journal .macro-cell-kcal,
+#page-journal .fn-ui-macro-kcal {
+  --badge-accent: var(--fn-main-macro-kcal) !important;
+  --chip-accent: var(--fn-main-macro-kcal) !important;
+  --macro-accent: var(--fn-main-macro-kcal) !important;
+  --macro-color: var(--fn-main-macro-kcal) !important;
+}
+
+#page-journal .macro-cell-prot,
+#page-journal .fn-ui-macro-prot {
+  --badge-accent: var(--fn-main-macro-prot) !important;
+  --chip-accent: var(--fn-main-macro-prot) !important;
+  --macro-accent: var(--fn-main-macro-prot) !important;
+  --macro-color: var(--fn-main-macro-prot) !important;
+}
+
+#page-journal .macro-cell-gluc,
+#page-journal .fn-ui-macro-gluc {
+  --badge-accent: var(--fn-main-macro-gluc) !important;
+  --chip-accent: var(--fn-main-macro-gluc) !important;
+  --macro-accent: var(--fn-main-macro-gluc) !important;
+  --macro-color: var(--fn-main-macro-gluc) !important;
+}
+
+#page-journal .macro-cell-lip,
+#page-journal .fn-ui-macro-lip {
+  --badge-accent: var(--fn-main-macro-lip) !important;
+  --chip-accent: var(--fn-main-macro-lip) !important;
+  --macro-accent: var(--fn-main-macro-lip) !important;
+  --macro-color: var(--fn-main-macro-lip) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 42%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--badge-accent) 38%, transparent) 0, transparent 62%),
+    radial-gradient(circle at 4% 0%, rgba(255,255,255,.14) 0, transparent 44%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--bg2) 68%, var(--badge-accent) 15%),
+      color-mix(in srgb, var(--bg2) 76%, var(--badge-accent) 11%)
+    ) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--badge-accent) 13%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -35% -25% auto auto !important;
+  width: 60% !important;
+  height: 75% !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--badge-accent) 32%, transparent), transparent 68%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#page-journal .fn-home-objectif-icon,
+#page-journal .fn-calorie-flame.fn-home-objectif-icon,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 15px !important;
+  background: color-mix(in srgb, var(--badge-accent) 20%, var(--bg2)) !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 34%, var(--border2)) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+#page-journal .fn-calorie-flame.fn-home-objectif-icon {
+  margin: 0 auto 4px !important;
+}
+
+#page-journal .fn-home-objectif-icon::before,
+#page-journal .fn-home-objectif-icon::after {
+  display: none !important;
+  content: none !important;
+}
+
+#page-journal .fn-home-macro-row .macro-progress-fill,
+#page-journal .fn-calorie-summary-card .macro-progress-fill,
+#page-journal .fn-home-macro-row .fn-ui-smart-progress i,
+#page-journal .fn-calorie-summary-card .fn-ui-smart-progress i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent) 72%, #fff 6%), var(--badge-accent)) !important;
+}
+
+@media (max-width: 620px) {
+  #page-journal .fn-home-objectif-icon,
+  #page-journal .fn-calorie-flame.fn-home-objectif-icon,
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    border-radius: 13px !important;
+    font-size: 15px !important;
+  }
+}

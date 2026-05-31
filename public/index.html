@@ -4,23 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FoodNote beta 0.22.179</title>
-<link rel="icon" type="image/png" href="assets/img/favicon.png?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" id="theme-css" href="assets/css/style-dark.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/00-foodnote-calm.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/00-fn-ui-engine.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/30-food-add-component.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/31-mobile-bottom-nav.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/02-foodnote-energy-theme.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
-<link rel="stylesheet" href="assets/css/04-theme-lab.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530">
+<link rel="icon" type="image/png" href="assets/img/favicon.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/00-foodnote-calm.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/00-fn-ui-engine.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/31-mobile-bottom-nav.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/02-foodnote-energy-theme.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/04-theme-lab.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
 <!-- Icônes Tabler chargées en différé : ne bloque plus le premier affichage. -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"></noscript>
-<script src="assets/js/02-theme-lab-runtime.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-  <link rel="stylesheet" href="assets/css/94-capture-workflow-core.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-capture-workflow="css">
-  <link rel="stylesheet" href="assets/css/96-food-add-modal-controller.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-modal-controller="css">
-  <link rel="stylesheet" href="assets/css/99-food-add-search-results-core.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-search-results="css">
-  <link rel="stylesheet" href="assets/css/100-food-add-modal-ux-core.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-modal-ux="css">
+<script src="assets/js/02-theme-lab-runtime.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+  <link rel="stylesheet" href="assets/css/94-capture-workflow-core.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-capture-workflow="css">
+  <link rel="stylesheet" href="assets/css/96-food-add-modal-controller.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="css">
+  <link rel="stylesheet" href="assets/css/99-food-add-search-results-core.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-search-results="css">
+<link rel="stylesheet" id="theme-css" href="assets/css/style-dark.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
 </head>
 <body>
 <script>
@@ -47,10 +45,17 @@
   } catch(e) {}
   if (saved !== 'dark' && saved !== 'light') saved = 'dark';
   var link = document.getElementById('theme-css');
-  if (link) link.href = 'assets/css/style-' + saved + '.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  if (link) link.href = 'assets/css/style-' + saved + '.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
   try {
-    document.body.dataset.theme = saved;
-    document.body.classList.toggle('dark', saved === 'dark');
+    if (document.body) {
+      document.body.dataset.theme = saved;
+      document.body.classList.toggle('dark', saved === 'dark');
+      document.body.classList.toggle('foodnote-theme-dark', saved === 'dark');
+      document.body.classList.toggle('foodnote-theme-light', saved === 'light');
+    }
+    document.documentElement.dataset.theme = saved;
+    document.documentElement.classList.toggle('foodnote-theme-dark', saved === 'dark');
+    document.documentElement.classList.toggle('foodnote-theme-light', saved === 'light');
   } catch(e) {}
 })();
 </script>
@@ -62,7 +67,7 @@
   <div class="sb-header">
     <div class="sb-logo">
       <div class="sb-logo-icon">
-        <img src="assets/img/logo-icon.png?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" alt="FoodNote">
+        <img src="assets/img/logo-icon.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" alt="FoodNote">
       </div>
       <div class="sb-logo-text">
         <div class="sb-logo-name">foodnote</div>
@@ -161,7 +166,7 @@
 
 <div id="page-onboarding" class="page fn-ui-page-narrow">
   <div class="onboarding-brand">
-    <img class="onboarding-logo" src="assets/img/logo-wide.png?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" alt="FoodNote — Journal nutrition">
+    <img class="onboarding-logo" src="assets/img/logo-wide.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" alt="FoodNote — Journal nutrition">
     <div class="fn-ui-brand-title">Bienvenue sur foodnote</div>
     <div class="fn-ui-brand-sub">Quelques infos pour personnaliser ton suivi</div>
   </div>
@@ -219,17 +224,23 @@
 
 <div id="page-journal" class="page active journal-premium-page">
   <div class="journal-hero card fn-ui-surface journal-sticky-summary">
+    <div class="journal-page-heading">
+      <h1 class="journal-page-title">Aujourd'hui</h1>
+      <div class="journal-date-actions" aria-label="Actions de date du journal">
+        <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
+          <label>Date</label>
+          <input type="date" id="f-date" onchange="selectJournalDate(this.value)">
+        </div>
+        <button type="button" class="journal-date-launch journal-date-launch-heading" onclick="openJournalDatePicker()" aria-label="Choisir une date">📅</button>
+      </div>
+    </div>
+
     <div class="journal-day-row journal-day-row-carousel">
       <button type="button" class="journal-day-nav journal-day-nav-prev" onclick="shiftJournalDate(-1)" aria-label="Jour précédent">‹</button>
       <div class="journal-day-carousel-wrap">
         <div class="journal-day-carousel" id="journal-day-carousel" aria-label="Changer de journée"></div>
       </div>
       <button type="button" class="journal-day-nav journal-day-nav-next" onclick="shiftJournalDate(1)" aria-label="Jour suivant">›</button>
-      <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
-        <label>Date</label>
-        <input type="date" id="f-date" onchange="selectJournalDate(this.value)">
-      </div>
-      <button type="button" class="journal-date-launch" onclick="openJournalDatePicker()" aria-label="Choisir une date">📅</button>
     </div>
 
     <div class="journal-floating-macro-card card fn-ui-surface fn-ui-surface-soft fn-orbit-nutrition-card fn-home-nutrition-panel" aria-label="Résumé nutrition du jour">
@@ -246,7 +257,7 @@
           <div class="fn-calorie-ring-wrap" aria-hidden="true">
             <div class="fn-calorie-ring-visual">
               <div class="fn-calorie-ring-core">
-                <div class="fn-calorie-flame">🔥</div>
+                <div class="fn-calorie-flame fn-ui-smart-dot fn-ui-macro-kcal fn-home-objectif-icon" aria-hidden="true">🔥</div>
                 <div class="macro-val" id="m-kcal">0</div>
                 <div class="fn-calorie-unit">KCAL</div>
               </div>
@@ -263,7 +274,7 @@
 
         <div class="macro-bar journal-main-macros journal-main-macros-compact journal-main-macros-four fn-orbit-macros fn-home-macro-grid fn-home-macro-list" aria-label="Cartes nutriments du jour">
           <div class="macro-cell macro-cell-prot fn-macro-home-card fn-home-macro-row" data-macro="prot" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble" aria-hidden="true"><span>🥩</span></div>
+            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-prot fn-home-objectif-icon" aria-hidden="true">💪</div>
             <div class="fn-macro-copy">
               <div class="macro-head"><span class="macro-lbl">Protéines</span></div>
               <div class="macro-val" id="m-prot">0g</div>
@@ -273,7 +284,7 @@
           </div>
 
           <div class="macro-cell macro-cell-gluc fn-macro-home-card fn-home-macro-row" data-macro="gluc" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble" aria-hidden="true"><span>🍞</span></div>
+            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-gluc fn-home-objectif-icon" aria-hidden="true">🍞</div>
             <div class="fn-macro-copy">
               <div class="macro-head"><span class="macro-lbl">Glucides</span></div>
               <div class="macro-val" id="m-gluc">0g</div>
@@ -283,7 +294,7 @@
           </div>
 
           <div class="macro-cell macro-cell-lip fn-macro-home-card fn-home-macro-row" data-macro="lip" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble" aria-hidden="true"><span>💧</span></div>
+            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-lip fn-home-objectif-icon" aria-hidden="true">💧</div>
             <div class="fn-macro-copy">
               <div class="macro-head"><span class="macro-lbl">Lipides</span></div>
               <div class="macro-val" id="m-lip">0g</div>
@@ -531,20 +542,22 @@
             <p class="fn-ui-sub">Choisis une journée, saisis tes activités et FoodNote ajuste automatiquement ton bilan.</p>
           </div>
         </div>
-        <div class="fn-ui-actions"><span class="fn-ui-chip fn-ui-chip-sport" id="sport-date-pill">0 kcal sport</span></div>
+        <div class="fn-ui-actions sport-date-actions">
+          <span class="fn-ui-chip fn-ui-chip-sport" id="sport-date-pill">0 kcal sport</span>
+          <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
+            <label>Date sport</label>
+            <input type="date" id="sport-f-date" onchange="selectSportDate(this.value)">
+          </div>
+          <button type="button" class="journal-date-launch journal-date-launch-heading" onclick="openSportDatePicker()" aria-label="Choisir une date sport">📅</button>
+        </div>
       </div>
 
-      <div class="journal-day-row journal-day-row-carousel" aria-label="Carrousel des journées sport">
-        <button type="button" class="journal-day-nav journal-day-nav-prev" onclick="shiftSportDate(-1)" aria-label="Jour sport précédent">‹</button>
-        <div class="journal-day-carousel-wrap">
-          <div class="journal-day-carousel" id="sport-day-carousel" aria-label="Changer de journée sport"></div>
+      <div class="journal-day-row journal-day-row-carousel sport-day-row-carousel" aria-label="Carrousel des journées sport">
+        <button type="button" class="journal-day-nav journal-day-nav-prev sport-day-nav-prev" onclick="shiftSportDate(-1)" aria-label="Jour sport précédent">‹</button>
+        <div class="journal-day-carousel-wrap sport-day-carousel-wrap">
+          <div class="journal-day-carousel sport-day-carousel" id="sport-day-carousel" aria-label="Changer de journée sport"></div>
         </div>
-        <button type="button" class="journal-day-nav journal-day-nav-next" onclick="shiftSportDate(1)" aria-label="Jour sport suivant">›</button>
-        <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
-          <label>Date sport</label>
-          <input type="date" id="sport-f-date" onchange="selectSportDate(this.value)">
-        </div>
-        <button type="button" class="journal-date-launch" onclick="openSportDatePicker()" aria-label="Choisir une date sport">📅</button>
+        <button type="button" class="journal-day-nav journal-day-nav-next sport-day-nav-next" onclick="shiftSportDate(1)" aria-label="Jour sport suivant">›</button>
       </div>
     </section>
 
@@ -1269,7 +1282,7 @@
 </div>
 
 </div></div>
-<script src="assets/js/00-utils-storage.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
+<script src="assets/js/00-utils-storage.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script>
 function getCurrentTheme() {
   try {
@@ -1282,11 +1295,16 @@ function getCurrentTheme() {
 function applyTheme(theme) {
   theme = (theme === 'light') ? 'light' : 'dark';
   const link = document.getElementById('theme-css');
-  if (link) link.href = 'assets/css/style-' + theme + '.css?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  if (link) link.href = 'assets/css/style-' + theme + '.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
   try { localStorage.setItem('foodnote_theme', theme); } catch (e) {}
   if (typeof saveSettingRemote === 'function') saveSettingRemote('theme', theme);
   document.body.classList.toggle('dark', theme === 'dark');
+  document.body.classList.toggle('foodnote-theme-dark', theme === 'dark');
+  document.body.classList.toggle('foodnote-theme-light', theme === 'light');
   document.body.dataset.theme = theme;
+  document.documentElement.classList.toggle('foodnote-theme-dark', theme === 'dark');
+  document.documentElement.classList.toggle('foodnote-theme-light', theme === 'light');
+  document.documentElement.dataset.theme = theme;
   const btn = document.getElementById('theme-toggle');
   if (btn) {
     btn.classList.toggle('active', theme === 'dark');
@@ -1305,37 +1323,36 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
 });
 </script>
-<script src="assets/js/05-ui-components.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/10-data.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/20-profile-state.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/30-nutrition-foods.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/40-ia-integrations.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/50-profile-phases-settings.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/60-navigation.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/61-mobile-bottom-nav.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/62-theme-lab.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/80-stats-onboarding-init.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/81-stats-unified.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/82-recap.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/99-recap-badges-compact.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
+<script src="assets/js/05-ui-components.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/10-data.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/20-profile-state.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/30-nutrition-foods.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/40-ia-integrations.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/50-profile-phases-settings.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/60-navigation.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/61-mobile-bottom-nav.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/62-theme-lab.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/80-stats-onboarding-init.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/81-stats-unified.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/82-recap.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/99-recap-badges-compact.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script>
 // Le popup Ajouter est piloté par FoodAddModalController.
 // Le contrôleur possède le cycle de vie popup ET les actions principales du modal.
 window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
 </script>
-<script src="assets/js/93-food-add-tools.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
-<script src="assets/js/95-food-add-clean.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530"></script>
+<script src="assets/js/93-food-add-tools.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/95-food-add-clean.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 
 <script>
 (function(){
-  const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const BUILD = 'foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
   const deferred = [
     '/vendor/html5-qrcode.min.js',
     'assets/js/90-diagnostics.js',
     'assets/js/91-mqtt-home-assistant.js',
     'assets/js/92-recipes.js',
-    'assets/js/99-visual-polish.js',
     'assets/js/94-camera-skin.js',
     'assets/js/96-camera-crop-clean.js',
     'assets/js/97-barcode-flow-clean.js',
@@ -1369,18 +1386,17 @@ window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
   else window.addEventListener('load', schedule, {once:true});
 })();
 </script>
-<script src="assets/js/94-capture-workflow-core.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-capture-workflow="js"></script>
-<script src="assets/js/96-food-add-modal-controller.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-modal-controller="js"></script>
-<script src="assets/js/97-food-add-domain-core.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-domain="js"></script>
-<script src="assets/js/98-food-capture-flows-core.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-capture-flows="js"></script>
-<script src="assets/js/99-food-add-search-results-core.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-search-results="js"></script>
-<script src="assets/js/100-food-add-modal-ux-core.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-modal-ux="js"></script>
-<script src="assets/js/101-food-add-hardening-checkpoint.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-food-add-hardening="js"></script>
-<script src="assets/js/00-foodnote-smoke-tests.js?v=foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530" data-foodnote-smoke-tests="js"></script>
+<script src="assets/js/94-capture-workflow-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-capture-workflow="js"></script>
+<script src="assets/js/96-food-add-modal-controller.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="js"></script>
+<script src="assets/js/97-food-add-domain-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-domain="js"></script>
+<script src="assets/js/98-food-capture-flows-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-capture-flows="js"></script>
+<script src="assets/js/99-food-add-search-results-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-search-results="js"></script>
+<script src="assets/js/101-food-add-hardening-checkpoint.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-hardening="js"></script>
+<script src="assets/js/00-foodnote-smoke-tests.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-smoke-tests="js"></script>
 <script>
 // FoodNote beta 0.22.179 — sécurité de diagnostic : fallback autonome si le fichier 101 ne s'est pas chargé.
 (function(){
-  const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const BUILD = 'foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
   function fallbackHealth(){
     var real = window.FoodNoteFoodAddHardening;
     if (real && real.loaded && typeof real.health === 'function') return real.health();

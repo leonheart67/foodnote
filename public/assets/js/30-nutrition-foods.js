@@ -1510,7 +1510,6 @@ function createRow(a, idx, isCustom, hidden) {
   const qtyTitle = (Number(a.poidsUnite)||0)>0 ? 'Quantité : l’unité est un raccourci, le calcul se fait en grammes' : 'Quantité réelle en grammes';
 
   row.innerHTML = `
-    <div class="aliment-check"><span class="chk-mark">✓</span></div>
     <div class="food-drag-handle" title="Glisser vers un autre repas" aria-label="Glisser vers un autre repas">⋮⋮</div>
 
     <div class="food-compact-info">
@@ -1543,10 +1542,8 @@ function createRow(a, idx, isCustom, hidden) {
       <button class="food-mini-btn off" onclick="event.stopPropagation();toggleOFFSearch(${idx})" title="Rechercher dans OpenFoodFacts"><span class="btn-ico">🛒</span><span class="btn-label">OpenFoodFacts</span></button>
     </div>
   `;
-  row.addEventListener('click', () => {
-    const currentIdx = foodnoteResolveFoodIndexFromRow(row, idx, 'row-click');
-    if (currentIdx >= 0) toggleRow(currentIdx);
-  });
+  // Sécurité journal : les lignes aliment ne sont plus cochables.
+  // Un clic sur la ligne ne doit plus ajouter/supprimer un aliment ; la suppression passe uniquement par la croix.
   foodnoteSetupMealDragForRow(row, idx);
   container.appendChild(row);
 
@@ -2375,10 +2372,9 @@ function toggleRow(i) {
   if (idx < 0) return;
   const currentRow = document.getElementById('row-' + idx) || row;
   if (selected.has(idx)) {
-    // Moteur 0.22.9 : désélection d'une ligne repas = suppression atomique de la ligne,
-    // pas POST global de toute la journée. Le garde-fou 409 reste réservé aux vrais remplacements.
-    deleteFoodLineCanonical(idx, { confirm:false, source:'toggle-remove' });
-    return;
+    // Sécurité journal : une ligne déjà présente ne se supprime plus par toggle/clic.
+    // La seule suppression volontaire passe par le bouton ✕, avec confirmation.
+    return false;
   }
 
   selected.add(idx);

@@ -780,8 +780,7 @@ function checkMealMovePersistence() {
 function checkMealSelectionUiGuard() {
   const nutrition = path.join(JS_DIR, '30-nutrition-foods.js');
   const ux = path.join(JS_DIR, '95-food-add-clean.js');
-  const css = path.join(CSS_DIR, '30-food-add-component.css');
-  [nutrition, ux, css].forEach(f => exists(f, rel(f)));
+  [nutrition, ux].forEach(f => exists(f, rel(f)));
   if (fs.existsSync(nutrition)) {
     const code = read(nutrition);
     for (const token of [
@@ -801,16 +800,6 @@ function checkMealSelectionUiGuard() {
       "#food-add-modal .food-meal-chip[data-food-meal]"
     ]) {
       if (!code.includes(token)) errors.push(`Sélection repas visible absente côté UX: ${token}`);
-    }
-  }
-  if (fs.existsSync(css)) {
-    const code = read(css);
-    for (const token of [
-      '.food-meal-chip.is-selected',
-      '.fn-meal-choice-btn.is-selected',
-      '[data-foodnote-meal-selected="1"]'
-    ]) {
-      if (!code.includes(token)) errors.push(`Style sélection repas absent: ${token}`);
     }
   }
 }

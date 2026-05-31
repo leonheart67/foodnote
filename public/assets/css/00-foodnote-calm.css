@@ -53,32 +53,37 @@ body[data-theme="light"] {
 
 body:not([data-theme="light"]),
 body.dark,
+body.foodnote-theme-dark,
 body[data-theme="dark"] {
-  --bg: #151a16;
-  --bg2: rgba(31,38,33,.92);
-  --bg3: #232c25;
-  --bg4: #2d382f;
-  --text: #f2f5ef;
-  --text2: #d7ded5;
-  --text3: #a9b3aa;
-  --text4: #7f897f;
-  --border: rgba(238,245,235,.09);
-  --border2: rgba(238,245,235,.14);
-  --green: #7fb28a;
-  --green-dark: #a6d7ad;
-  --green-bg: rgba(127,178,138,.16);
-  --green-mid: rgba(127,178,138,.28);
-  --orange: #efb366;
-  --orange-bg: rgba(239,179,102,.15);
-  --blue: #8ecae6;
-  --blue-bg: rgba(142,202,230,.14);
-  --red: #ee8f8f;
-  --red-bg: rgba(238,143,143,.13);
-  --pill-bg: rgba(242,245,239,.08);
-  --calm-surface: rgba(30,38,33,.78);
-  --calm-surface-strong: rgba(33,42,36,.96);
-  --calm-soft: rgba(38,48,41,.78);
-  --calm-glass: rgba(28,36,31,.72);
+  /* Dark sobre : quasi noir / graphite, sans dominante verte */
+  --bg: #070809;
+  --bg2: rgba(13,14,16,.96);
+  --bg3: #14161a;
+  --bg4: #1c1f24;
+  --text: #f1f1ee;
+  --text2: #c8cac5;
+  --text3: #9a9d96;
+  --text4: #666b65;
+  --border: rgba(241,241,238,.08);
+  --border2: rgba(241,241,238,.14);
+  --green: #b8894b;
+  --green-dark: #d7ad72;
+  --green-bg: rgba(184,137,75,.11);
+  --green-mid: rgba(184,137,75,.18);
+  --orange: #c38b4a;
+  --orange-bg: rgba(195,139,74,.13);
+  --blue: #7890a8;
+  --blue-bg: rgba(120,144,168,.12);
+  --red: #c76b6b;
+  --red-bg: rgba(199,107,107,.12);
+  --pill-bg: rgba(241,241,238,.07);
+  --calm-green: #b8894b;
+  --calm-green-strong: #d7ad72;
+  --calm-mint: rgba(184,137,75,.10);
+  --calm-surface: rgba(17,18,20,.84);
+  --calm-surface-strong: rgba(20,22,25,.97);
+  --calm-soft: rgba(24,26,30,.82);
+  --calm-glass: rgba(14,15,17,.76);
 }
 
 html {
@@ -100,6 +105,13 @@ body[data-theme="light"] {
     radial-gradient(circle at 12% -10%, rgba(205,230,204,.95) 0, transparent 30vw),
     radial-gradient(circle at 92% 4%, rgba(239,215,178,.60) 0, transparent 32vw),
     linear-gradient(180deg, #f8f7f1 0%, #f3f1eb 58%, #f6f5f0 100%) !important;
+}
+
+body.dark,
+body.foodnote-theme-dark,
+body[data-theme="dark"] {
+  background:
+    linear-gradient(180deg, #070809 0%, #090a0b 48%, #060707 100%) !important;
 }
 
 /* Layout général : plus premium, largeur uniforme entre les pages */
@@ -173,7 +185,7 @@ button.btn-primary,
 .sport-add-btn {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 76%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 95%, #133a26), color-mix(in srgb, var(--green) 68%, #7dd3a0)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #17130d), color-mix(in srgb, var(--green) 70%, #d7ad72)) !important;
   box-shadow: 0 12px 28px color-mix(in srgb, var(--green) 26%, transparent) !important;
 }
 input[type=text], input[type=number], input[type=date], input[type=password], textarea, select {
@@ -496,7 +508,7 @@ body.sidebar-collapsed .main-wrap { margin-left: 74px !important; }
   min-height: 58px !important;
   min-width: 168px !important;
   font-weight: 900 !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0b3821), color-mix(in srgb, var(--green) 62%, #a7f3d0)) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #17130d), color-mix(in srgb, var(--green) 64%, #d7ad72)) !important;
   box-shadow: 0 18px 34px color-mix(in srgb, var(--green) 26%, transparent) !important;
 }
 
@@ -656,10 +668,11 @@ body[data-theme="light"] {
 }
 body:not([data-theme="light"]),
 body.dark,
+body.foodnote-theme-dark,
 body[data-theme="dark"] {
-  --fn-badge-surface: rgba(31,40,34,.64);
-  --fn-badge-surface-strong: rgba(37,47,40,.92);
-  --fn-badge-border: rgba(242,245,239,.09);
+  --fn-badge-surface: rgba(17,18,20,.66);
+  --fn-badge-surface-strong: rgba(22,24,27,.94);
+  --fn-badge-border: rgba(241,241,238,.09);
   --fn-badge-shadow: none;
 }
 
@@ -969,12 +982,13 @@ body {
   --fn-chip-shadow: 0 10px 30px rgba(31, 48, 38, .075);
 }
 body.dark,
+body.foodnote-theme-dark,
 html[data-theme="dark"] body,
 body[data-theme="dark"] {
-  --fn-chip-surface: color-mix(in srgb, var(--card, #1e2420) 82%, transparent);
-  --fn-chip-surface-strong: color-mix(in srgb, var(--card, #1e2420) 92%, #0f1411 8%);
-  --fn-chip-border: color-mix(in srgb, var(--border2, #303a34) 82%, transparent);
-  --fn-chip-shadow: 0 12px 30px rgba(0,0,0,.22);
+  --fn-chip-surface: color-mix(in srgb, var(--card, #111214) 82%, transparent);
+  --fn-chip-surface-strong: color-mix(in srgb, var(--card, #111214) 94%, #070809 6%);
+  --fn-chip-border: color-mix(in srgb, var(--border2, #2a2d32) 82%, transparent);
+  --fn-chip-shadow: 0 12px 30px rgba(0,0,0,.24);
 }
 
 .journal-dashboard-grid,
@@ -1202,14 +1216,14 @@ button.fn-smart-chip,
   box-shadow: 0 20px 50px color-mix(in srgb, #000 13%, transparent) !important;
 }
 body.dark #page-journal .fn-orbit-nutrition-card,
+body.foodnote-theme-dark #page-journal .fn-orbit-nutrition-card,
 body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
   --fn-ring-track: rgba(255,255,255,.10);
-  --fn-card-glow: rgba(127,178,138,.18);
+  --fn-card-glow: rgba(184,137,75,.10);
   background:
-    radial-gradient(circle at 50% 0%, rgba(127,178,138,.16), transparent 45%),
-    linear-gradient(145deg, rgba(31,38,34,.96), rgba(21,26,23,.98)) !important;
+    linear-gradient(145deg, rgba(18,19,21,.98), rgba(10,11,12,.99)) !important;
   border-color: rgba(255,255,255,.09) !important;
-  box-shadow: 0 24px 60px rgba(0,0,0,.38) !important;
+  box-shadow: 0 24px 60px rgba(0,0,0,.42) !important;
 }
 #page-journal .fn-orbit-card-top {
   display:flex !important;
@@ -2403,17 +2417,19 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
 @media (max-width: 340px) {
   #page-journal .fn-home-nutrition-layout { grid-template-columns: 1fr !important; }
   #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
-    grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0,1fr) !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
     min-height: 116px !important;
-    text-align: left !important;
-    justify-items: stretch !important;
+    text-align: center !important;
+    justify-items: center !important;
+    align-content: center !important;
   }
-  #page-journal .fn-calorie-copy { justify-items: start !important; text-align: left !important; }
+  #page-journal .fn-calorie-copy { justify-items: center !important; text-align: center !important; }
 }
 
 /* FoodNote beta 0.22.63 — Accueil mobile compact : deux colonnes, hauteur réduite.
-   Correction de fond : le layout mobile n'empile plus, et la carte Calories redevient horizontale
-   pour gagner environ 35% de hauteur visuelle sans sacrifier la lisibilité. */
+   Correction de fond : le layout mobile n'empile plus, et la colonne calories garde le panneau compact, mais le libellé reste sous l'anneau
+   pour respecter la lecture verticale de la carte Calories. */
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
   container-type: inline-size;
@@ -2497,22 +2513,22 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
     display: grid !important;
-    grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0, 1fr) !important;
-    grid-template-rows: 1fr !important;
-    justify-items: stretch !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto !important;
+    justify-items: center !important;
     align-items: center !important;
     align-content: center !important;
-    text-align: left !important;
-    gap: 7px !important;
+    text-align: center !important;
+    gap: 5px !important;
     min-height: 118px !important;
-    padding: 7px 7px !important;
+    padding: 7px 6px !important;
     border-radius: 17px !important;
   }
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy {
-    justify-items: start !important;
+    justify-items: center !important;
     align-content: center !important;
-    text-align: left !important;
+    text-align: center !important;
   }
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl {
     font-size: 7.5px !important;
@@ -3524,4 +3540,97 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   #page-recap .recap-trend-grid { grid-template-columns: 1fr !important; }
   #page-recap .recap-trend-card { padding: 10px !important; }
   #page-recap .recap-trend-values strong { font-size: 19px !important; }
+}
+
+/* =========================================================
+   FoodNote beta 0.22.179 — mobile : barres macros sous le texte
+   Les lignes Protéines / Glucides / Lipides de l'accueil étaient
+   trop compactes : la barre de progression absolue pouvait recouvrir
+   le détail “manque Xg · cible Yg”. On réserve maintenant une zone
+   basse dédiée à la barre, sans masquer le texte.
+========================================================= */
+@media (max-width: 720px) {
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row,
+  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row {
+    min-height: 58px !important;
+    padding-bottom: 15px !important;
+    align-content: center !important;
+    overflow: hidden !important;
+  }
+
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-head,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-head,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    display: block !important;
+    max-width: 100% !important;
+    margin-top: 2px !important;
+    padding-right: 2px !important;
+    font-size: 8.2px !important;
+    line-height: 1.18 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 6px !important;
+    height: 2px !important;
+    z-index: 1 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row,
+  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row {
+    min-height: 54px !important;
+    padding-bottom: 14px !important;
+  }
+
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    font-size: 7.4px !important;
+    line-height: 1.14 !important;
+    margin-top: 1px !important;
+  }
+
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    bottom: 5px !important;
+  }
+}
+
+/* Même sécurité pour les cartes métriques du Récap intelligent sur mobile. */
+@media (max-width: 620px) {
+  .foodnote-smart-dashboard-metrics .fn-ui-metric {
+    min-height: 112px !important;
+    padding-bottom: 14px !important;
+  }
+  .foodnote-smart-dashboard-metrics .fn-ui-metric p {
+    min-height: 2.4em !important;
+    line-height: 1.2 !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+  }
+  .foodnote-smart-dashboard-metrics .fn-ui-metric-track {
+    margin-top: 8px !important;
+    flex-shrink: 0 !important;
+  }
 }
