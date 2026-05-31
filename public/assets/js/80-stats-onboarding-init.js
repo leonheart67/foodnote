@@ -1,3 +1,9 @@
+/*
+ * FoodNote — statistiques, onboarding et bilan quotidien intégré.
+ * Rôle : afficher les statistiques, initialiser les vues principales et piloter le bilan du jour.
+ * Gère : graphiques, carrousels, badges de synthèse, rappel quotidien intégré au Journal.
+ * Ne doit pas gérer : persistance SQLite bas niveau, imports CIQUAL/OpenFoodFacts, ni styles CSS globaux.
+ */
 // FoodNote beta 0.22.91 — Récap : mini bilan macros 7 jours complet
 function renderStats() {
   _statsEntries = getEntries().filter(e => e.date).sort((a,b) => a.date.localeCompare(b.date));
@@ -1306,11 +1312,10 @@ function selectJournalDate(iso) {
     if (typeof updateMacros === 'function') updateMacros();
   }
   if (typeof foodnoteRefreshJournalMutationViews === 'function') {
-    foodnoteRefreshJournalMutationViews('journal-date-select', { journalCarousel:true, sportCarousel:true, quickFoods:true });
+    foodnoteRefreshJournalMutationViews('journal-date-select', { journalCarousel:true, sportCarousel:true });
   } else {
     renderJournalDayCarousel();
     if (typeof renderSportDayCarousel === 'function') renderSportDayCarousel();
-    if (typeof renderQuickFoods === 'function') renderQuickFoods();
   }
 }
 
@@ -1491,7 +1496,7 @@ function renderSportDayCarousel() {
 
 
 
-// v11.47 — Badge notification global + assistant bilan du jour
+// FoodNote beta 0.22.179 — bilan quotidien intégré au Journal, sans badge flottant global
 const FOODNOTE_DAILY_REVIEW_DEFAULT_HOUR = 18;
 let foodnoteReviewStep = 0;
 const FOODNOTE_REVIEW_STEPS = ['weight', 'food', 'sport', 'feeling', 'note'];
@@ -1616,6 +1621,15 @@ function foodnoteChecklist(entry) {
 function foodnoteHasText(v) {
   return String(v ?? '').trim().length > 0;
 }
+function foodnoteEntryHasRealSport(entry) {
+  // Une ligne sport vide/restaurée ne doit pas compter comme activité réelle.
+  // On valide le sport uniquement s'il existe une dépense, une durée ou un total positif.
+  const rows = Array.isArray(entry?.sports) ? entry.sports : [];
+  const fromRows = rows.reduce((sum, r) => sum + (Number(r?.total ?? 0) || 0), 0);
+  const hours = rows.reduce((sum, r) => sum + (Number(r?.heures ?? r?.hours ?? r?.duree ?? r?.duration ?? 0) || 0), 0);
+  const dep = Number(entry?.depSport ?? entry?.dep_sport ?? fromRows) || 0;
+  return dep > 0 || fromRows > 0 || hours > 0;
+}
 function foodnoteDailyReviewMissing(entry) {
   const c = foodnoteChecklist(entry);
   const foods = Array.isArray(entry?.aliments) ? entry.aliments : [];
@@ -1623,7 +1637,7 @@ function foodnoteDailyReviewMissing(entry) {
   const missing = [];
   if (!c.weightDone && !foodnoteHasText(entry?.poids)) missing.push('weight');
   if (!c.foodDone && foods.length === 0) missing.push('food');
-  if (!c.sportDone && sports.length === 0 && !(Number(entry?.depSport || 0) > 0)) missing.push('sport');
+  if (!c.sportDone && !foodnoteEntryHasRealSport(entry)) missing.push('sport');
   if (!c.feelingDone && !foodnoteHasText(entry?.energie) && !foodnoteHasText(entry?.faim)) missing.push('feeling');
   if (!c.noteDone && !foodnoteHasText(entry?.notes) && !foodnoteHasText(entry?.extras)) missing.push('note');
   return missing;
@@ -1647,8 +1661,7 @@ function foodnoteEntryIsTracked(entry) {
   const c = foodnoteChecklist(entry);
   return Object.values(c).some(Boolean)
     || (Array.isArray(entry.aliments) && entry.aliments.length > 0)
-    || (Array.isArray(entry.sports) && entry.sports.length > 0)
-    || Number(entry.depSport || 0) > 0
+    || foodnoteEntryHasRealSport(entry)
     || foodnoteHasText(entry.poids)
     || foodnoteHasText(entry.energie)
     || foodnoteHasText(entry.faim)
@@ -1710,7 +1723,10 @@ function foodnoteGetNotifications() {
     successes.push({icon:'🏁', title:'Phase du jour respectée', text: phase ? `Objectif cohérent avec : ${phase}.` : 'Calories et protéines sont cohérentes avec l’objectif.'});
   }
   if (entry && foodnoteHasText(entry.poids)) successes.push({icon:'⚖️', title:'Poids renseigné', text:`${entry.poids} kg enregistré aujourd’hui.`});
-  if (entry && ((Array.isArray(entry.sports) && entry.sports.length) || Number(entry.depSport || 0) > 0)) successes.push({icon:'🏃', title:'Sport enregistré', text:`${Math.round(Number(entry.depSport || 0))} kcal dépensées.`});
+  if (entry && foodnoteEntryHasRealSport(entry)) {
+    const sportKcal = Math.round(Number(entry.depSport ?? entry.dep_sport ?? 0) || 0);
+    successes.push({icon:'🏃', title:'Sport enregistré', text: sportKcal > 0 ? `${sportKcal} kcal dépensées.` : 'Activité enregistrée.'});
+  }
   if (entry && foodnoteChecklistComplete(entry)) successes.push({icon:'✅', title:'Bilan du jour complet', text:'Poids, alimentation, sport, ressenti et note sont validés.'});
 
   const entries = (typeof getEntries === 'function' ? getEntries() : []) || [];
@@ -1733,59 +1749,159 @@ function foodnoteGetNotifications() {
   const unseenSuccessCount = uniqueSuccesses.filter(s => !s.seen).length;
   return {entry, due, missing, visibleMissing, todoHidden, successes: uniqueSuccesses, unseenSuccessCount, reviewHour: foodnoteNotificationHour()};
 }
+function foodnoteRemoveLegacyNotificationOverlay() {
+  // Migration propre : l'ancien système créait une cloche fixed et une modale globale.
+  // Le nouveau bilan du jour vit dans la page Journal, donc ces nœuds ne doivent plus recouvrir l'app.
+  ['fn-notification-badge', 'fn-notification-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.closest('#fn-notification-inline')) el.remove();
+  });
+}
+
+function foodnoteNotificationHost() {
+  foodnoteRemoveLegacyNotificationOverlay();
+  let host = document.getElementById('fn-notification-inline');
+  if (!host) {
+    const journalHero = document.querySelector('#page-journal .journal-hero') || document.getElementById('page-journal');
+    host = document.createElement('section');
+    host.id = 'fn-notification-inline';
+    host.className = 'fn-daily-status-panel';
+    host.setAttribute('aria-live', 'polite');
+    host.hidden = true;
+    if (journalHero) {
+      const dayRow = journalHero.querySelector('.journal-day-row-carousel');
+      if (dayRow && dayRow.parentNode) dayRow.insertAdjacentElement('afterend', host);
+      else journalHero.insertBefore(host, journalHero.firstChild || null);
+    } else {
+      document.body.appendChild(host);
+    }
+  }
+  return host;
+}
+
 function ensureFoodnoteNotificationUI() {
-  if (!document.getElementById('fn-notification-badge')) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = 'fn-notification-badge';
-    btn.className = 'fn-notification-badge';
-    btn.title = 'Notifications FoodNote';
-    btn.setAttribute('aria-label', 'Notifications FoodNote');
-    btn.onclick = openFoodnoteNotificationCenter;
-    btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openFoodnoteNotificationCenter(); });
-    btn.innerHTML = '<span class="fn-notification-icon">🔔</span><span class="fn-notification-count" id="fn-notification-count">0</span>';
-    document.body.appendChild(btn);
-  }
-  if (!document.getElementById('fn-notification-modal')) {
-    const modal = document.createElement('div');
-    modal.id = 'fn-notification-modal';
-    modal.className = 'fn-notification-modal';
-    modal.style.display = 'none';
-    modal.innerHTML = '<div class="fn-notification-backdrop" onclick="closeFoodnoteNotificationCenter()"></div><div class="fn-notification-panel" role="dialog" aria-modal="true" aria-label="Notifications FoodNote"><div id="fn-notification-content"></div></div>';
-    document.body.appendChild(modal);
-  }
+  return foodnoteNotificationHost();
 }
+
+function foodnoteProfileReadyForInlineNotification() {
+  try { return !!(typeof loadProfil === 'function' ? loadProfil().onboardingDone : true); }
+  catch(e) { return true; }
+}
+
+function foodnoteNotificationSummaryModel() {
+  const {due, missing, visibleMissing, todoHidden, successes, unseenSuccessCount, reviewHour} = foodnoteGetNotifications();
+  const missingText = missing.map(foodnoteStepLabel).join(', ');
+  if (visibleMissing.length) {
+    return {
+      visible:true,
+      state:'warning',
+      icon:'📝',
+      title:`Bilan du jour à compléter`,
+      text:`Il manque : ${missingText}.`,
+      action:'Compléter',
+      actionKind:'review'
+    };
+  }
+  if (todoHidden && missing.length) {
+    return {
+      visible:true,
+      state:'muted',
+      icon:'🙈',
+      title:'Rappel masqué pour aujourd’hui',
+      text:`Il manque encore : ${missingText}.`,
+      action:'Voir',
+      actionKind:'open'
+    };
+  }
+  if (unseenSuccessCount > 0) {
+    const first = successes.find(s => !s.seen) || successes[0];
+    return {
+      visible:true,
+      state:'success',
+      icon:first?.icon || '🏆',
+      title:unseenSuccessCount > 1 ? `${unseenSuccessCount} accomplissements` : (first?.title || 'Accomplissement'),
+      text:first?.text || 'Objectif validé aujourd’hui.',
+      action:'Voir',
+      actionKind:'open'
+    };
+  }
+  if (due && successes.length) {
+    return {
+      visible:false,
+      state:'success',
+      icon:'✅',
+      title:'Bilan du jour OK',
+      text:'Rien d’important à compléter.',
+      action:'Voir',
+      actionKind:'open'
+    };
+  }
+  return {
+    visible:false,
+    state:'neutral',
+    icon:'⏰',
+    title:`Bilan après ${reviewHour}h`,
+    text:`Le rappel discret apparaîtra après ${reviewHour}h si une étape manque.`,
+    action:'Voir',
+    actionKind:'open'
+  };
+}
+
+function foodnoteSetInlineNotificationState(host, state) {
+  host.classList.remove('is-warning', 'is-success', 'is-muted', 'is-neutral', 'is-open', 'is-review', 'is-compact');
+  host.classList.add('is-' + (state || 'neutral'));
+}
+
 function renderFoodnoteNotificationBadge() {
-  ensureFoodnoteNotificationUI();
-  const btn = document.getElementById('fn-notification-badge');
-  const countEl = document.getElementById('fn-notification-count');
-  const {visibleMissing, successes, unseenSuccessCount} = foodnoteGetNotifications();
-  const count = visibleMissing.length;
-  if (countEl) countEl.textContent = count > 9 ? '9+' : String(count);
-  if (btn) {
-    let profileReady = true;
-    try { profileReady = !!(typeof loadProfil === 'function' ? loadProfil().onboardingDone : true); } catch(e) {}
-    btn.style.display = profileReady ? 'inline-flex' : 'none';
-    btn.classList.toggle('has-items', count > 0);
-    btn.classList.toggle('has-success', count === 0 && unseenSuccessCount > 0);
-    btn.title = count > 0 ? `Bilan du jour : ${count} élément(s) à compléter` : (unseenSuccessCount ? `${unseenSuccessCount} accomplissement(s) nouveau(x)` : (successes.length ? 'Accomplissements vus' : 'Notifications FoodNote'));
-  }
+  const host = ensureFoodnoteNotificationUI();
+  if (!host) return;
+  if (!foodnoteProfileReadyForInlineNotification()) { host.hidden = true; return; }
+  const model = foodnoteNotificationSummaryModel();
+  if (!model.visible) { host.hidden = true; return; }
+  host.hidden = false;
+  foodnoteSetInlineNotificationState(host, model.state);
+  host.classList.add('is-compact');
+  host.innerHTML = `
+    <div class="fn-daily-status-summary">
+      <div class="fn-daily-status-icon" aria-hidden="true">${foodnoteEsc(model.icon)}</div>
+      <div class="fn-daily-status-copy">
+        <strong class="fn-daily-status-title">${foodnoteEsc(model.title)}</strong>
+        <div class="fn-daily-status-text">${foodnoteEsc(model.text)}</div>
+      </div>
+      <div class="fn-daily-status-actions">
+        ${model.actionKind === 'review'
+          ? '<button type="button" class="primary" onclick="openFoodnoteDailyReview()">Compléter</button>'
+          : '<button type="button" onclick="openFoodnoteNotificationCenter()">Voir</button>'}
+        <button type="button" onclick="closeFoodnoteNotificationCenter()" aria-label="Masquer le bilan du jour">Masquer</button>
+      </div>
+    </div>`;
 }
+
 function openFoodnoteNotificationCenter() {
-  ensureFoodnoteNotificationUI();
-  renderFoodnoteNotificationCenter();
-  const modal = document.getElementById('fn-notification-modal');
-  if (modal) modal.style.display = 'flex';
+  const host = ensureFoodnoteNotificationUI();
+  if (!host || !foodnoteProfileReadyForInlineNotification()) return;
+  host.hidden = false;
+  renderFoodnoteNotificationCenter({expanded:true});
+  try { host.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(e) {}
 }
+
 function closeFoodnoteNotificationCenter() {
-  const modal = document.getElementById('fn-notification-modal');
-  if (modal) modal.style.display = 'none';
+  const host = ensureFoodnoteNotificationUI();
+  if (!host) return;
+  host.classList.remove('is-open', 'is-review');
+  renderFoodnoteNotificationBadge();
 }
-function renderFoodnoteNotificationCenter() {
-  const box = document.getElementById('fn-notification-content');
-  if (!box) return;
+
+function renderFoodnoteNotificationCenter(options = {}) {
+  const host = ensureFoodnoteNotificationUI();
+  if (!host) return;
+  if (!options.expanded && host.hidden) return;
   const {entry, due, missing, visibleMissing, todoHidden, successes, unseenSuccessCount, reviewHour} = foodnoteGetNotifications();
   const missingText = missing.map(foodnoteStepLabel).join(', ');
+  const model = foodnoteNotificationSummaryModel();
+  host.hidden = false;
+  foodnoteSetInlineNotificationState(host, model.state || 'neutral');
+  host.classList.add('is-open');
   let todoHtml = '';
   if (due && missing.length && !todoHidden) {
     todoHtml = `
@@ -1806,7 +1922,7 @@ function renderFoodnoteNotificationCenter() {
         <div class="fn-notification-card-icon">🙈</div>
         <div class="fn-notification-card-main">
           <div class="fn-notification-card-title">Bilan masqué pour aujourd’hui</div>
-          <div class="fn-notification-card-text">Il manque encore : ${foodnoteEsc(missingText)}, mais la pastille rouge ne revient plus aujourd’hui.</div>
+          <div class="fn-notification-card-text">Il manque encore : ${foodnoteEsc(missingText)}, mais le rappel reste discret.</div>
           <div class="fn-notification-row-actions">
             <button type="button" class="fn-notification-action" onclick="openFoodnoteDailyReview()">Faire maintenant</button>
             <button type="button" class="fn-notification-small-action" onclick="unhideFoodnoteTodoToday()">Réactiver</button>
@@ -1819,7 +1935,7 @@ function renderFoodnoteNotificationCenter() {
         <div class="fn-notification-card-icon">${due ? '✅' : '⏰'}</div>
         <div class="fn-notification-card-main">
           <div class="fn-notification-card-title">${due ? 'Bilan du jour OK' : `Bilan après ${reviewHour}h`}</div>
-          <div class="fn-notification-card-text">${due ? 'Rien d’important à compléter pour aujourd’hui.' : `Le rappel de fin de journée apparaîtra après ${reviewHour}h.`}</div>
+          <div class="fn-notification-card-text">${due ? 'Rien d’important à compléter pour aujourd’hui.' : `Le rappel discret apparaîtra après ${reviewHour}h si une étape manque.`}</div>
         </div>
       </div>`;
   }
@@ -1837,13 +1953,13 @@ function renderFoodnoteNotificationCenter() {
       ${unseenSuccessCount ? '<button type="button" class="fn-notification-small-action" onclick="markFoodnoteSuccessesSeen()">Marquer comme vu</button>' : ''}
     </div>
     ${successCards}` : '';
-  box.innerHTML = `
+  host.innerHTML = `
     <div class="fn-notification-head">
       <div>
-        <div class="fn-notification-title">Notifications</div>
-        <div class="fn-notification-sub">FoodNote suit ton bilan, tes objectifs et tes accomplissements.</div>
+        <div class="fn-notification-title">Bilan du jour</div>
+        <div class="fn-notification-sub">Rappel intégré au Journal, sans bulle flottante.</div>
       </div>
-      <button type="button" class="fn-notification-close" onclick="closeFoodnoteNotificationCenter()">✕</button>
+      <button type="button" class="fn-notification-close" onclick="closeFoodnoteNotificationCenter()" aria-label="Refermer le bilan">✕</button>
     </div>
     <div class="fn-notification-list">${todoHtml}${successHtml || ''}</div>
     <div class="fn-notification-settings">
@@ -1910,8 +2026,11 @@ async function persistFoodnoteDailyReview(patch = {}, checklistPatch = {}) {
   }
 }
 function renderFoodnoteDailyReview() {
-  const box = document.getElementById('fn-notification-content');
+  const box = ensureFoodnoteNotificationUI();
   if (!box) return;
+  box.hidden = false;
+  foodnoteSetInlineNotificationState(box, 'warning');
+  box.classList.add('is-open', 'is-review');
   const entry = foodnoteReviewEntryOrEmpty();
   const key = FOODNOTE_REVIEW_STEPS[foodnoteReviewStep] || 'weight';
   const stepNo = foodnoteReviewStep + 1;
@@ -2064,8 +2183,6 @@ async function confirmFoodnoteReviewSport() {
   const idx = FOODNOTE_REVIEW_STEPS.indexOf('sport');
   foodnoteReviewStep = Math.min(FOODNOTE_REVIEW_STEPS.length - 1, Math.max(0, idx + 1));
   ensureFoodnoteNotificationUI();
-  const modal = document.getElementById('fn-notification-modal');
-  if (modal) modal.style.display = 'flex';
   renderFoodnoteDailyReview();
 }
 async function confirmFoodnoteReviewFood() {
@@ -2074,8 +2191,6 @@ async function confirmFoodnoteReviewFood() {
   const idx = FOODNOTE_REVIEW_STEPS.indexOf('food');
   foodnoteReviewStep = Math.min(FOODNOTE_REVIEW_STEPS.length - 1, Math.max(0, idx + 1));
   ensureFoodnoteNotificationUI();
-  const modal = document.getElementById('fn-notification-modal');
-  if (modal) modal.style.display = 'flex';
   renderFoodnoteDailyReview();
 }
 function confirmFoodnoteReviewResume() {
@@ -2098,16 +2213,6 @@ function openFoodnoteSportFill() {
 function bindFoodnoteNotificationClicks() {
   if (window.__foodnoteNotificationClicksBound) return;
   window.__foodnoteNotificationClicksBound = true;
-  document.addEventListener('click', (e) => {
-    const target = e.target;
-    if (!target || typeof target.closest !== 'function') return;
-    const badge = target.closest('#fn-notification-badge');
-    if (badge) {
-      e.preventDefault();
-      e.stopPropagation();
-      openFoodnoteNotificationCenter();
-    }
-  }, true);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeFoodnoteNotificationCenter();
   });

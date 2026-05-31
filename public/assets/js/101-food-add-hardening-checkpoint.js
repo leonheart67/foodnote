@@ -1,6 +1,8 @@
-/* FoodNote beta 0.22.179 — CLEANUP_PASS_13_DATE_SELECTION_REFRESH_CORE
- * Diagnostic global du popup Ajouter.
- * Objectif : vérifier la stabilité sans ajouter d'observer, intervalle ou recalcul permanent.
+/*
+ * FoodNote — diagnostic du popup Ajouter.
+ * Rôle : vérifier manuellement la santé du flux Ajouter sans modifier les données.
+ * Gère : présence des modules, état du popup, recherche intégrée, surfaces de capture.
+ * Ne doit pas gérer : rendu UI, sauvegarde SQLite, import CIQUAL/OpenFoodFacts, ni logique nutritionnelle.
  */
 (function FoodNoteFoodAddHardeningCheckpoint(){
   'use strict';
@@ -8,7 +10,7 @@
   // Marqueur immédiat : permet de confirmer que le fichier est bien exécuté, même avant DOMContentLoaded.
   window.__FoodNoteFoodAddHardeningScriptLoaded = true;
 
-  const VERSION = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const VERSION = 'foodnote_beta_0_22_179_integrated_search_no_legacy_20260531';
   const installedAt = Date.now();
   const $ = (id) => document.getElementById(id);
   const qa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -25,7 +27,24 @@
   function getModalHealth(){ return safeCall(window.FoodNoteFoodAddModal || window.FoodNoteFoodAddModalController, 'health') || safeCall(window.FoodNoteFoodAddModalController, 'audit'); }
   function getDomainHealth(){ return safeCall(window.FoodNoteFoodAddDomain, 'health') || safeCall(window.FoodNoteFoodAddDomain, 'audit'); }
   function getCaptureHealth(){ return safeCall(window.FoodNoteFoodCaptureFlows, 'health') || safeCall(window.FoodNoteFoodCaptureFlows, 'audit'); }
-  function getSearchHealth(){ return safeCall(window.FoodNoteFoodAddSearchResults, 'health') || safeCall(window.FoodNoteFoodAddSearchResults, 'audit'); }
+  function integratedSearchStatus(){
+    const input = $('db-search');
+    const suggestions = $('db-suggestions');
+    const selectedCard = $('db-selected-card');
+    const hasSearchHandler = typeof window.handleDBSearchInput === 'function';
+    const hasPickHandler = typeof window.pickDBSuggestion === 'function';
+    return {
+      mode: 'integrated',
+      input: !!input,
+      suggestions: !!suggestions,
+      selectedCard: !!selectedCard,
+      handleDBSearchInput: hasSearchHandler,
+      pickDBSuggestion: hasPickHandler,
+      ok: !!input && !!suggestions && hasSearchHandler && hasPickHandler,
+      note: 'Recherche intégrée dans 30-nutrition-foods.js / 95-food-add-clean.js.'
+    };
+  }
+  function getSearchHealth(){ return integratedSearchStatus(); }
   function getUxHealth(){ return safeCall(window.FoodNoteFoodAddModalUX, 'health'); }
 
   function modal(){ return $('food-add-modal'); }
@@ -37,16 +56,9 @@
   }
 
   function predictionSurfaceStatus(){
-    const quick = $('quick-foods-card');
-    const quickList = $('quick-foods-list');
     const db = $('db-suggestions');
-    const m = modal();
     return {
-      quickCardExists: !!quick,
-      quickListExists: !!quickList,
       dbSuggestionsExists: !!db,
-      quickCardHiddenByView: !!(quick && quick.getAttribute('aria-hidden') === 'true' && m && m.dataset.fnModalView === 'search'),
-      quickCards: quick ? qa('[data-food-add-action="history-add"], .fn-suggestion-card, .quick-food-chip', quick).length : 0,
       dbCards: db ? qa('[data-food-add-action="search-pick"], .db-suggestion', db).length : 0
     };
   }
@@ -63,7 +75,7 @@
     if (!window.FoodNoteFoodAddModalController) issues.push('modal_controller_missing');
     if (!window.FoodNoteFoodAddDomain) issues.push('domain_core_missing');
     if (!window.FoodNoteFoodCaptureFlows) issues.push('capture_flows_missing');
-    if (!window.FoodNoteFoodAddSearchResults) issues.push('search_results_core_missing');
+    if (!(searchHealth && searchHealth.ok)) issues.push('integrated_search_missing');
     if (!window.FoodNoteFoodAddModalUX) issues.push('ux_core_missing');
 
     if (inlineHandlerCount() > 0) issues.push('inline_handlers_inside_modal:' + inlineHandlerCount());
@@ -73,7 +85,7 @@
     if (searchHealth && searchHealth.observerEnabled) issues.push('search_results_observer_enabled');
     if (pred.quickCardHiddenByView) issues.push('predictions_hidden_in_search_view');
     if (window.FoodNoteFoodAddModalController && !(modalHealth && modalHealth.knownSurfaces && modalHealth.knownSurfaces.searchAfterAddRecovery)) issues.push('search_after_add_recovery_missing');
-    if (window.FoodNoteFoodAddModalController && !(modalHealth && modalHealth.knownSurfaces && modalHealth.knownSurfaces.legacySearchRecovery)) issues.push('legacy_search_recovery_missing');
+    if (window.FoodNoteFoodAddModalController && !(modalHealth && modalHealth.knownSurfaces && modalHealth.knownSurfaces.integratedSearchRecovery)) issues.push('integrated_search_recovery_missing');
     if (window.FoodNoteFoodAddModalController && !(modalHealth && modalHealth.knownSurfaces && modalHealth.knownSurfaces.detachedCaptureActionBridge)) issues.push('detached_capture_action_bridge_missing');
     if (m && !m.classList.contains('fn-food-add-managed')) issues.push('modal_not_marked_managed');
 
@@ -109,18 +121,18 @@
       controllerObserverEnabled: !!(parts.modalHealth && parts.modalHealth.knownSurfaces && parts.modalHealth.knownSurfaces.observerEnabled),
       uxObserverEnabled: !!(parts.uxHealth && parts.uxHealth.observerEnabled),
       uxIntervalEnabled: !!(parts.uxHealth && parts.uxHealth.intervalEnabled),
-      searchResultsObserverEnabled: !!(parts.searchHealth && parts.searchHealth.observerEnabled),
+      integratedSearchObserverEnabled: false,
       stableDialogSize: !!(parts.uxHealth && parts.uxHealth.stableDialogSize),
       predictionsLayoutFix: !!(parts.uxHealth && parts.uxHealth.predictionsLayoutFix),
       searchAfterAddRecovery: !!(parts.modalHealth && parts.modalHealth.knownSurfaces && parts.modalHealth.knownSurfaces.searchAfterAddRecovery),
-      legacySearchRecovery: !!(parts.modalHealth && parts.modalHealth.knownSurfaces && parts.modalHealth.knownSurfaces.legacySearchRecovery),
+      integratedSearchRecovery: !!(parts.modalHealth && parts.modalHealth.knownSurfaces && parts.modalHealth.knownSurfaces.integratedSearchRecovery),
       detachedCaptureActionBridge: !!(parts.modalHealth && parts.modalHealth.knownSurfaces && parts.modalHealth.knownSurfaces.detachedCaptureActionBridge),
       predictions: parts.predictions,
       modules: {
         modal: !!window.FoodNoteFoodAddModalController,
         domain: !!window.FoodNoteFoodAddDomain,
         capture: !!window.FoodNoteFoodCaptureFlows,
-        searchResults: !!window.FoodNoteFoodAddSearchResults,
+        integratedSearch: !!(parts.searchHealth && parts.searchHealth.ok),
         ux: !!window.FoodNoteFoodAddModalUX
       },
       parts
@@ -161,7 +173,7 @@
 (function FoodNoteSearchPickQuantityStablePath(){
   'use strict';
 
-  const VERSION = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const VERSION = 'foodnote_beta_0_22_179_integrated_search_no_legacy_20260531';
   const state = {
     food: null,
     index: -1,

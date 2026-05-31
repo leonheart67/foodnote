@@ -1,6 +1,8 @@
-/* FoodNote beta 0.22.118 — JOURNAL_ADD_REAL_FREEZE_FIX
- * Couche domaine unique pour les validations/sauvegardes issues du popup Ajouter, avec verrous anti-double-enregistrement.
- * Cette passe prend aussi en charge la confirmation du sélecteur de quantité.
+/*
+ * FoodNote — domaine du popup Ajouter.
+ * Rôle : valider et préparer les ajouts alimentaires issus du popup.
+ * Gère : garde-fous anti-double-ajout, repas cible, confirmation quantité et ponts de sauvegarde.
+ * Ne doit pas gérer : rendu global, thèmes CSS, import CIQUAL/OpenFoodFacts ni accès SQLite bas niveau.
  */
 (function FoodNoteFoodAddDomainCore(){
   'use strict';

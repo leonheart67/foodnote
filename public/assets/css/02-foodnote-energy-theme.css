@@ -1,7 +1,9 @@
-/* FoodNote beta 0.22.37 — Energy Theme Tokens
-   Couche globale : plus de couleur, gradients renforcés, objectifs plus visuels.
-   Aucun moteur JS n'est modifié par cette feuille. */
-
+/*
+ * FoodNote — couche Energy Theme.
+ * Rôle : renforcer les couleurs, badges, icônes nutrition et gradients visuels.
+ * Gère : variables de couleurs, pastilles macro, badges objectif et effets de surface.
+ * Ne doit pas gérer : logique JavaScript, données SQLite, imports CIQUAL/OpenFoodFacts ni structure HTML.
+ */
 :root {
   --fn-energy-green: #74c984;
   --fn-energy-mint: #58d5b2;
@@ -86,7 +88,6 @@ body[data-theme="light"] {
 .profile-hero,
 .stats-panel,
 .data-card,
-.quick-foods-card,
 .sport-box,
 .journal-meals-card,
 .journal-section-card,
@@ -117,7 +118,6 @@ body[data-theme="light"] {
 .card-title,
 .fn-section-title,
 .stats-mini-title,
-.quick-foods-title,
 .journal-meals-title {
   color: var(--text) !important;
 }
@@ -326,7 +326,6 @@ button:hover,
   #page-objectif .profile-summary-main { min-height: 142px !important; border-radius: 28px !important; }
   #page-objectif .profile-name { font-size: 34px !important; }
 }
-
 
 /* FoodNote beta 0.22.37 — Theme Lab
    Objectif : garder l'énergie, mais rendre l'accueil plus lisible.
@@ -781,7 +780,6 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   #page-journal .fn-home-macro-grid .macro-val { font-size: clamp(25px, 8vw, 32px) !important; }
 }
 
-
 /* FoodNote beta 0.22.69 — Programme de phases : la frise est générée par classes,
    sans couleur sur le wrapper et sans barre décorative sous le titre. */
 #page-objectif #objectif-programme::before,
@@ -810,7 +808,6 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
 #page-objectif .fn-ui-phase-segments i {
   height: 100% !important;
 }
-
 
 /* FoodNote beta 0.22.70 — Programme de phases : frise lisible, sans debug visuel parasite.
    La couleur vit uniquement dans les segments; le wrapper reste une piste neutre. */

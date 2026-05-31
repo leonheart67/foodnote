@@ -1,10 +1,14 @@
-/* FoodNote beta 0.22.51 — Theme Lab
-   Outil temporaire de réglage live des couleurs. Aucun moteur métier modifié. */
+/*
+ * FoodNote — moteur Theme Lab temporaire.
+ * Rôle : appliquer et synchroniser les essais visuels de développement.
+ * Gère : stockage local Theme Lab, prévisualisations, synchronisation entre onglets.
+ * Ne doit pas gérer : thème officiel final, Journal, données SQLite, imports CIQUAL/OpenFoodFacts ni nutrition.
+ * Note : module isolé à supprimer avant la version 1.0.
+ */
 (function(){
   const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
   const STORAGE_KEY = 'foodnote_theme_lab_v1';
   const ACTIVE_KEY = 'foodnote_theme_lab_active';
-  const ACTIVE_MIGRATION_KEY = 'foodnote_theme_lab_active_migrated_022181';
   const SYNC_KEY = 'foodnote_theme_lab_sync_v1';
   const CHANNEL_NAME = 'foodnote_theme_lab_live_sync_v1';
   const CLIENT_ID = (() => {
@@ -135,8 +139,7 @@ body.fn-theme-lab-active #food-add-modal .food-add-dialog {
   background: linear-gradient(180deg, var(--fn-add-surface, var(--bg2)), var(--fn-add-card, var(--card))) !important;
 }
 body.fn-theme-lab-active #food-add-modal .food-add-head,
-body.fn-theme-lab-active #food-add-modal .journal-add-row,
-body.fn-theme-lab-active #food-add-modal .quick-foods-card {
+body.fn-theme-lab-active #food-add-modal .journal-add-row {
   border-color: var(--fn-add-line, var(--border2)) !important;
   background: color-mix(in srgb, var(--fn-add-surface, var(--bg2)) 88%, var(--fn-add-soft, transparent) 12%) !important;
 }
@@ -1022,20 +1025,18 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
 @media (max-width: 340px) {
   #page-journal .fn-home-nutrition-layout { grid-template-columns: 1fr !important; }
   #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
-    grid-template-columns: 1fr !important;
-    grid-template-rows: auto auto !important;
+    grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0,1fr) !important;
     min-height: 116px !important;
-    text-align: center !important;
-    justify-items: center !important;
-    align-content: center !important;
+    text-align: left !important;
+    justify-items: stretch !important;
   }
-  #page-journal .fn-calorie-copy { justify-items: center !important; text-align: center !important; }
+  #page-journal .fn-calorie-copy { justify-items: start !important; text-align: left !important; }
 }
 
 
 /* FoodNote beta 0.22.63 — Accueil mobile compact : deux colonnes, hauteur réduite.
-   Correction de fond : le layout mobile n'empile plus, et la colonne calories garde le panneau compact, mais le libellé reste sous l'anneau
-   pour respecter la lecture verticale de la carte Calories. */
+   Correction de fond : le layout mobile n'empile plus, et la carte Calories redevient horizontale
+   pour gagner environ 35% de hauteur visuelle sans sacrifier la lisibilité. */
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
   container-type: inline-size;
@@ -1119,22 +1120,22 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
     display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-template-rows: auto auto !important;
-    justify-items: center !important;
+    grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0, 1fr) !important;
+    grid-template-rows: 1fr !important;
+    justify-items: stretch !important;
     align-items: center !important;
     align-content: center !important;
-    text-align: center !important;
-    gap: 5px !important;
+    text-align: left !important;
+    gap: 7px !important;
     min-height: 118px !important;
-    padding: 7px 6px !important;
+    padding: 7px 7px !important;
     border-radius: 17px !important;
   }
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy {
-    justify-items: center !important;
+    justify-items: start !important;
     align-content: center !important;
-    text-align: center !important;
+    text-align: left !important;
   }
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl {
     font-size: 7.5px !important;
@@ -1561,7 +1562,7 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
       .filter(([key, value]) => String(key || '').startsWith('--') && String(value ?? '').trim())
       .map(([key, value]) => `  ${cssEscapeIdent(key)}: ${cssSafeValue(value)} !important;`)
       .join('\n');
-    style.textContent = `/* FoodNote Theme Lab runtime vars — appliqué sur toutes les pages */\nhtml.fn-theme-lab-active, body.fn-theme-lab-active {\n${rows}\n}\n`;
+    style.textContent = `/* FoodNote Theme Lab runtime vars — appliqué sur toutes les pages */\n:root, html.fn-theme-lab-active, body.fn-theme-lab-active {\n${rows}\n}\n`;
   }
   function setVar(key, value) {
     const v = String(value ?? '').trim();
@@ -1578,29 +1579,17 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
     ensureGlobalBridgeStyles();
     ensureHomeNutritionReferenceStyle();
     const data = withDerivedThemeValues(values || readStore());
-    const isOn = !!active;
-
-    if (isOn) {
-      Object.entries(data).forEach(([key, value]) => setVar(key, value));
-      writeRuntimeVarsStyle(data, true);
-    } else {
-      allKnownThemeKeys(Object.keys(data)).forEach(key => {
-        if (!String(key || '').startsWith('--')) return;
-        document.documentElement.style.removeProperty(key);
-        if (document.body) document.body.style.removeProperty(key);
-      });
-      writeRuntimeVarsStyle({}, false);
-    }
-
-    document.documentElement.classList.toggle('fn-theme-lab-active', isOn);
-    if (document.body) document.body.classList.toggle('fn-theme-lab-active', isOn);
+    Object.entries(data).forEach(([key, value]) => setVar(key, value));
+    writeRuntimeVarsStyle(data, !!active);
+    document.documentElement.classList.toggle('fn-theme-lab-active', !!active);
+    if (document.body) document.body.classList.toggle('fn-theme-lab-active', !!active);
     try {
       if (window.FoodNoteThemeLabRuntime && typeof window.FoodNoteThemeLabRuntime.apply === 'function') {
-        window.FoodNoteThemeLabRuntime.apply(isOn ? data : {}, isOn, { reason:'theme-lab-ui' });
+        window.FoodNoteThemeLabRuntime.apply(data, !!active, { reason:'theme-lab-ui' });
       }
     } catch(e) {}
-    if (options.persistActive !== false) setActiveStored(isOn);
-    try { window.dispatchEvent(new CustomEvent('foodnote-theme-lab-applied', { detail:{ active:isOn, keys:Object.keys(data) } })); } catch(e) {}
+    if (options.persistActive !== false) setActiveStored(!!active);
+    try { window.dispatchEvent(new CustomEvent('foodnote-theme-lab-applied', { detail:{ active:!!active, keys:Object.keys(data) } })); } catch(e) {}
     if (!options.silent) updateStatus();
     updateExportBox();
   }
@@ -2580,18 +2569,7 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
 `;
   }
 
-
-  function migrateLegacyActiveFlag() {
-    try {
-      if (localStorage.getItem(ACTIVE_KEY) === '1' && localStorage.getItem(ACTIVE_MIGRATION_KEY) !== '1') {
-        localStorage.removeItem(ACTIVE_KEY);
-        localStorage.setItem(ACTIVE_MIGRATION_KEY, '1');
-      }
-    } catch(e) {}
-  }
-
   function init() {
-    migrateLegacyActiveFlag();
     ensureGlobalBridgeStyles();
     captureOrigins();
     setupLiveSync();

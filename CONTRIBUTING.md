@@ -1,17 +1,6 @@
 # Contribuer à FoodNote
 
-Les contributions sont bienvenues, mais FoodNote est encore en bêta.
-
-En proposant une contribution, vous acceptez qu’elle soit distribuée sous la licence du projet : GNU AGPL-3.0-or-later.
-
-
-Pour le moment, les contributions recommandées sont :
-- corrections de bugs ;
-- amélioration de documentation ;
-- nettoyage de code ;
-- améliorations UI simples.
-
-Les grosses modifications fonctionnelles doivent être discutées dans une issue avant PR.
+FoodNote est en bêta active. Les contributions sont bienvenues, mais la priorité est la stabilité.
 
 ## Principes
 
@@ -30,6 +19,15 @@ Lancez :
 npm test
 ```
 
+Vérifiez aussi manuellement les flux de base :
+
+- ajout aliment ;
+- changement quantité ;
+- changement repas ;
+- suppression aliment ;
+- historique ;
+- récapitulatif.
+
 ## Données et secrets
 
 Ne committez jamais :
@@ -44,3 +42,6 @@ clés API
 logs
 ```
 
+## Style de contribution
+
+Les petites PR ciblées sont préférées aux grosses réécritures. Si un bug touche un flux utilisateur, ajoutez si possible un garde-fou dans `scripts/foodnote-static-check.js`.

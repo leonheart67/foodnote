@@ -1,8 +1,6 @@
-
 {
   "name": "foodnote-server",
   "version": "0.22.179",
-  "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "commonjs",
   "scripts": {

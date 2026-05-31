@@ -1,3 +1,10 @@
+/*
+ * FoodNote — historique, export, stockage et outils de bases locales.
+ * Rôle : gérer l'historique côté interface, les exports/imports utilisateur,
+ *        les statuts et actions de maintenance CIQUAL/OpenFoodFacts.
+ * Gère : appels API depuis l'UI, affichage des statuts, logs et actions utilisateur.
+ * Ne doit pas gérer : logique serveur, parsing CIQUAL/OpenFoodFacts, ni accès direct SQLite.
+ */
 function formatDate(d) { const [y,m,j]=d.split('-'); return j+'/'+m+'/'+y; }
 
 let historyFilters = { q:'', period:'all', type:'all' };
@@ -190,7 +197,7 @@ function entryMatchesHistoryFilters(e, maxTs) {
   if (q) {
     const hay = normalizeHistoryText([
       e.date, formatDate(String(e.date || '')), historyWeekdayShort(e.date),
-      e.notes, e.extras, e.question, e.energie, e.faim,
+      e.notes, e.extras, e.energie, e.faim,
       ...(e.aliments || []).map(a => `${a.nom || ''} ${a.qty || ''} ${a.unite || ''}`),
       ...(e.sports || []).map(s => `${s.nom || ''} ${s.heures || ''} ${s.total || ''}`)
     ].join(' '));
@@ -208,7 +215,7 @@ function entryMatchesHistoryFilters(e, maxTs) {
   const sportCount = e._detailsLoaded === true ? (Array.isArray(e.sports) ? e.sports.length : 0) : Number(e.sportCount ?? e.sport_count ?? 0);
   if (type === 'sport' && !sportCount && !Number(e.depSport || 0)) return false;
   if (type === 'poids' && !Number(e.poids || 0)) return false;
-  if (type === 'notes' && !String(e.notes || e.extras || e.question || '').trim()) return false;
+  if (type === 'notes' && !String(e.notes || e.extras || '').trim()) return false;
   if (type === 'aliments' && !foodCount) return false;
   return true;
 }
@@ -599,7 +606,6 @@ function editEntry(id) {
   setVal('f-energie', entry.energie || '');
   setVal('f-faim', entry.faim || '');
   setVal('f-notes', entry.notes || '');
-  setVal('f-question', entry.question || '');
   setVal('f-extras', entry.extras || '');
 
   selected.clear();
@@ -776,8 +782,7 @@ ${sportLines}
 - Net après sport : ${Number.isFinite(net) ? net : Math.round(Number(m.kcal || 0))} kcal
 
 ## Notes
-${e.notes || e.extras || 'RAS'}
-${e.question ? '\n## Question / remarque\n' + e.question : ''}`;
+${e.notes || e.extras || 'RAS'}`;
 }
 
 function historyFilteredEntriesSnapshot(scope) {
@@ -870,11 +875,7 @@ function buildJournalTextBundle(entries) {
 }
 
 function exportScopeFromUI() {
-  const dataActive = document.getElementById('page-donnees')?.classList.contains('active');
-  const exportActive = document.getElementById('page-export')?.classList.contains('active');
-  if (dataActive && document.getElementById('data-export-scope')) return document.getElementById('data-export-scope').value || 'filtered';
-  if (exportActive && document.getElementById('export-scope')) return document.getElementById('export-scope').value || 'filtered';
-  return document.getElementById('data-export-scope')?.value || document.getElementById('export-scope')?.value || 'filtered';
+  return document.getElementById('data-export-scope')?.value || 'filtered';
 }
 
 function exportEntriesForUI(scope) {
@@ -882,7 +883,7 @@ function exportEntriesForUI(scope) {
 }
 
 function setExportStatus(message, cls) {
-  ['export-status','data-export-status'].forEach(id => {
+  ['data-export-status'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.textContent = message || ''; el.className = 'fn-ui-inline-status ' + (cls || ''); }
   });
@@ -997,34 +998,12 @@ function renderHistoryExportBar(entries) {
   });
 }
 
-function renderExportSelect(){
-  const sel = document.getElementById('export-select'), entries = getEntries();
-  if (sel) {
-    sel.innerHTML = '<option value="">— choisir —</option>' + entries.map(e=>`<option value="${e.id}">${formatDate(e.date)}</option>`).join('');
-    const content = document.getElementById('export-content');
-    if (content) content.textContent = 'Sélectionne une entrée ci-dessus.';
-  }
-  renderAdvancedExportPage();
-}
-
-function renderAdvancedExportPage() {
-  const root = document.getElementById('export-advanced-root');
-  if (!root) return;
-  root.innerHTML = '';
-  const shell = document.createElement('section');
-  shell.className = 'fn-ui-panel fn-ui-panel-pad';
-  shell.innerHTML = '<div id="export-advanced-panel"></div>';
-  root.appendChild(shell);
-  renderAdvancedExportPanel('export-advanced-panel', { compact:false });
-}
-
-function generateExport(){
-  const content = document.getElementById('export-content');
-  const id = parseInt(document.getElementById('export-select')?.value || '0');
-  if(!id){ if (content) content.textContent='Sélectionne une entrée ci-dessus.'; return; }
-  const e=getEntries().find(e=>e.id===id);
-  if(e && content) content.textContent=generateExportText(e);
-}
+/*
+ * L'ancienne page Export autonome a été supprimée.
+ * L'export lisible reste disponible dans :
+ * - Historique, via la barre d'export des résultats filtrés ;
+ * - Données, via le panneau `data-export-advanced`.
+ */
 
 function ensureHistoryRawTextModal(){
   let modal = document.getElementById('history-raw-text-modal');
@@ -1099,26 +1078,6 @@ function downloadHistoryRawText(){
 }
 function exportSingle(id){ openHistoryRawText(id); }
 function exportJournalCSV(){ downloadAdvancedExport('csv-summary'); }
-function copyExport(){
-  const content = document.getElementById('export-content');
-  const txt = content ? content.textContent : '';
-  if(!txt || txt === 'Sélectionne une entrée ci-dessus.') return;
-  navigator.clipboard.writeText(txt).then(()=>alert('Copié !')).catch(()=>alert('Copie automatique impossible. Sélectionne le texte brut manuellement.'));
-}
-
-function renderRef(){
-  const tbody = document.getElementById('ref-table');
-  if (!allAliments.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:1rem">Aucun aliment préenregistré. La référence se remplira avec tes entrées manuelles.</td></tr>';
-    return;
-  }
-  tbody.innerHTML=allAliments.map(a=>{
-    const qte=a.unite==='unité'?a.defaut+' unité':a.defaut+'g';
-    const m=getMacros(a,a.defaut);
-    return `<tr><td>${a.nom}${a.cat==='custom'?' <span style="font-size:11px;color:#aaa">(manuel)</span>':''}</td><td class="num">${qte}</td><td class="num">${Math.round(m.kcal)}</td><td class="num">${Math.round(m.prot)}g</td><td class="num">${Math.round(m.gluc)}g</td><td class="num">${Math.round(m.lip)}g</td></tr>`;
-  }).join('');
-}
-
 function renderBDD() {
   renderUnitWeights();
   const bdd = getBDD();
@@ -2056,25 +2015,70 @@ function saveBDD(d) {
   scheduleFoodsSave();
 }
 
+function getStarterAlimentsForSeed() {
+  const fromModule = window.FOODNOTE_STARTER_FOODS;
+  if (Array.isArray(fromModule)) return fromModule;
+  // Compatibilité ancienne version : si un vieux build a encore la constante locale,
+  // on l'utilise sans casser l'app, mais la source cible reste 11-starter-foods.js.
+  try {
+    if (typeof STARTER_ALIMENTS_FIRST_LAUNCH !== 'undefined' && Array.isArray(STARTER_ALIMENTS_FIRST_LAUNCH)) {
+      return STARTER_ALIMENTS_FIRST_LAUNCH;
+    }
+  } catch(e) {}
+  return [];
+}
+
+function foodnoteStarterFoodKey(foodOrName) {
+  return String(foodOrName && typeof foodOrName === 'object' ? (foodOrName.nom || foodOrName.name || '') : (foodOrName || ''))
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function foodnoteIsStarterOwnedFood(food) {
+  if (!food || typeof food !== 'object') return false;
+  if (food.source === 'starter') return true;
+  // Les anciens aliments de démarrage utilisaient des id négatifs et base:true.
+  const id = Number(food.id);
+  return food.base === true && Number.isFinite(id) && id < 0;
+}
+
 function seedStarterAliments(force = false) {
-  const seedVersion = 4;
+  const starters = getStarterAlimentsForSeed();
+  const seedVersion = Number(window.FOODNOTE_STARTER_FOODS_VERSION || 5) || 5;
+  if (!starters.length) {
+    console.warn('[FoodNote] aliments de démarrage indisponibles : 11-starter-foods.js non chargé ?');
+    return;
+  }
+
   const bdd = getBDD();
-  const indexByName = new Map(bdd.map((b, i) => [(b.nom || '').trim().toLowerCase(), i]));
+  const indexByName = new Map(bdd.map((b, i) => [foodnoteStarterFoodKey(b), i]).filter(([key]) => key));
   let changed = false;
 
-  STARTER_ALIMENTS_FIRST_LAUNCH.forEach(a => {
-    const key = a.nom.trim().toLowerCase();
-    const baseFood = {...a, base:true, source:a.source || 'starter'};
+  starters.forEach(a => {
+    if (!a || !a.nom) return;
+    const key = foodnoteStarterFoodKey(a);
+    if (!key) return;
+    const baseFood = normalizeFoodListForClient([{...a, base:true, source:'starter'}])[0];
+    if (!baseFood) return;
+
     if (!indexByName.has(key)) {
       bdd.push(baseFood);
       indexByName.set(key, bdd.length - 1);
       changed = true;
-    } else if (force) {
-      const i = indexByName.get(key);
-      bdd[i] = {...bdd[i], ...baseFood, id:bdd[i].id || baseFood.id};
+      return;
+    }
+
+    const i = indexByName.get(key);
+    const existing = bdd[i];
+    if (force && foodnoteIsStarterOwnedFood(existing)) {
+      // Restauration volontaire : on remet à niveau uniquement les fiches starter.
+      // Une fiche utilisateur portant le même nom n'est pas écrasée.
+      bdd[i] = {...existing, ...baseFood, id:existing.id || baseFood.id};
       changed = true;
-    } else if (!bdd[indexByName.get(key)].base) {
-      bdd[indexByName.get(key)].base = true;
+    } else if (foodnoteIsStarterOwnedFood(existing) && (existing.base !== true || existing.source !== 'starter')) {
+      bdd[i] = {...existing, base:true, source:'starter'};
       changed = true;
     }
   });
@@ -2345,6 +2349,21 @@ function importJSON(event) {
   reader.readAsText(file); event.target.value = '';
 }
 
+function ensureCIQUALUpdateButton() {
+  const importBtn = document.getElementById('btn-ciqual-import');
+  if (!importBtn || !importBtn.parentElement) return null;
+  let btn = document.getElementById('btn-ciqual-update');
+  if (btn) return btn;
+  btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'fn-ui-button fn-ui-button-primary';
+  btn.id = 'btn-ciqual-update';
+  btn.textContent = '🔄 Télécharger / mettre à jour CIQUAL';
+  btn.onclick = triggerCIQUALUpdate;
+  importBtn.parentElement.insertBefore(btn, importBtn);
+  return btn;
+}
+
 function formatCIQUALFileStatus(label, ok, info) {
   const icon = ok ? '✓' : '✕';
   const color = ok ? 'var(--green)' : 'var(--text4)';
@@ -2358,6 +2377,7 @@ async function checkCIQUALStatus() {
     const d = await readJSONResponse(r, 'CIQUAL statut');
     const el = document.getElementById('ciqual-status-box');
     const btn = document.getElementById('btn-ciqual-import');
+    const btnUpdate = ensureCIQUALUpdateButton();
     if (!el) return;
 
     const sourceLabel = d.source === 'sqlite' ? 'SQLite/off.db' : (d.source === 'json' ? 'ciqual_data.json' : 'aucune base');
@@ -2369,24 +2389,29 @@ async function checkCIQUALStatus() {
       formatCIQUALFileStatus('grp.xml', !!xml.grp, files.grp) + ' <span style="color:var(--text4)">(optionnel)</span>'
     ].join(' · ');
 
+    if (btnUpdate) {
+      btnUpdate.disabled = !!d.running || !d.can_update;
+      btnUpdate.textContent = d.running ? '⏳ CIQUAL en cours...' : '🔄 Télécharger / mettre à jour CIQUAL';
+      btnUpdate.title = d.can_update ? 'Télécharge les XML officiels CIQUAL puis lance l’import local' : 'update_ciqual.sh ou download_ciqual.py est introuvable côté serveur';
+    }
     if (btn) {
       btn.disabled = !!d.running || !d.can_import;
-      btn.textContent = d.running ? '⏳ Import en cours...' : '🌿 Importer les fichiers CIQUAL';
-      btn.title = d.can_import ? 'Réimporte les fichiers XML CIQUAL déjà présents (/data ou /app)' : 'alim.xml et compo.xml doivent être présents dans /data ou fournis dans l’image GitHub';
+      btn.textContent = d.running ? '⏳ CIQUAL en cours...' : '🌿 Réimporter les XML locaux';
+      btn.title = d.can_import ? 'Réimporte les fichiers XML CIQUAL déjà présents (/data ou /app)' : 'alim.xml et compo.xml doivent être présents dans /data ou téléchargés avec le bouton CIQUAL';
     }
 
     if (d.available) {
       el.innerHTML = '<div><span style="color:var(--green)">✓ Base CIQUAL disponible</span> — <span style="color:var(--text3)">' + (d.count || 0) + ' aliments</span> — <span style="color:var(--text4)">' + sourceLabel + '</span></div>' +
         '<div style="margin-top:6px;font-size:12px">Fichiers XML : ' + xmlLine + '</div>' +
-        '<div style="margin-top:4px;font-size:12px;color:var(--text4)">Si les XML sont fournis avec l’app, l’import se lance automatiquement au démarrage. Le bouton sert surtout à forcer une réimportation.</div>';
+        '<div style="margin-top:4px;font-size:12px;color:var(--text4)">Le bouton Télécharger met à jour les XML officiels puis réimporte. Le bouton Réimporter relit seulement les XML déjà présents.</div>';
     } else if (d.can_import) {
       el.innerHTML = '<div><span style="color:var(--orange)">⚠ Fichiers XML CIQUAL détectés</span> — base locale pas encore importée</div>' +
         '<div style="margin-top:6px;font-size:12px">Fichiers XML : ' + xmlLine + '</div>' +
-        '<div style="margin-top:4px;font-size:12px;color:var(--text3)">Import automatique prévu au démarrage. Tu peux aussi cliquer sur <strong>Importer les fichiers CIQUAL</strong> pour le lancer maintenant.</div>';
+        '<div style="margin-top:4px;font-size:12px;color:var(--text3)">Tu peux cliquer sur <strong>Réimporter les XML locaux</strong>, ou sur <strong>Télécharger / mettre à jour CIQUAL</strong> pour récupérer les XML officiels puis importer.</div>';
     } else {
       el.innerHTML = '<div><span style="color:var(--orange)">⚠ Base CIQUAL non disponible</span></div>' +
         '<div style="margin-top:6px;font-size:12px">Fichiers XML : ' + xmlLine + '</div>' +
-        '<div style="margin-top:4px;font-size:12px;color:var(--text3)">Ajoute au minimum <code>alim.xml</code> et <code>compo.xml</code> dans <code>/data</code>, ou fournis-les directement dans le projet GitHub.</div>';
+        '<div style="margin-top:4px;font-size:12px;color:var(--text3)">Clique sur <strong>Télécharger / mettre à jour CIQUAL</strong> pour récupérer les XML officiels, ou copie manuellement <code>alim.xml</code> et <code>compo.xml</code> dans <code>/data</code>.</div>';
     }
   } catch(e) {
     const el = document.getElementById('ciqual-status-box');
@@ -2395,25 +2420,52 @@ async function checkCIQUALStatus() {
 }
 
 async function lancerImportCIQUAL() {
-  if (!confirm('Lancer/réimporter CIQUAL ? Les fichiers alim.xml et compo.xml doivent être présents dans /data ou fournis dans l’image GitHub.')) return;
+  if (!confirm('Réimporter les XML CIQUAL déjà présents ? Pour télécharger les XML officiels, utilise plutôt “Télécharger / mettre à jour CIQUAL”.')) return;
   const btn = document.getElementById('btn-ciqual-import');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Import en cours...'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Réimport en cours...'; }
   const logBox = document.getElementById('ciqual-log-box');
   if (logBox) logBox.style.display = 'block';
   try {
     const r = await fetch('/api/ciqual/import', { method: 'POST' });
     const d = await r.json();
     if (d.ok) {
-      showSaveStatus('Import CIQUAL lancé');
+      showSaveStatus('Réimport CIQUAL lancé');
       pollCIQUALLog();
     } else {
       showSaveStatus(d.error || 'Erreur import CIQUAL', true);
-      if (btn) { btn.disabled = false; btn.textContent = '🌿 Importer les fichiers CIQUAL'; }
+      if (btn) { btn.disabled = false; btn.textContent = '🌿 Réimporter les XML locaux'; }
       checkCIQUALStatus();
     }
   } catch(e) {
     showSaveStatus('Erreur réseau', true);
-    if (btn) { btn.disabled = false; btn.textContent = '🌿 Importer les fichiers CIQUAL'; }
+    if (btn) { btn.disabled = false; btn.textContent = '🌿 Réimporter les XML locaux'; }
+  }
+}
+
+async function triggerCIQUALUpdate() {
+  if (!confirm('Télécharger / mettre à jour CIQUAL ? FoodNote va récupérer les XML officiels ANSES, puis lancer l’import local.')) return;
+  const btn = document.getElementById('btn-ciqual-update');
+  const importBtn = document.getElementById('btn-ciqual-import');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Téléchargement CIQUAL...'; }
+  if (importBtn) importBtn.disabled = true;
+  const logBox = document.getElementById('ciqual-log-box');
+  if (logBox) logBox.style.display = 'block';
+  try {
+    const r = await fetch('/api/ciqual/update', { method: 'POST' });
+    const d = await r.json();
+    if (d.ok) {
+      showSaveStatus('Mise à jour CIQUAL lancée depuis l’interface. Logs en direct activés.');
+      pollCIQUALLog();
+    } else {
+      showSaveStatus(d.error || 'Mise à jour CIQUAL non lancée', true);
+      if (btn) { btn.disabled = false; btn.textContent = '🔄 Télécharger / mettre à jour CIQUAL'; }
+      if (importBtn) importBtn.disabled = false;
+      pollCIQUALLog();
+    }
+  } catch(e) {
+    showSaveStatus('Erreur lors du lancement CIQUAL : ' + (e && e.message ? e.message : e), true);
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Télécharger / mettre à jour CIQUAL'; }
+    if (importBtn) importBtn.disabled = false;
   }
 }
 
@@ -2426,6 +2478,8 @@ async function pollCIQUALLog() {
     if (d.running) {
       setTimeout(pollCIQUALLog, 2000);
     } else {
+      const btn = document.getElementById('btn-ciqual-update');
+      if (btn) { btn.disabled = false; btn.textContent = '🔄 Télécharger / mettre à jour CIQUAL'; }
       checkCIQUALStatus();
     }
   } catch(e) {}

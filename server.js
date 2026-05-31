@@ -1,3 +1,10 @@
+/*
+ * FoodNote — serveur principal SQLite / API locale.
+ * Rôle : exposer les API HTTP, gérer la base SQLite FoodNote, les imports locaux
+ *        CIQUAL/OpenFoodFacts, les sauvegardes et les données utilisateur.
+ * Gère : routes Express, accès SQLite, opérations serveur longues via scripts dédiés.
+ * Ne doit pas gérer : rendu visuel frontend, logique d'affichage CSS/JS, ni état UI client.
+ */
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -5431,7 +5438,8 @@ const CIQUAL_XML_CANDIDATES = {
   const: [path.join(DATA_DIR, 'const.xml'), path.join(DATA_DIR, 'const_2025_11_03.xml'), path.join(__dirname, 'const.xml'), path.join(__dirname, 'const_2025_11_03.xml')],
 };
 let ciqualCache = null;
-let ciqImportRunning = false;
+let ciqualProc = null;
+let ciqualRunningKind = '';
 
 function normalizeStr(s) {
   return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -5652,24 +5660,42 @@ app.get('/api/ciqual/status', async (req, res) => {
       json,
       xml,
       can_import: xml.ready,
-      running: ciqImportRunning,
-      manual_download_required: !xml.ready,
+      can_update: !!getCiqualUpdateScript(),
+      running: isCiqualOperationRunning(),
+      manual_download_required: !xml.ready && !getCiqualUpdateScript(),
       xml_provided: xml.ready,
       auto_import_enabled: process.env.FOODNOTE_CIQUAL_AUTO_IMPORT !== '0',
       import_button_useful: xml.ready,
+      update_button_useful: !!getCiqualUpdateScript(),
       import_script_available: !!getCiqualImportScript(),
+      download_script_available: !!getCiqualDownloadScript(),
+      update_script_available: !!getCiqualUpdateScript(),
       message: available
         ? 'Base CIQUAL disponible localement.'
         : (xml.ready ? (xml.const ? 'Fichiers XML CIQUAL détectés : import automatique au démarrage ou import manuel possible.' : 'Fichiers CIQUAL détectés sans const.xml : import possible en mode secours, mais const.xml est recommandé pour éviter les erreurs de mapping.') : 'Base CIQUAL absente : les XML officiels peuvent être téléchargés dans /data ou copiés manuellement (alim.xml, compo.xml et idéalement const.xml).')
     });
   } catch(e) {
-    res.json({ available: false, source: 'none', count: 0, error: e.message, xml: getCiqualXmlStatus(), running: ciqImportRunning });
+    res.json({ available: false, source: 'none', count: 0, error: e.message, xml: getCiqualXmlStatus(), running: isCiqualOperationRunning() });
   }
 });
 
-function appendCiqualLog(line) {
-  const logFile = path.join(DATA_DIR, 'ciqual_update.log');
+function getCiqualLogFile() { return path.join(DATA_DIR, 'ciqual_update.log'); }
+function getCiqualPidFile() { return path.join(DATA_DIR, 'ciqual_update.pid'); }
+function isCiqualOperationRunning() {
+  if (ciqualProc && ciqualProc.exitCode === null && ciqualProc.signalCode === null) return true;
+  const pidFile = getCiqualPidFile();
   try {
+    if (!fs.existsSync(pidFile)) return false;
+    const pid = Number(fs.readFileSync(pidFile, 'utf8').trim());
+    if (!pid) return false;
+    try { process.kill(pid, 0); return true; }
+    catch (_) { try { fs.unlinkSync(pidFile); } catch(e) {} return false; }
+  } catch(e) { return false; }
+}
+function appendCiqualLog(line) {
+  const logFile = getCiqualLogFile();
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(logFile, '[' + new Date().toISOString() + '] ' + line + '\n', { flag: 'a' });
   } catch(e) {
     console.error('CIQUAL log erreur:', e.message);
@@ -5684,47 +5710,88 @@ function getCiqualImportScript() {
   return candidates.find(f => fs.existsSync(f)) || null;
 }
 
+function getCiqualDownloadScript() {
+  const candidates = [
+    path.join('/app', 'download_ciqual.py'),
+    path.join(__dirname, 'download_ciqual.py')
+  ];
+  return candidates.find(f => fs.existsSync(f)) || null;
+}
+
+function getCiqualUpdateScript() {
+  const candidates = [
+    path.join('/app', 'update_ciqual.sh'),
+    path.join(__dirname, 'update_ciqual.sh')
+  ];
+  return candidates.find(f => fs.existsSync(f)) || null;
+}
+
+
+function startCiqualProcess(kind, command, args, cwd) {
+  if (isCiqualOperationRunning()) return { ok: false, running: true, error: 'Opération CIQUAL déjà en cours' };
+  const { spawn } = require('child_process');
+  const logFile = getCiqualLogFile();
+  const pidFile = getCiqualPidFile();
+  const title = kind === 'update' ? 'Mise à jour CIQUAL' : 'Import CIQUAL';
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.writeFileSync(logFile,
+      'FoodNote — ' + title + ' depuis l’interface\n' +
+      'Début : ' + new Date().toISOString() + '\n' +
+      'Commande : ' + [command].concat(args || []).join(' ') + '\n\n'
+    );
+    const out = fs.openSync(logFile, 'a');
+    const err = fs.openSync(logFile, 'a');
+    ciqualRunningKind = kind;
+    ciqualProc = spawn(command, args || [], {
+      cwd: cwd || '/app',
+      env: { ...process.env, DATA_DIR },
+      detached: false,
+      stdio: ['ignore', out, err]
+    });
+    fs.writeFileSync(pidFile, String(ciqualProc.pid));
+    ciqualProc.on('exit', (code, signal) => {
+      try { fs.appendFileSync(logFile, '\nFin : ' + new Date().toISOString() + ' | code=' + code + ' signal=' + (signal || '') + '\n'); } catch(e) {}
+      try { fs.unlinkSync(pidFile); } catch(e) {}
+      try { fs.closeSync(out); } catch(e) {}
+      try { fs.closeSync(err); } catch(e) {}
+      ciqualCache = null;
+      ciqualRunningKind = '';
+      ciqualProc = null;
+    });
+    ciqualProc.on('error', (e) => {
+      try { fs.appendFileSync(logFile, '\nERREUR lancement CIQUAL : ' + e.message + '\n'); } catch(_) {}
+      try { fs.unlinkSync(pidFile); } catch(_) {}
+      ciqualRunningKind = '';
+      ciqualProc = null;
+    });
+    return { ok: true, running: true, kind, pid: ciqualProc.pid, log: '/api/ciqual/log' };
+  } catch(e) {
+    ciqualRunningKind = '';
+    ciqualProc = null;
+    return { ok: false, status: 500, error: e.message };
+  }
+}
+
 function startCiqualImport(reason = 'manual') {
-  if (ciqImportRunning) return { ok: false, error: 'Import déjà en cours' };
   const xml = getCiqualXmlStatus();
   if (!xml.ready) {
     return {
       ok: false,
       status: 400,
-      error: 'Fichiers CIQUAL manquants : alim.xml et compo.xml doivent être présents dans /data ou téléchargés avec download_ciqual.py.',
+      error: 'Fichiers CIQUAL manquants : alim.xml et compo.xml doivent être présents dans /data ou téléchargés avec le bouton CIQUAL.',
       xml
     };
   }
   const script = getCiqualImportScript();
-  if (!script) {
-    return { ok: false, status: 500, error: 'Script import_ciqual.py introuvable dans /app.', xml };
-  }
+  if (!script) return { ok: false, status: 500, error: 'Script import_ciqual.py introuvable dans /app.', xml };
+  return startCiqualProcess('import', 'python3', [script, '--data-dir', DATA_DIR], path.dirname(script));
+}
 
-  const { spawn } = require('child_process');
-  const logFile = path.join(DATA_DIR, 'ciqual_update.log');
-  try {
-    appendCiqualLog((reason === 'auto' ? 'Import CIQUAL automatique' : 'Import CIQUAL manuel') + ' lancé');
-    ciqImportRunning = true;
-    const proc = spawn('python3', [script], {
-      cwd: path.dirname(script),
-      detached: true,
-      stdio: ['ignore', fs.openSync(logFile, 'a'), fs.openSync(logFile, 'a')]
-    });
-    proc.unref();
-    proc.on('exit', (code) => {
-      ciqImportRunning = false;
-      ciqualCache = null;
-      appendCiqualLog('Import CIQUAL terminé avec code ' + code);
-    });
-    proc.on('error', (err) => {
-      ciqImportRunning = false;
-      appendCiqualLog('Erreur import CIQUAL : ' + err.message);
-    });
-    return { ok: true, xml, script, reason };
-  } catch(e) {
-    ciqImportRunning = false;
-    return { ok: false, status: 500, error: e.message, xml };
-  }
+function startCiqualUpdate(reason = 'manual') {
+  const script = getCiqualUpdateScript();
+  if (!script) return { ok: false, status: 500, error: 'Script update_ciqual.sh introuvable dans /app.' };
+  return startCiqualProcess('update', 'sh', [script], path.dirname(script));
 }
 
 async function maybeAutoImportCiqualOnStartup() {
@@ -5746,12 +5813,18 @@ app.post('/api/ciqual/import', (req, res) => {
   res.json(result);
 });
 
+app.post('/api/ciqual/update', (req, res) => {
+  const result = startCiqualUpdate('manual');
+  if (!result.ok) return res.status(result.status || 400).json(result);
+  res.json(result);
+});
+
 app.get('/api/ciqual/log', (req, res) => {
   const logFile = path.join(DATA_DIR, 'ciqual_update.log');
   try {
-    if (!fs.existsSync(logFile)) return res.json({ log: 'Aucun log disponible.', running: ciqImportRunning });
+    if (!fs.existsSync(logFile)) return res.json({ log: 'Aucun log disponible.', running: isCiqualOperationRunning() });
     const lines = fs.readFileSync(logFile, 'utf8').split('\n').slice(-40).join('\n');
-    res.json({ log: lines, running: ciqImportRunning });
+    res.json({ log: lines, running: isCiqualOperationRunning() });
   } catch(e) { res.json({ log: e.message, running: false }); }
 });
 

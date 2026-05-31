@@ -1,0 +1,366 @@
+/*
+ * FoodNote — explorateur des bases alimentaires.
+ * Rôle : mettre en forme l'exploration visuelle des sources Starter, CIQUAL et OpenFoodFacts.
+ * Gère : accordéons de bases, champs de recherche, lignes résultats et états vides.
+ * Ne doit pas gérer : couleurs globales de thème, logique de recherche, sauvegarde SQLite ou import des bases.
+ */
+
+.fn-db-explorer {
+  display: grid;
+  gap: 14px;
+}
+
+.fn-db-explorer-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border: 1px solid var(--border2, rgba(148, 163, 184, .22));
+  border-radius: 18px;
+  background: var(--surface2, rgba(255, 255, 255, .045));
+}
+
+.fn-db-explorer-intro strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.fn-db-explorer-intro p {
+  margin: 0;
+  max-width: 760px;
+  color: var(--text3, #94a3b8);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.fn-db-explorer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fn-db-source {
+  overflow: hidden;
+  border: 1px solid var(--border2, rgba(148, 163, 184, .22));
+  border-radius: 20px;
+  background: var(--surface, rgba(255, 255, 255, .04));
+}
+
+.fn-db-source summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 14px 16px;
+  user-select: none;
+}
+
+.fn-db-source summary::-webkit-details-marker {
+  display: none;
+}
+
+.fn-db-source-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.fn-db-source-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 14px;
+  background: var(--surface2, rgba(255, 255, 255, .06));
+  border: 1px solid var(--border2, rgba(148, 163, 184, .2));
+  flex: 0 0 auto;
+}
+
+.fn-db-source-title b {
+  display: block;
+  font-size: 15px;
+}
+
+.fn-db-source-title small {
+  display: block;
+  margin-top: 2px;
+  color: var(--text3, #94a3b8);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.fn-db-source-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fn-db-count,
+.fn-db-source-chevron {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--text3, #94a3b8);
+  background: var(--surface2, rgba(255, 255, 255, .06));
+  border: 1px solid var(--border2, rgba(148, 163, 184, .2));
+}
+
+.fn-db-source-chevron {
+  width: 28px;
+  justify-content: center;
+  padding: 0;
+  font-size: 15px;
+  transition: transform .18s ease;
+}
+
+.fn-db-source[open] .fn-db-source-chevron {
+  transform: rotate(180deg);
+}
+
+.fn-db-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+.fn-db-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.fn-db-search-field {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text3, #94a3b8);
+}
+
+.fn-db-search-field input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--border2, rgba(148, 163, 184, .24));
+  background: var(--input-bg, rgba(255, 255, 255, .06));
+  color: var(--text, #f8fafc);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.fn-db-search-field input:focus {
+  border-color: var(--accent, #22c55e);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #22c55e) 18%, transparent);
+}
+
+.fn-db-clear {
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.fn-db-status-line {
+  color: var(--text3, #94a3b8);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.fn-db-results {
+  display: grid;
+  gap: 8px;
+}
+
+.fn-db-result-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--border2, rgba(148, 163, 184, .18));
+  background: var(--surface2, rgba(255, 255, 255, .045));
+}
+
+.fn-db-result-main {
+  min-width: 0;
+}
+
+.fn-db-result-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.fn-db-result-name span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fn-db-source-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2, #cbd5e1);
+  background: rgba(148, 163, 184, .12);
+  border: 1px solid rgba(148, 163, 184, .2);
+}
+
+.fn-db-result-meta {
+  margin-top: 4px;
+  color: var(--text3, #94a3b8);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.fn-db-macros {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  max-width: 360px;
+}
+
+.fn-db-macro {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text2, #cbd5e1);
+  background: rgba(148, 163, 184, .10);
+  border: 1px solid rgba(148, 163, 184, .18);
+}
+
+.fn-db-note,
+.fn-db-empty,
+.fn-db-error {
+  padding: 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text3, #94a3b8);
+  border: 1px dashed var(--border2, rgba(148, 163, 184, .25));
+  background: var(--surface2, rgba(255, 255, 255, .035));
+}
+
+.fn-db-error {
+  color: var(--danger, #ef4444);
+  border-style: solid;
+}
+
+.fn-db-more-row {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.fn-db-footer-note {
+  color: var(--text4, #64748b);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+
+/* Accordéon réutilisable des cartes Bases.
+   Cette règle est volontairement générique : elle sert à l'explorateur comme à Mes aliments,
+   sans design spécifique à une source alimentaire. */
+.fn-collapsible-panel {
+  overflow: hidden;
+}
+
+.fn-collapsible-panel > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fn-collapsible-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fn-collapsible-panel--database {
+  transition: border-color .18s ease, background .18s ease;
+}
+
+.fn-collapsible-panel--database:not([open]) {
+  background: var(--surface, rgba(255, 255, 255, .035));
+}
+
+.fn-collapsible-summary .fn-ui-title-row {
+  margin: 0;
+}
+
+.fn-collapsible-body {
+  display: grid;
+  gap: 14px;
+  padding-top: 14px;
+}
+
+.fn-collapsible-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--text3, #94a3b8);
+  background: var(--surface2, rgba(255, 255, 255, .06));
+  border: 1px solid var(--border2, rgba(148, 163, 184, .2));
+  transition: transform .18s ease;
+}
+
+.fn-collapsible-panel[open] .fn-collapsible-chevron {
+  transform: rotate(180deg);
+}
+
+.fn-collapsible-panel:not([open]) .fn-collapsible-body {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .fn-db-source summary,
+  .fn-db-explorer-intro {
+    align-items: stretch;
+  }
+
+  .fn-db-source summary,
+  .fn-db-result-row,
+  .fn-db-search-row {
+    grid-template-columns: 1fr;
+  }
+
+  .fn-db-source summary {
+    display: grid;
+  }
+
+  .fn-db-source-meta,
+  .fn-db-macros {
+    justify-content: flex-start;
+  }
+
+  .fn-db-result-name span:last-child {
+    white-space: normal;
+  }
+
+  .fn-db-clear {
+    width: 100%;
+  }
+}

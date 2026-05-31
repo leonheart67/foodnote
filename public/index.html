@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!--
+  FoodNote — document HTML principal.
+  Rôle : déclarer la structure des pages, la navigation, les feuilles de style et les scripts chargés par l’interface.
+  Gère : points d’ancrage UI, pages, modales, navigation et ordre de chargement frontend.
+  Ne doit pas gérer : logique métier longue, accès SQLite direct, imports CIQUAL/OpenFoodFacts ni calcul nutritionnel.
+-->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -17,8 +23,9 @@
 <script src="assets/js/02-theme-lab-runtime.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
   <link rel="stylesheet" href="assets/css/94-capture-workflow-core.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-capture-workflow="css">
   <link rel="stylesheet" href="assets/css/96-food-add-modal-controller.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="css">
-  <link rel="stylesheet" href="assets/css/99-food-add-search-results-core.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-search-results="css">
 <link rel="stylesheet" id="theme-css" href="assets/css/style-dark.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link rel="stylesheet" href="assets/css/72-database-explorer.css?v=foodnote_beta_0_22_179_database_explorer_20260531">
+<link rel="stylesheet" href="assets/css/73-notification-inline.css?v=foodnote_beta_0_22_179_notification_inline_20260531">
 </head>
 <body>
 <script>
@@ -115,9 +122,10 @@
       <i class="ti ti-chevron-down sb-chevron" id="chev-bdd" aria-hidden="true"></i>
     </div>
     <div class="sb-sub" id="sub-bdd">
+      <div class="sb-sub-item" onclick="showPageSection('bases','database-explorer-card',this);document.getElementById('database-explorer-card')?.setAttribute('open','')">Explorer</div>
       <div class="sb-sub-item" onclick="showPageSection('bases','ciqual-card',this)">CIQUAL</div>
       <div class="sb-sub-item" onclick="showPageSection('bases','off-card',this)">OpenFoodFacts</div>
-      <div class="sb-sub-item" onclick="showPageSection('bases','aliments-card',this)">Mes aliments</div>
+      <div class="sb-sub-item" onclick="showPageSection('bases','aliments-card',this);document.getElementById('aliments-card')?.setAttribute('open','')">Mes aliments</div>
       <div class="sb-sub-item" onclick="showPageSection('bases','unit-weights-card',this)">Poids par unité</div>
     </div>
 
@@ -137,10 +145,6 @@
 
     <div class="sb-item" onclick="showPage('profil',this)" id="nav-profil">
       <i class="ti ti-user" aria-hidden="true"></i> Mon profil
-    </div>
-
-    <div class="sb-item" onclick="showPage('ref',this)" id="nav-ref">
-      <i class="ti ti-book" aria-hidden="true"></i> Référence
     </div>
   </div>
 
@@ -242,6 +246,8 @@
       </div>
       <button type="button" class="journal-day-nav journal-day-nav-next" onclick="shiftJournalDate(1)" aria-label="Jour suivant">›</button>
     </div>
+
+    <section id="fn-notification-inline" class="fn-daily-status-panel" aria-live="polite" hidden></section>
 
     <div class="journal-floating-macro-card card fn-ui-surface fn-ui-surface-soft fn-orbit-nutrition-card fn-home-nutrition-panel" aria-label="Résumé nutrition du jour">
       <div class="fn-orbit-card-top fn-home-panel-head">
@@ -345,21 +351,6 @@
             <input type="hidden" id="db-selected-id">
             <div id="db-suggestions" class="db-suggestions"></div>
             <div id="db-selected-card" class="db-selected-card"></div>
-            <div class="quick-foods-card fn-ui-surface fn-ui-surface-soft quick-foods-drawer food-add-quick-panel" id="quick-foods-card" style="display:none">
-              <div class="quick-foods-head">
-                <div>
-                  <div class="quick-foods-title"><span class="quick-foods-icon">⚡</span> Mémoire rapide</div>
-                  <div class="quick-foods-sub">Choisis un aliment récent ou fréquent pour l’ajouter au repas sélectionné.</div>
-                </div>
-              </div>
-              <div class="quick-foods-tabs" role="tablist" aria-label="Mémoire rapide">
-                <button type="button" class="quick-tab active" id="quick-tab-recents" data-food-add-action="quick-panel" data-quick-panel="recents">⏱ Récents</button>
-                <button type="button" class="quick-tab" id="quick-tab-frequents" data-food-add-action="quick-panel" data-quick-panel="frequents">⭐ Fréquents</button>
-                <button type="button" class="quick-tab" id="quick-tab-hier" data-food-add-action="quick-panel" data-quick-panel="hier">↩ Hier</button>
-              </div>
-              <div id="quick-foods-actions" class="quick-foods-actions"></div>
-              <div id="quick-foods-list" class="quick-foods-list"></div>
-            </div>
           </div>
           <div class="food-add-actions">
             <button type="button" id="food-main-action-btn" data-food-add-action="main" class="btn-primary journal-add-btn">Ajouter</button>
@@ -505,7 +496,7 @@
   <details class="journal-advanced card fn-ui-surface journal-tile-card">
     <summary>
       <span class="fn-section-title fn-section-title-summary"><span class="fn-section-icon">📝</span><span>Ressenti et notes</span></span>
-      <small>Énergie, faim, question IA</small>
+      <small>Énergie, faim et notes</small>
     </summary>
     <div class="row2" style="margin-top:14px">
       <div class="field"><label>Énergie</label>
@@ -517,13 +508,6 @@
     </div>
     <div class="field"><label>Notes libres</label><textarea id="f-notes" placeholder="Sommeil, douleurs, humeur..."></textarea></div>
     <div class="field"><label>Notes libres alimentation</label><textarea id="f-extras" placeholder="Repas au restaurant, recette spéciale..."></textarea></div>
-    <div class="field" data-feature="ia">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <label style="margin:0">Question(s) pour l'IA</label>
-        <button onclick="genPrompt()" style="font-size:12px;padding:4px 10px;border-radius:6px">Estimer aliments libres ↗</button>
-      </div>
-      <textarea id="f-question" placeholder="Ex: Mes protéines sont-elles suffisantes ?"></textarea>
-    </div>
   </details>
   </div>
 
@@ -576,39 +560,6 @@
 
 <div id="page-historique" class="page"><div id="hist-list" class="fn-ui-page fn-ui-stack"></div></div>
 
-<div id="page-export" class="page">
-  <div id="export-advanced-root" class="fn-ui-page fn-ui-stack"></div>
-</div>
-
-<div id="page-ref" class="page">
-  <div class="card fn-ui-surface">
-    <div class="card-title fn-section-title fn-section-title-with-extra"><span class="fn-section-icon">👤</span><span>Profil</span> <span class="phase-badge">Phase 1 — Reverse dieting</span></div>
-    <div class="row3" style="margin-bottom:1rem">
-      <div class="macro-cell"><div class="macro-val">63 kg</div><div class="macro-lbl">poids de départ</div></div>
-      <div class="macro-cell"><div class="macro-val">2 200</div><div class="macro-lbl">kcal cible</div></div>
-      <div class="macro-cell"><div class="macro-val">120g</div><div class="macro-lbl">protéines min</div></div>
-    </div>
-    <p class="fn-ui-note">Homme · 1,71 m · objectif ventre sec/abdos · musculation 2-3x/sem · VTT 4-5x/sem 1h modéré</p>
-  </div>
-  <div class="card fn-ui-surface">
-    <div class="card-title fn-section-title"><span class="fn-section-icon">📋</span><span>Tableau de référence</span></div>
-    <div class="macro-ref fn-ui-table-wrap"><table class="fn-ui-table">
-      <thead><tr><th>Aliment</th><th class="num">Qté réf.</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th></tr></thead>
-      <tbody id="ref-table"></tbody>
-    </table></div>
-  </div>
-</div>
-
-<div id="page-bddalim" class="page">
-  <div class="card fn-ui-surface">
-    <div class="card-title fn-section-title"><span class="fn-section-icon">🍽</span><span>Base de données aliments</span></div>
-    <p class="fn-ui-note fn-ui-mb-lg">Tous les aliments sauvegardés (valeurs pour 100g). Cliquer sur ✎ pour modifier.</p>
-    <div class="macro-ref fn-ui-table-wrap"><table class="fn-ui-table">
-      <thead><tr><th>Nom</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th><th></th></tr></thead>
-      <tbody id="bdd-table-old"></tbody>
-    </table></div>
-  </div>
-</div>
 
 <div id="page-profil" class="page">
   <div class="fn-ui-page fn-ui-stack">
@@ -1001,30 +952,56 @@
       </section>
     </div>
 
-    <section class="fn-ui-panel fn-ui-panel-pad" id="aliments-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">📦</span>
-          <div>
-            <span class="fn-ui-kicker">SQLite</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Mes aliments / ingrédients</h2>
-            <p class="fn-ui-sub">Aliments enregistrés localement. Les corrections restent dans ta base SQLite.</p>
+
+    <details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database fn-collapsible-panel--explorer" id="database-explorer-card">
+      <summary class="fn-collapsible-summary">
+        <div class="fn-ui-title-row">
+          <div class="fn-ui-title-left">
+            <span class="fn-ui-icon" aria-hidden="true">🔎</span>
+            <div>
+              <span class="fn-ui-kicker">Exploration</span>
+              <h2 class="fn-ui-title fn-ui-title-inline">Explorer les bases alimentaires</h2>
+              <p class="fn-ui-sub">Starter, CIQUAL et OpenFoodFacts restent repliés par défaut. Ouvre seulement la source dont tu as besoin.</p>
+            </div>
           </div>
+          <span class="fn-ui-chip">Lecture seule</span>
+          <span class="fn-collapsible-chevron" aria-hidden="true">⌄</span>
         </div>
-        <span class="fn-ui-chip fn-ui-chip-kcal">Base locale</span>
+      </summary>
+      <div class="fn-collapsible-body">
+        <div id="database-explorer-root" class="fn-db-explorer-host">Chargement de l’explorateur…</div>
       </div>
-      <div class="fn-ui-actions">
-        <button type="button" class="fn-ui-button" onclick="restoreStarterAliments()">↺ Restaurer les ingrédients de base</button>
-        <button type="button" class="fn-ui-button" onclick="rebuildFoodsFromEntriesUI()">🧩 Récupérer depuis l’historique</button>
+    </details>
+
+    <details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database" id="aliments-card">
+      <summary class="fn-collapsible-summary">
+        <div class="fn-ui-title-row">
+          <div class="fn-ui-title-left">
+            <span class="fn-ui-icon" aria-hidden="true">📦</span>
+            <div>
+              <span class="fn-ui-kicker">SQLite</span>
+              <h2 class="fn-ui-title fn-ui-title-inline">Mes aliments / ingrédients</h2>
+              <p class="fn-ui-sub">Aliments enregistrés localement. Ouvre seulement si tu veux les consulter ou les corriger.</p>
+            </div>
+          </div>
+          <span class="fn-ui-chip fn-ui-chip-kcal">Base locale</span>
+          <span class="fn-collapsible-chevron" aria-hidden="true">⌄</span>
+        </div>
+      </summary>
+      <div class="fn-collapsible-body">
+        <div class="fn-ui-actions">
+          <button type="button" class="fn-ui-button" onclick="restoreStarterAliments()">↺ Restaurer les ingrédients de base</button>
+          <button type="button" class="fn-ui-button" onclick="rebuildFoodsFromEntriesUI()">🧩 Récupérer depuis l’historique</button>
+        </div>
+        <div id="bdd-recovery-note" class="fn-ui-muted"></div>
+        <div class="fn-ui-table-wrap">
+          <table class="fn-ui-table">
+            <thead><tr><th>Nom</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th><th></th></tr></thead>
+            <tbody id="bdd-table"></tbody>
+          </table>
+        </div>
       </div>
-      <div id="bdd-recovery-note" class="fn-ui-muted"></div>
-      <div class="fn-ui-table-wrap">
-        <table class="fn-ui-table">
-          <thead><tr><th>Nom</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th><th></th></tr></thead>
-          <tbody id="bdd-table"></tbody>
-        </table>
-      </div>
-    </section>
+    </details>
 
     <section class="fn-ui-panel fn-ui-panel-pad" id="unit-weights-card">
       <div class="fn-ui-title-row">
@@ -1324,15 +1301,17 @@ document.addEventListener('DOMContentLoaded', async function(){
 });
 </script>
 <script src="assets/js/05-ui-components.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/11-starter-foods.js?v=foodnote_beta_0_22_179_starter_foods_150_20260531"></script>
 <script src="assets/js/10-data.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/20-profile-state.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/30-nutrition-foods.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/40-ia-integrations.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/50-profile-phases-settings.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/60-navigation.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/60-navigation.js?v=foodnote_beta_0_22_179_remove_reference_page_20260531"></script>
 <script src="assets/js/61-mobile-bottom-nav.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/62-theme-lab.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_22_179_remove_reference_page_20260531"></script>
+<script src="assets/js/72-database-explorer.js?v=foodnote_beta_0_22_179_database_explorer_20260531"></script>
 <script src="assets/js/80-stats-onboarding-init.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/81-stats-unified.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/82-recap.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
@@ -1342,7 +1321,6 @@ document.addEventListener('DOMContentLoaded', async function(){
 // Le contrôleur possède le cycle de vie popup ET les actions principales du modal.
 window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
 </script>
-<script src="assets/js/93-food-add-tools.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 <script src="assets/js/95-food-add-clean.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
 
 <script>
@@ -1390,7 +1368,6 @@ window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
 <script src="assets/js/96-food-add-modal-controller.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="js"></script>
 <script src="assets/js/97-food-add-domain-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-domain="js"></script>
 <script src="assets/js/98-food-capture-flows-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-capture-flows="js"></script>
-<script src="assets/js/99-food-add-search-results-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-search-results="js"></script>
 <script src="assets/js/101-food-add-hardening-checkpoint.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-hardening="js"></script>
 <script src="assets/js/00-foodnote-smoke-tests.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-smoke-tests="js"></script>
 <script>
@@ -1411,7 +1388,7 @@ window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
         modal: !!window.FoodNoteFoodAddModalController,
         domain: !!window.FoodNoteFoodAddDomain,
         capture: !!window.FoodNoteFoodCaptureFlows,
-        searchResults: !!window.FoodNoteFoodAddSearchResults,
+        searchResults: 'disabled_legacy_module',
         ux: !!window.FoodNoteFoodAddModalUX
       },
       advice: 'Recharge forcée navigateur/WebView, vérifier que public/assets/js/101-food-add-hardening-checkpoint.js existe et que index.html correspond bien au ZIP installé.'

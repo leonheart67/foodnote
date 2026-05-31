@@ -1,3 +1,9 @@
+/*
+ * FoodNote — navigation principale.
+ * Rôle : piloter le menu latéral, l’affichage des pages et les rendus déclenchés au changement de page.
+ * Gère : sidebar, sous-menus, titres de page, activation des pages et appels de rendu UI.
+ * Ne doit pas gérer : données nutritionnelles, stockage SQLite, imports CIQUAL/OpenFoodFacts ni logique métier des pages.
+ */
 function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sb-overlay');
@@ -92,10 +98,10 @@ function showPage(id, tab) {
   targetPage.classList.add('active');
 
   // Mettre à jour le titre de la page
-  const titles = { journal:'Saisie du jour', sport:'Sport & activité', historique:'Historique', export:'Export avancé',
-    ref:'Référence', bddalim:'Mes aliments', donnees:'Données', stats:'Statistiques', objectif:'Objectif',
+  const titles = { journal:'Saisie du jour', sport:'Sport & activité', historique:'Historique',
+    donnees:'Données', stats:'Statistiques', objectif:'Objectif',
     profil:'Mon profil', ia:'IA — Groq', bases:'Bases de données', recap:'Récap', themelab:'Laboratoire couleurs', recettes:'Recettes', onboarding:'Configuration' };
-  const titleIcons = { journal:'🍽', sport:'🚴', historique:'🕘', export:'📤', ref:'📚', bddalim:'🥫', donnees:'📁', stats:'📊', objectif:'🎯', profil:'👤', ia:'🤖', bases:'🗄', recap:'✅', themelab:'🎨', recettes:'🍲', onboarding:'⚙️' };
+  const titleIcons = { journal:'🍽', sport:'🚴', historique:'🕘', donnees:'📁', stats:'📊', objectif:'🎯', profil:'👤', ia:'🤖', bases:'🗄', recap:'✅', themelab:'🎨', recettes:'🍲', onboarding:'⚙️' };
   const parentOf = { ia:'nav-ia', bases:'nav-bases', donnees:'nav-donnees' };
   const parentId = parentOf[id];
   if (parentId) { const parentNav = document.getElementById(parentId); if (parentNav) parentNav.classList.add('active'); }
@@ -112,19 +118,16 @@ function showPage(id, tab) {
   // Fermer le sidebar sur mobile
   if (window.innerWidth <= 700) closeSidebar();
 
-  if ((id === 'historique' || id === 'stats' || id === 'recap' || id === 'export' || id === 'donnees') && typeof loadEntriesFullNative === 'function') {
+  if ((id === 'historique' || id === 'stats' || id === 'recap' || id === 'donnees') && typeof loadEntriesFullNative === 'function') {
     loadEntriesFullNative().then(() => {
       if (id === 'historique' && typeof renderHistorique === 'function') renderHistorique();
       if (id === 'stats' && typeof renderStats === 'function') renderStats();
       if (id === 'recap' && typeof renderRecap === 'function') renderRecap();
-      if (id === 'export' && typeof renderExportSelect === 'function') renderExportSelect();
       if (id === 'donnees' && typeof renderDonnees === 'function') renderDonnees();
     }).catch(e => console.warn('[FoodNote] historique complet non chargé', e));
   }
   if (id === 'historique' && typeof renderHistorique === 'function') renderHistorique();
-  if (id === 'export' && typeof renderExportSelect === 'function') renderExportSelect();
-  if (id === 'ref' && typeof renderRef === 'function') renderRef();
-  if ((id === 'bddalim' || id === 'bases') && typeof renderBDD === 'function') renderBDD();
+  if (id === 'bases' && typeof renderBDD === 'function') renderBDD();
   if (id === 'donnees' && typeof renderDonnees === 'function') renderDonnees();
   if (id === 'bases') {
     if (typeof checkOFFStatus === 'function') checkOFFStatus();

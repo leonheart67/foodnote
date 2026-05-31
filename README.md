@@ -1,391 +1,168 @@
-#  <img src="docs/logo-icon.png" width="42" alt="FoodNote logo"> FoodNote
+# FoodNote beta 0.22.179
 
-![FoodNote aperçu](docs/foodnote-readme-fr.png)
 
-**Application web self-hosted de suivi alimentaire avec SQLite, CIQUAL, OpenFoodFacts et IA optionnelle.**
+FoodNote est une application web self-hosted de suivi alimentaire, pensée pour rester simple côté utilisateur tout en gardant les données en local.
 
-![License: AGPL-3.0-or-later](https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED.svg)
-![Node.js](https://img.shields.io/badge/Node.js-backend-339933.svg)
-![Status](https://img.shields.io/badge/status-beta-orange.svg)
+> État du projet : **bêta active**. L'application fonctionne, mais le code est encore en nettoyage et certaines zones restent expérimentales.
 
-FoodNote est une application de suivi nutritionnel pensée pour un usage personnel, local et self-hosted.
+## Objectif
 
-L’objectif : garder une interface simple pour suivre ses repas au quotidien, tout en utilisant des bases nutritionnelles sérieuses comme **CIQUAL** et **OpenFoodFacts**, avec une aide IA optionnelle.
+FoodNote sert à suivre une journée alimentaire : repas, aliments, poids, calories, macronutriments, historique, statistiques et imports nutritionnels.
 
-> ⚠️ FoodNote est en bêta active.  
-> Le projet fonctionne, mais certaines parties sont encore en stabilisation et nettoyage.
+Le projet a été créé pour un usage personnel, avec une approche pragmatique : SQLite comme source de vérité, Docker pour le déploiement, interface web légère et options avancées cachées autant que possible.
 
-> ⚕️ FoodNote n’est pas un dispositif médical.  
-> Les valeurs nutritionnelles, estimations IA et calculs doivent être considérés comme des aides au suivi personnel.
+## Fonctionnalités principales
 
---- 
+- Journal alimentaire par jour et par repas.
+- Ajout manuel d'aliments.
+- Recherche dans la base nutritionnelle locale.
+- Import CIQUAL / OpenFoodFacts.
+- Historique, export et récapitulatif.
+- Statistiques nutritionnelles.
+- OCR pour certains flux photo / tableau nutritionnel.
+- IA texte optionnelle via Groq, si une clé API est fournie.
+- Stockage local SQLite côté serveur.
+- Déploiement Docker / Docker Compose.
 
-## ✨ Fonctionnalités
+## Limites actuelles
 
-- 📊 **Suivi quotidien** — calories, protéines, glucides, lipides
-- 🍽️ **Journal par repas** — petit-déjeuner, déjeuner, dîner, collations
-- ⚖️ **Quantités personnalisées** — ajout, modification, déplacement entre repas
-- 🔍 **Recherche alimentaire** — CIQUAL, OpenFoodFacts et base personnelle
-- 📦 **OpenFoodFacts** — produits industriels et codes-barres
-- 🇫🇷 **CIQUAL / Anses** — base nutritionnelle française de référence
-- 🤖 **IA optionnelle** — estimation de repas via Groq
-- 🚴 **Sport** — suivi des dépenses et bilan net
-- 📈 **Stats & phases** — suivi de progression et objectifs nutritionnels
-- 🌙 **Thème clair / sombre**
-- 💾 **SQLite local** — vos données restent chez vous
-- 🐳 **Docker ready**
-- 📱 **Utilisable sur mobile** via navigateur / WebView
+FoodNote n'est pas un outil médical. Les valeurs nutritionnelles peuvent être approximatives, surtout pour les estimations IA, les plats préparés, les restaurants et les portions visuelles.
 
----
+Certaines sections sont encore en bêta : capture photo, OCR, IA, recette et nettoyage de vieux modules. Le projet assume cette transparence.
 
-## 🚀 Installation rapide
-
-### Prérequis
-
-- Docker
-- Docker Compose
-- Git
-
-### 1. Cloner le dépôt
-
-```bash
-git clone https://github.com/leonheart67/foodnote.git
-cd foodnote
-```
-
-### 2. Créer le fichier `.env`
-
-```bash
-cp .env.example .env
-```
-
-Exemple minimal :
-
-```env
-PORT=3000
-DATA_DIR=/data
-PUBLIC_DIR=/app/public
-
-FOODNOTE_APP_DIR=.
-FOODNOTE_DATA_DIR=./database
-
-GROQ_API_KEY=
-FOODNOTE_ALLOW_UI_SECRET_STORAGE=0
-
-FOODNOTE_CIQUAL_AUTO_DOWNLOAD=0
-OFF_IMPORT_LIMIT=0
-```
-
-### 3. Lancer FoodNote
-
-```bash
-docker compose up -d
-```
-
-Accès :
+## Structure du projet
 
 ```text
-http://localhost:3000
-```
-
----
-
-## 📁 Structure du projet
-
-```text
-foodnote/
-├── server.js              # Backend Node.js + API
+.
+├── server.js
 ├── package.json
 ├── Dockerfile
 ├── docker-compose.yml
-├── start.sh               # Script de démarrage conteneur
-├── update_off.sh          # Mise à jour OpenFoodFacts
-├── import_off.py          # Import OpenFoodFacts
-├── import_ciqual.py       # Import CIQUAL / Anses
-├── download_ciqual.py     # Téléchargement optionnel CIQUAL
+├── start.sh
+├── update_off.sh
+├── import_ciqual.py
+├── import_off.py
+├── import_off.js
+├── download_ciqual.py
 ├── public/
-│   ├── index.html         # Application web
+│   ├── index.html
+│   ├── vendor/
 │   └── assets/
 │       ├── css/
+│       ├── img/
 │       └── js/
 └── scripts/
     └── foodnote-static-check.js
 ```
 
-La structure est volontairement simple :
+Le serveur Node est à la racine, le frontend est dans `public/`, et les scripts d'import restent à la racine pour simplifier Docker et le self-hosting.
 
-- `server.js` reste à la racine ;
-- les scripts d’import restent à la racine ;
-- le frontend est dans `public/` ;
-- les contrôles projet sont dans `scripts/`.
+## Démarrage rapide avec Docker Compose
 
----
-
-## 🗄️ Bases de données nutritionnelles
-
-| Source | Usage | Qualité | Import |
-|---|---|---:|---|
-| **CIQUAL / Anses** | aliments bruts et références nutritionnelles françaises | ⭐⭐⭐ | manuel ou optionnel |
-| **OpenFoodFacts** | produits industriels, marques, codes-barres | ⭐⭐ | manuel / script / interface |
-| **BDD personnelle** | aliments et recettes utilisateur | ⭐⭐⭐ | via l’app |
-
----
-
-## 🇫🇷 CIQUAL
-
-FoodNote peut utiliser les fichiers officiels CIQUAL de l’Anses.
-
-Par défaut, le téléchargement automatique peut être désactivé :
-
-```env
-FOODNOTE_CIQUAL_AUTO_DOWNLOAD=0
-```
-
-Cela évite qu’un conteneur télécharge automatiquement des données externes au premier démarrage.
-
----
-
-## 📦 OpenFoodFacts
-
-OpenFoodFacts est utilisé pour :
-
-- les produits industriels ;
-- les codes-barres ;
-- les données nutritionnelles de produits emballés.
-
-La base OpenFoodFacts peut être volumineuse.  
-L’import est donc volontairement manuel ou déclenché depuis l’interface / les scripts.
-
-```env
-OFF_IMPORT_LIMIT=0
-```
-
-`0` signifie : pas de limite d’import.
-
----
-
-## 🤖 IA / Groq
-
-FoodNote peut utiliser une clé API Groq pour certaines fonctions IA.
-
-Deux modes sont possibles.
-
-### 1. Mode serveur recommandé
-
-La clé est configurée côté serveur, dans `.env` ou dans les variables Docker :
-
-```env
-GROQ_API_KEY=your_groq_api_key_here
-FOODNOTE_ALLOW_UI_SECRET_STORAGE=0
-```
-
-Dans ce mode, l’interface web ne permet pas d’enregistrer une clé IA.
-
-C’est le mode recommandé pour :
-
-- une installation publique ;
-- une installation partagée ;
-- une instance exposée ;
-- un dépôt GitHub public.
-
-### 2. Mode interface utilisateur
-
-Pour un usage personnel self-hosted, il est possible d’autoriser la saisie de la clé Groq depuis l’interface FoodNote :
-
-```env
-FOODNOTE_ALLOW_UI_SECRET_STORAGE=1
-```
-
-Dans ce mode, la clé peut être saisie dans l’interface et enregistrée côté serveur dans SQLite.
-
-⚠️ Ce mode doit être utilisé uniquement sur une instance personnelle et maîtrisée.
-
-Ne publiez jamais :
-
-- votre fichier `.env` ;
-- votre base SQLite ;
-- une capture d’écran contenant une clé API ;
-- une clé API dans une issue GitHub.
-
----
-
-## 📱 Mobile / Android
-
-FoodNote est utilisable depuis un navigateur mobile.
-
-Il peut aussi être intégré dans une application Android WebView.  
-L’APK Android n’est pas fourni comme version stable pour le moment.
-
----
-
-## 🧪 Tests
-
-FoodNote contient un contrôle statique du projet :
+Copiez l'exemple d'environnement :
 
 ```bash
-npm test
+cp .env.example .env
 ```
 
-Ce test vérifie notamment :
+Puis lancez :
 
-- la présence des fichiers importants ;
-- les références JS/CSS dans `index.html` ;
-- certains contrats entre modules ;
-- des garde-fous sur les flux critiques ;
-- la cohérence minimale avant publication.
+```bash
+docker compose up -d --build
+```
 
----
-
-## 🔐 Sécurité
-
-FoodNote est conçu pour un usage self-hosted.
-
-Recommandations :
-
-- ne publiez jamais `.env` ;
-- ne publiez jamais votre base SQLite ;
-- ne mettez jamais de clé API dans le frontend ;
-- gardez `FOODNOTE_ALLOW_UI_SECRET_STORAGE=0` sur une instance exposée ;
-- utilisez un reverse proxy sécurisé si l’app est accessible depuis Internet ;
-- sauvegardez régulièrement le dossier `database/`.
-
----
-
-## 💾 Sauvegarde
-
-Les données principales sont stockées côté serveur, dans SQLite.
-
-Sauvegardez régulièrement :
+Par défaut, l'application écoute le port `8085` côté hôte :
 
 ```text
-database/
+http://localhost:8085
 ```
 
-Selon votre configuration Docker, ce dossier peut être monté avec :
+Les données persistantes sont stockées dans `./database` par défaut.
+
+Pour un déploiement Dockge / Proxmox avec un chemin fixe, adaptez `.env` :
 
 ```env
-FOODNOTE_DATA_DIR=./database
+FOODNOTE_APP_DIR=/mnt/Docker/data/nginx
+FOODNOTE_DATA_DIR=/mnt/Docker/data/nginx/database
 ```
 
-ou avec un chemin serveur personnalisé.
+## Variables utiles
 
----
+```env
+PORT=3000
+DATA_DIR=/data
+PUBLIC_DIR=/app/public
+GROQ_API_KEY=
+FOODNOTE_ALLOW_UI_SECRET_STORAGE=0
+FOODNOTE_CIQUAL_AUTO_DOWNLOAD=0
+FOODNOTE_CIQUAL_AUTO_IMPORT=1
+```
 
-## 🚫 Données à ne pas publier
+Par sécurité, la clé Groq doit être fournie via `.env` ou Docker, pas commitée dans le dépôt.
 
-Avant de pousser sur GitHub, vérifiez que ces fichiers ne sont pas suivis par Git :
+## CIQUAL et OpenFoodFacts
+
+FoodNote peut utiliser des données issues de :
+
+- CIQUAL / Anses pour les données nutritionnelles françaises.
+- OpenFoodFacts pour les produits et codes-barres.
+
+Les fichiers lourds ou générés ne sont pas destinés à être commités dans GitHub. Placez-les localement ou laissez FoodNote/import scripts les reconstruire selon votre configuration.
+
+Exemples de fichiers exclus :
 
 ```text
-.env
-database/
-data/
-*.db
-*.sqlite
-*.sqlite3
-node_modules/
-*.zip
-*.log
 alim.xml
 compo.xml
 grp.xml
 ciqual_data.json
 openfoodfacts*.json
 openfoodfacts*.csv
-openfoodfacts*.csv.gz
+*.sqlite
+*.db
 ```
 
-Ces fichiers peuvent contenir :
+## Tests / contrôles statiques
 
-- des données personnelles ;
-- des exports ;
-- des clés API ;
-- des bases nutritionnelles volumineuses ;
-- des journaux alimentaires.
+FoodNote fournit un contrôle statique maison :
 
----
+```bash
+npm test
+```
 
-## 🗺️ Roadmap
+ou :
 
-Idées prévues ou envisagées :
+```bash
+npm run check
+```
 
-- nettoyage progressif du code mort ;
-- amélioration du thème sombre ;
-- simplification des flux d’ajout ;
-- meilleure séparation IA texte / OCR / photo ;
-- amélioration mobile ;
-- documentation d’installation plus détaillée ;
-- meilleure gestion CIQUAL / OpenFoodFacts ;
-- statistiques plus lisibles ;
-- sauvegarde / restauration simplifiée ;
-- tests automatisés plus complets.
+Ce test vérifie notamment :
 
----
+- syntaxe JS ;
+- cohérence des références chargées par `index.html` ;
+- présence des assets critiques ;
+- garde-fous sur certains flux sensibles ;
+- absence de métadonnées incohérentes connues.
 
-## 🤝 Contribuer
+## Sécurité et confidentialité
 
-Les contributions sont bienvenues, mais FoodNote est encore en bêta.
+Les données alimentaires, profils, historiques, clés API et bases SQLite doivent rester locales.
 
-Avant une grosse modification, ouvrez idéalement une issue pour en discuter.
-
-Contributions utiles :
-
-- corrections de bugs ;
-- amélioration du README ;
-- amélioration UI/UX ;
-- nettoyage de code ;
-- tests ;
-- documentation Docker ;
-- corrections d’installation.
-
-En proposant une contribution, vous acceptez qu’elle soit distribuée sous la même licence que le projet :
+Ne publiez jamais :
 
 ```text
-GNU AGPL-3.0-or-later
+.env
+database/
+*.db
+*.sqlite
+exports personnels
+logs
 ```
 
----
+## Licence
 
-## 📚 Sources de données
+Code publié sous licence MIT. Les bases de données nutritionnelles externes gardent leurs propres licences et conditions d'attribution.
 
-### CIQUAL / Anses
+## Avertissement
 
-FoodNote peut utiliser la table de composition nutritionnelle des aliments CIQUAL publiée par l’Anses.
-
-Citation recommandée :
-
-```text
-Anses. Table de composition nutritionnelle des aliments Ciqual.
-```
-
-### OpenFoodFacts
-
-FoodNote peut utiliser les données OpenFoodFacts pour les produits alimentaires.
-
-OpenFoodFacts possède ses propres licences et conditions d’utilisation.  
-Consultez la documentation officielle OpenFoodFacts pour les détails d’attribution.
-
----
-
-## 📄 Licence
-
-FoodNote est distribué sous licence :
-
-```text
-GNU Affero General Public License v3.0 or later
-AGPL-3.0-or-later
-```
-
-Vous pouvez utiliser, modifier et redistribuer FoodNote, y compris dans un contexte professionnel, à condition de respecter les termes de l’AGPL.
-
-Si vous modifiez FoodNote et le mettez à disposition d’utilisateurs via un réseau ou un service hébergé, vous devez rendre disponible le code source correspondant de cette version modifiée.
-
-Pour une utilisation commerciale avec des conditions différentes de l’AGPL, contactez l’auteur du projet.
-
----
-
-## ⭐ Support
-
-Si FoodNote vous est utile, une ⭐ sur GitHub est toujours appréciée.
-
-Les retours de test, rapports de bugs et suggestions sont les bienvenus.
+FoodNote est un projet personnel en bêta. Les calculs nutritionnels sont fournis à titre indicatif et ne remplacent pas l'avis d'un professionnel de santé.

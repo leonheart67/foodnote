@@ -1,11 +1,14 @@
-/* FoodNote beta 0.22.155 — SMOKE_TESTS
- * Harnais passif : ne lance aucun test automatiquement et ne modifie pas l'état de l'application.
+/*
+ * FoodNote — smoke tests manuels.
+ * Rôle : fournir une checklist console après installation d'un patch.
+ * Gère : contrôles passifs de présence des modules et des surfaces UI principales.
+ * Ne doit pas gérer : tests automatiques au démarrage, données SQLite, import, ni modification d'état utilisateur.
  * Utilisation console : FoodNoteSmokeTest.run()
  */
 (function FoodNoteSmokeTests(){
   'use strict';
 
-  const VERSION = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const VERSION = 'foodnote_beta_0_22_179_integrated_search_health_20260531';
 
   function check(label, ok, detail) {
     return { label, ok: !!ok, detail: detail || '' };
@@ -33,7 +36,7 @@
       check('Contrôleur modal ajouter', !!window.FoodNoteFoodAddModalController),
       check('Domaine ajout aliment', !!window.FoodNoteFoodAddDomain),
       check('Flux capture popup', !!window.FoodNoteFoodCaptureFlows),
-      check('Recherche résultats', !!window.FoodNoteFoodAddSearchResults),
+      check('Recherche aliments intégrée', selector('#db-search') && selector('#db-suggestions') && hasFn('handleDBSearchInput') && hasFn('pickDBSuggestion')),
       check('Hardening ajout', !!window.FoodNoteFoodAddHardening),
       check('Refresh journal centralisé', hasFn('foodnoteRefreshJournalMutationViews')),
       check('Refresh stats centralisé', hasFn('refreshFoodnoteStatsAfterJournalMutation')),

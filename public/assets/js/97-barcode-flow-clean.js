@@ -1,8 +1,9 @@
-/* FoodNote 0.18.1 — module code-barres : retour vers la préparation d'ajout
-   Problème : après un scan code-barres depuis Estimer > Lire une étiquette,
-   le produit était bien trouvé/rempli, mais le popup restait en mode caméra/estimation.
-   Le bloc quantité + repas + bouton Ajouter restait donc masqué.
-*/
+/*
+ * FoodNote — flux code-barres.
+ * Rôle : gérer le retour propre entre scan code-barres et préparation d’ajout.
+ * Gère : états UI du scan, remplissage produit et retour vers quantité/repas/ajout.
+ * Ne doit pas gérer : moteur nutritionnel, thèmes globaux, import CIQUAL/OpenFoodFacts ni stockage SQLite direct.
+ */
 (function(){
   const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
   const $ = (id) => document.getElementById(id);
@@ -30,8 +31,7 @@
         display:block!important;
       }
       body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-inline-filters,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-suggestions,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .quick-foods-card{
+      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-suggestions{
         display:none!important;
       }
       .fn-barcode-ready-note{
@@ -85,7 +85,7 @@
     });
 
     modal.classList.add('is-open', 'fn-barcode-ready', 'food-intent-search');
-    modal.classList.remove('food-intent-estimate', 'food-intent-recipes', 'food-scan-submodal-open', 'food-add-ai-mode', 'food-add-quick-mode', 'food-estimate-result-active', 'fn-add-estimate-result');
+    modal.classList.remove('food-intent-estimate', 'food-intent-recipes', 'food-scan-submodal-open', 'food-add-ai-mode', 'food-estimate-result-active', 'fn-add-estimate-result');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.remove('foodnote-camera-view-open', 'barcode-modal-open');
 
@@ -113,9 +113,6 @@
 
     const suggestions = $('db-suggestions');
     if (suggestions) { suggestions.classList.remove('visible'); suggestions.style.setProperty('display', 'none', 'important'); }
-
-    const quick = $('quick-foods-card');
-    if (quick) quick.style.setProperty('display', 'none', 'important');
 
     const card = $('db-selected-card');
     if (card && card.innerHTML.trim()) {

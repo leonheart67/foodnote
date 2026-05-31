@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-"""Import CIQUAL XML vers /data/ciqual_data.json et /data/off.db.
+"""FoodNote — import CIQUAL local.
 
-Entrées attendues (dans DATA_DIR=/data, /data ou le dossier courant) :
-- alim.xml  : liste des aliments
-- compo.xml : compositions nutritionnelles
-- grp.xml   : groupes alimentaires (optionnel)
-- const.xml : constituants/nutriments (optionnel, améliore la détection des codes)
+Rôle : importer les XML CIQUAL présents dans DATA_DIR vers ciqual_data.json et la table ciqual de off.db.
+Gère : parsing XML, mapping des constituants via const.xml, nettoyage des valeurs aberrantes, écriture JSON/SQLite.
+Ne doit pas gérer : téléchargement réseau, routes HTTP, affichage frontend, ni mélange avec OpenFoodFacts.
 
-Le script est volontairement tolérant pour accepter les noms officiels ANSES
-renommés en alim.xml / compo.xml / grp.xml.
+Entrées attendues : alim.xml et compo.xml obligatoires ; grp.xml et const.xml recommandés.
 """
 import argparse
 import json

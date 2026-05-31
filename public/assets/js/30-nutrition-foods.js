@@ -1,3 +1,11 @@
+/*
+ * FoodNote — moteur nutrition et aliments du journal.
+ * Rôle : calculer les macros, gérer les listes d'aliments affichées dans le Journal,
+ *        les lignes repas, les unités, l'OCR nutritionnel et les passerelles historiques encore nécessaires.
+ * Gère : calculs /100g, quantités, rendu des lignes alimentaires, validation nutritionnelle côté interface.
+ * Ne doit pas gérer : navigation générale, stockage SQLite direct, import CIQUAL/OpenFoodFacts,
+ *                    ni orchestration globale du popup Ajouter quand un module dédié existe.
+ */
 function getMacros(a, qty) {
   // Invariant moteur : un calcul nutritionnel ne doit jamais planter si une ligne UI
   // vient d'être supprimée ou si un handler DOM arrive en retard. Une ligne absente
@@ -1510,6 +1518,7 @@ function createRow(a, idx, isCustom, hidden) {
   const qtyTitle = (Number(a.poidsUnite)||0)>0 ? 'Quantité : l’unité est un raccourci, le calcul se fait en grammes' : 'Quantité réelle en grammes';
 
   row.innerHTML = `
+    <div class="aliment-check"><span class="chk-mark">✓</span></div>
     <div class="food-drag-handle" title="Glisser vers un autre repas" aria-label="Glisser vers un autre repas">⋮⋮</div>
 
     <div class="food-compact-info">
@@ -1542,8 +1551,10 @@ function createRow(a, idx, isCustom, hidden) {
       <button class="food-mini-btn off" onclick="event.stopPropagation();toggleOFFSearch(${idx})" title="Rechercher dans OpenFoodFacts"><span class="btn-ico">🛒</span><span class="btn-label">OpenFoodFacts</span></button>
     </div>
   `;
-  // Sécurité journal : les lignes aliment ne sont plus cochables.
-  // Un clic sur la ligne ne doit plus ajouter/supprimer un aliment ; la suppression passe uniquement par la croix.
+  row.addEventListener('click', () => {
+    const currentIdx = foodnoteResolveFoodIndexFromRow(row, idx, 'row-click');
+    if (currentIdx >= 0) toggleRow(currentIdx);
+  });
   foodnoteSetupMealDragForRow(row, idx);
   container.appendChild(row);
 
@@ -2142,7 +2153,6 @@ function foodnoteRefreshJournalMutationViews(reason = 'mutation', options = {}) 
     journalCarousel: false,
     sportCarousel: false,
     sportSummary: false,
-    quickFoods: false,
     phaseMini: false,
     notification: false,
     dashboard: false,
@@ -2157,7 +2167,6 @@ function foodnoteRefreshJournalMutationViews(reason = 'mutation', options = {}) 
   if (opts.journalCarousel) foodnoteSafeViewCall('renderJournalDayCarousel', window.renderJournalDayCarousel);
   if (opts.sportCarousel) foodnoteSafeViewCall('renderSportDayCarousel', window.renderSportDayCarousel);
   if (opts.phaseMini) foodnoteSafeViewCall('renderJournalPhaseMini', window.renderJournalPhaseMini);
-  if (opts.quickFoods) foodnoteSafeViewCall('renderQuickFoods', window.renderQuickFoods);
   if (opts.notification) foodnoteSafeViewCall('renderFoodnoteNotificationBadge', window.renderFoodnoteNotificationBadge);
   if (opts.dashboard) foodnoteSafeViewCall('renderJournalDashboardBadges', window.renderJournalDashboardBadges);
   if (opts.recap) refreshFoodnoteRecapAfterJournalMutation();
@@ -2372,9 +2381,10 @@ function toggleRow(i) {
   if (idx < 0) return;
   const currentRow = document.getElementById('row-' + idx) || row;
   if (selected.has(idx)) {
-    // Sécurité journal : une ligne déjà présente ne se supprime plus par toggle/clic.
-    // La seule suppression volontaire passe par le bouton ✕, avec confirmation.
-    return false;
+    // Moteur 0.22.9 : désélection d'une ligne repas = suppression atomique de la ligne,
+    // pas POST global de toute la journée. Le garde-fou 409 reste réservé aux vrais remplacements.
+    deleteFoodLineCanonical(idx, { confirm:false, source:'toggle-remove' });
+    return;
   }
 
   selected.add(idx);
@@ -2969,7 +2979,6 @@ function buildLists(options = {}) {
   initMealToggle();
   if (!light) {
     renderMealGrouping();
-    renderQuickFoods();
     updateMacros();
   }
   refreshDBSelect();
@@ -3588,122 +3597,9 @@ function addFoodFromHistoryItem(item) {
   });
 }
 
-function getYesterdayEntry() {
-  const today = document.getElementById('f-date')?.value || new Date().toISOString().slice(0,10);
-  return (getEntries ? getEntries() : [])
-    .filter(e => e.date && e.date < today && Array.isArray(e.aliments) && e.aliments.length)
-    .sort((a,b) => b.date.localeCompare(a.date))[0] || null;
-}
 
-function reuseYesterdayFoods() {
-  const e = getYesterdayEntry();
-  if (!e || !Array.isArray(e.aliments)) return;
-  e.aliments.forEach(addFoodFromHistoryItem);
-  updateMacros();
-}
-
-function getFrequentFoods(limit = 8) {
-  const counts = new Map();
-  const entries = (getEntries ? getEntries() : []).filter(e => Array.isArray(e.aliments)).slice(0, 60);
-  entries.forEach(e => {
-    e.aliments.forEach(a => {
-      if (!a || !a.nom) return;
-      const key = normalizeSearchText(a.nom);
-      const cur = counts.get(key) || { item:a, count:0, lastDate:e.date || '' };
-      cur.count += 1;
-      if ((e.date || '') > (cur.lastDate || '')) { cur.item = a; cur.lastDate = e.date; }
-      counts.set(key, cur);
-    });
-  });
-  return Array.from(counts.values()).sort((a,b) => b.count - a.count || b.lastDate.localeCompare(a.lastDate)).slice(0, limit);
-}
-
-let quickFoodsPanel = 'recents';
-let quickFoodsOpen = false;
-
-function getRecentFoods(limit = 10) {
-  const seen = new Set();
-  const out = [];
-  const entries = (getEntries ? getEntries() : []).filter(e => Array.isArray(e.aliments)).slice(0, 30);
-  entries.forEach(e => {
-    e.aliments.forEach(a => {
-      if (!a || !a.nom) return;
-      const key = normalizeSearchText(a.nom + '|' + (a.qty || '') + '|' + (a.unite || 'g'));
-      if (seen.has(key)) return;
-      seen.add(key);
-      out.push({ item:a, lastDate:e.date || '' });
-    });
-  });
-  return out.sort((a,b) => b.lastDate.localeCompare(a.lastDate)).slice(0, limit);
-}
-
-
-function toggleQuickFoodsDrawer(force) {
-  quickFoodsOpen = typeof force === 'boolean' ? force : !quickFoodsOpen;
-  renderQuickFoods();
-}
-
-function setQuickFoodsPanel(panel) {
-  quickFoodsPanel = panel || 'recents';
-  quickFoodsOpen = true;
-  renderQuickFoods();
-}
-
-function foodnoteEncodeActionPayload(value) {
-  try { return encodeURIComponent(JSON.stringify(value || {})); }
-  catch(e) { return ''; }
-}
-
-function renderQuickFoodChip(a, extra = '') {
-  const item = normalizeHistoryFoodItemForReuse(a || {});
-  const qty = item.qty || 100;
-  const macros = { kcal:item.kcal, prot:item.prot, gluc:item.gluc, lip:item.lip };
-  const macroLine = (item.kcal != null || item.prot != null || item.gluc != null || item.lip != null)
-    ? `<span class="chip-macros"><span class="macro-kcal">🔥 ${item.kcal ?? '?'} </span><span class="macro-prot">🍖 ${item.prot ?? '?'}g</span><span class="macro-gluc">🍞 ${item.gluc ?? '?'}g</span><span class="macro-lip">🥑 ${item.lip ?? '?'}g</span></span>`
-    : '';
-  const payload = foodnoteEncodeActionPayload(item);
-  return `<button class="quick-food-chip" type="button" data-food-add-action="history-add" data-history-food="${payload}" title="Ajouter ${escapeHtml(item.nom)}">
-    <span class="chip-main"><span>${escapeHtml(item.nom)}</span><small>${formatFoodQty(item, qty)}${extra ? ' · ' + escapeHtml(extra) : ''}</small>${macroLine}</span>
-  </button>`;
-}
-
-function renderQuickFoods() {
-  const launcher = document.getElementById('quick-foods-launch');
-  const card = document.getElementById('quick-foods-card');
-  const actions = document.getElementById('quick-foods-actions');
-  const list = document.getElementById('quick-foods-list');
-  const chevron = document.getElementById('quick-foods-chevron');
-  if (!card || !actions || !list || typeof getEntries !== 'function') return;
-
-  const yesterday = getYesterdayEntry();
-  const recent = getRecentFoods(10);
-  const frequent = getFrequentFoods(10);
-  const hasQuickFoods = !!yesterday || recent.length || frequent.length;
-  if (launcher) launcher.style.display = hasQuickFoods ? 'block' : 'none';
-  if (chevron) chevron.textContent = quickFoodsOpen ? '▴' : '▾';
-  if (!hasQuickFoods) { card.style.display = 'none'; return; }
-
-  card.style.display = quickFoodsOpen ? 'block' : 'none';
-  if (!quickFoodsOpen) return;
-  ['recents','frequents','hier'].forEach(id => {
-    const tab = document.getElementById('quick-tab-' + id);
-    if (tab) tab.classList.toggle('active', quickFoodsPanel === id);
-  });
-
-  if (quickFoodsPanel === 'hier') {
-    actions.innerHTML = yesterday ? `<button onclick="reuseYesterdayFoods()">↩ Reprendre toute la dernière journée (${formatDate(yesterday.date)})</button>` : '';
-    const items = yesterday?.aliments || [];
-    list.innerHTML = items.length ? items.map(a => renderQuickFoodChip(a, 'hier')).join('') : '<div class="fn-ui-note-compact">Aucune journée précédente avec aliments.</div>';
-    return;
-  }
-
-  actions.innerHTML = yesterday ? `<button onclick="setQuickFoodsPanel('hier')">Voir hier (${formatDate(yesterday.date)})</button>` : '';
-  if (quickFoodsPanel === 'frequents') {
-    list.innerHTML = frequent.length ? frequent.map(f => renderQuickFoodChip(f.item, f.count + '×')).join('') : '<div class="fn-ui-note-compact">Pas encore assez d’historique.</div>';
-  } else {
-    list.innerHTML = recent.length ? recent.map(f => renderQuickFoodChip(f.item, 'récent')).join('') : '<div class="fn-ui-note-compact">Aucun aliment récent.</div>';
-  }
-}
+// Ancienne mémoire rapide supprimée : l'ajout passe désormais par la recherche intégrée,
+// les aliments récents peuvent être retrouvés via l'historique et la base personnelle.
 
 
 let dbSuggestionIndex = -1;
@@ -4313,7 +4209,7 @@ function toggleFoodSourceFilter(src) {
 }
 
 function setFoodAddMode(mode) {
-  const next = mode === 'ia' ? 'ia' : (mode === 'quick' ? 'quick' : 'search');
+  const next = mode === 'ia' ? 'ia' : 'search';
   if (next === 'ia' && typeof isAIEnabled === 'function' && !isAIEnabled()) {
     alert('Les fonctions IA sont désactivées dans Options de l’application.');
     return;
@@ -4323,7 +4219,6 @@ function setFoodAddMode(mode) {
   const input = document.getElementById('db-search');
   const btn = document.getElementById('food-main-action-btn');
   const iaBtn = document.getElementById('food-ai-mode-btn');
-  const quickBtn = document.getElementById('food-quick-mode-btn');
   const recipeBtn = document.getElementById('food-recipe-mode-btn');
   const modeBadge = document.getElementById('food-add-mode-badge');
   const suggestions = document.getElementById('db-suggestions');
@@ -4331,11 +4226,10 @@ function setFoodAddMode(mode) {
   const hidden = document.getElementById('db-selected-id');
   if (modal) {
     modal.classList.toggle('food-add-ai-mode', foodAddMode === 'ia');
-    modal.classList.toggle('food-add-quick-mode', foodAddMode === 'quick');
+    modal.classList.remove('food-add-quick-mode');
     modal.classList.remove('food-add-expanded', 'food-add-recipe-mode', 'food-add-recipe-camera', 'food-add-recipe-crop', 'food-add-recipe-result', 'food-add-recipe-processing');
   }
   if (iaBtn) iaBtn.classList.toggle('active', foodAddMode === 'ia');
-  if (quickBtn) quickBtn.classList.toggle('active', foodAddMode === 'quick');
   if (recipeBtn) recipeBtn.classList.remove('active');
   foodRecipeOCRMode = false;
   syncOCRPanelMode && syncOCRPanelMode();
@@ -4345,33 +4239,21 @@ function setFoodAddMode(mode) {
     input.placeholder = foodAddMode === 'ia'
       ? 'Plat ou repas à estimer : pâtes bolo maison, 1 assiette'
       : 'Rechercher un aliment : pain, yaourt, poulet...';
-    if (foodAddMode !== 'quick') input.focus({ preventScroll: true });
+    input.focus({ preventScroll: true });
   }
   if (btn) btn.textContent = foodAddMode === 'ia' ? 'Estimer' : 'Ajouter';
-  if (modeBadge) modeBadge.textContent = foodAddMode === 'ia' ? '⚡ IA' : (foodAddMode === 'quick' ? '🧠 Mémoire rapide' : '🍽 Aliment');
+  if (modeBadge) modeBadge.textContent = foodAddMode === 'ia' ? '⚡ IA' : '🍽 Aliment';
   if (suggestions) {
     suggestions.innerHTML = '';
     suggestions.classList.remove('visible');
   }
   const respEl = document.getElementById('groq-response');
-  if (foodAddMode === 'quick') {
+  if (foodAddMode === 'ia') {
     dbSelectedFood = null;
     closeDBQuantitySelector({keepSearch:true});
     if (hidden) hidden.value = '';
     if (selectedCard) selectedCard.innerHTML = '';
-    if (respEl) respEl.style.display = 'none';
-    quickFoodsOpen = true;
-    renderQuickFoods();
-  } else if (foodAddMode === 'ia') {
-    dbSelectedFood = null;
-    closeDBQuantitySelector({keepSearch:true});
-    if (hidden) hidden.value = '';
-    if (selectedCard) selectedCard.innerHTML = '';
-    quickFoodsOpen = false;
-    renderQuickFoods();
   } else {
-    quickFoodsOpen = false;
-    renderQuickFoods();
     if (respEl) respEl.style.display = 'none';
     handleDBSearchInput();
   }
@@ -4382,7 +4264,8 @@ function toggleFoodAIMode() {
 }
 
 function toggleFoodQuickMode() {
-  setFoodAddMode(foodAddMode === 'quick' ? 'search' : 'quick');
+  // Compatibilité anciens appels : la mémoire rapide a été retirée du Journal.
+  setFoodAddMode('search');
 }
 
 function openFoodIAPanel() { setFoodAddMode('ia'); }
@@ -4602,7 +4485,6 @@ function openFoodRecipePhotoOption() {
   try { window.FoodNoteCropMode = foodCropMode; } catch(e) {}
   document.getElementById('food-recipe-mode-btn')?.classList.add('active');
   document.getElementById('food-ai-mode-btn')?.classList.remove('active');
-  document.getElementById('food-quick-mode-btn')?.classList.remove('active');
   const modeBadge = document.getElementById('food-add-mode-badge');
   if (modeBadge) modeBadge.textContent = '🧾 Plat / recette';
   try { if (typeof resetFoodAddGroqVisualState === 'function') resetFoodAddGroqVisualState(); } catch(e) {}
@@ -4643,10 +4525,6 @@ function handleFoodMainAction() {
     if (typeof estimerGroq === 'function') estimerGroq();
     return;
   }
-  if (foodAddMode === 'quick') {
-    setFoodAddMode('search');
-    return;
-  }
   if (isDBQuantitySelectorOpen()) {
     confirmDBQuantitySelection();
     return;
@@ -4658,7 +4536,7 @@ function handleDBSearchInput() {
   const input = document.getElementById('db-search');
   const hidden = document.getElementById('db-selected-id');
   if (!input || !hidden) return;
-  if (foodAddMode === 'ia' || foodAddMode === 'quick') {
+  if (foodAddMode === 'ia') {
     hidden.value = '';
     dbSelectedFood = null;
     updateDBSelectedCard(null);
@@ -5979,7 +5857,6 @@ async function saveSportPayloadForDate(date, sports, silent = true) {
     energie: serverEntry?.energie || '',
     faim: serverEntry?.faim || '',
     notes: serverEntry?.notes || '',
-    question: serverEntry?.question || '',
     macros,
     netKcal: Math.round((Number(macros.kcal) || 0) - depSport),
     __replaceSports: true,
@@ -6089,8 +5966,7 @@ function currentJournalFormMetaForFoodSave() {
     energie: val('f-energie'),
     faim: val('f-faim'),
     notes: val('f-notes'),
-    extras: val('f-extras'),
-    question: val('f-question')
+    extras: val('f-extras')
   };
 }
 
@@ -6194,7 +6070,6 @@ function buildCurrentJournalEntryForFoodWrite() {
   const faimValue = document.getElementById('f-faim')?.value ?? '';
   const notesValue = document.getElementById('f-notes')?.value ?? '';
   const extrasValue = document.getElementById('f-extras')?.value ?? '';
-  const questionValue = document.getElementById('f-question')?.value ?? '';
 
   return {
     id: existing?.id || Date.now(),
@@ -6210,7 +6085,6 @@ function buildCurrentJournalEntryForFoodWrite() {
     energie: energieValue,
     faim: faimValue,
     notes: notesValue,
-    question: questionValue,
     macros: {
       kcal: Math.round(kcal),
       prot: round1(prot),
@@ -6353,7 +6227,6 @@ function mergeServerEntryWithFoodAutosave(serverEntry, incomingEntry) {
     faim: keepIncomingIfFilled(incomingEntry?.faim, serverEntry?.faim),
     notes: keepIncomingIfFilled(incomingEntry?.notes, serverEntry?.notes),
     extras: keepIncomingIfFilled(incomingEntry?.extras, serverEntry?.extras),
-    question: keepIncomingIfFilled(incomingEntry?.question, serverEntry?.question),
     aliments,
     sports,
     depSport,
@@ -6421,7 +6294,6 @@ async function saveEntry(silent = false) {
     energie: energieValue,
     faim: faimValue,
     notes: notesValue,
-    question: document.getElementById('f-question').value,
     macros:{kcal:Math.round(kcal),prot:Math.round(prot),gluc:Math.round(gluc),lip:Math.round(lip)},
     netKcal: Math.round(kcal - depSport),
     dailyChecklist: {
@@ -6564,8 +6436,9 @@ function resetForm() {
   });
   sportRows.forEach(r => document.getElementById('sport-row-'+r)?.remove());
   sportRows = [];
-  ['f-poids','f-extras','f-notes','f-question'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-energie').value=''; document.getElementById('f-faim').value='';
+  ['f-poids','f-extras','f-notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const energieEl = document.getElementById('f-energie'); if (energieEl) energieEl.value = '';
+  const faimEl = document.getElementById('f-faim'); if (faimEl) faimEl.value = '';
   updateMacros();
 }
 
@@ -7519,11 +7392,18 @@ function retakeNutritionLabelPhoto() {
   foodRecipeCropReady = false;
   setOCRStatus('Reprise tableau nutritionnel : cadre l’étiquette puis touche “Lire tableau”.', false);
   try {
-    if (window.FoodNoteFoodAddUX1513 && typeof window.FoodNoteFoodAddUX1513.startNutritionTableScan === 'function') {
-      window.FoodNoteFoodAddUX1513.startNutritionTableScan();
+    const flows = window.FoodNoteFoodCaptureFlows;
+    if (flows && typeof flows.openNutritionTable === 'function') {
+      flows.openNutritionTable();
       return;
     }
-  } catch(e) {}
+    if (flows && typeof flows.open === 'function') {
+      flows.open('nutrition_table', { reason:'retake-nutrition-label' });
+      return;
+    }
+  } catch(e) {
+    console.warn('[FoodNote] reprise OCR nutrition via FoodNoteFoodCaptureFlows impossible', e);
+  }
   try { if (typeof openFoodPhotoOption === 'function') openFoodPhotoOption(); } catch(e) {}
 }
 

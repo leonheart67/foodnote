@@ -1,3 +1,9 @@
+/*
+ * FoodNote — profil utilisateur et options applicatives.
+ * Rôle : charger/sauvegarder le profil, calculer les cibles nutritionnelles et appliquer les options d'affichage.
+ * Gère : profil local/serveur, calcul TDEE/macros, activation ou masquage des fonctions IA.
+ * Ne doit pas gérer : saisie du Journal, imports CIQUAL/OpenFoodFacts, rendu des pages ni accès SQLite direct.
+ */
 // ── Calcul automatique des cibles ─────────────────────────
 function calcTDEE(poids, taille, age, sexe, activite) {
   // Mifflin-St Jeor + compatibilité anciens/nouveaux profils.
@@ -197,8 +203,8 @@ function applyFeatureToggles() {
   if (toggle) toggle.checked = ai;
   const status = document.getElementById('feature-ai-status');
   if (status) status.textContent = ai
-    ? 'IA activée : les outils Groq et les champs “question IA” sont visibles.'
-    : 'Mode sans IA actif : les menus, boutons et champs IA sont masqués.';
+    ? 'IA activée : les outils Groq sont visibles.'
+    : 'Mode sans IA actif : les menus et boutons IA sont masqués.';
   const pageIA = document.getElementById('page-ia');
   if (!ai && pageIA && pageIA.classList.contains('active') && typeof showPage === 'function') {
     showPage('journal', document.getElementById('nav-journal'));

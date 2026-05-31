@@ -1,6 +1,9 @@
-/* FoodNote beta 0.22.102 — FOOD_ADD_STABILITY_CORE
-   Petite couche d'hygiène UI : le contrôleur décide quel panneau a le droit d'être visible. */
-
+/*
+ * FoodNote — styles du contrôleur Ajouter.
+ * Rôle : sécuriser l’affichage des panneaux du popup Ajouter.
+ * Gère : visibilité des surfaces de recherche/capture, hygiène modale et états UI associés.
+ * Ne doit pas gérer : logique JavaScript, calcul nutritionnel, données SQLite ni thèmes globaux.
+ */
 #food-add-modal.fn-food-add-managed {
   --fn-modal-controller-line: color-mix(in srgb, var(--border2) 72%, transparent);
 }
@@ -10,9 +13,7 @@
 }
 
 #food-add-modal.fn-food-add-managed[data-fn-modal-open="0"] #db-suggestions,
-#food-add-modal.fn-food-add-managed[data-fn-modal-open="0"] #quick-foods-card,
-#food-add-modal.fn-food-add-managed:not(.fn-modal-mode-search):not(.fn-modal-mode-saved) #db-suggestions,
-#food-add-modal.fn-food-add-managed:not(.fn-modal-mode-search):not(.fn-modal-mode-saved) #quick-foods-card {
+#food-add-modal.fn-food-add-managed:not(.fn-modal-mode-search):not(.fn-modal-mode-saved) #db-suggestions {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
@@ -111,7 +112,6 @@ body.food-add-modal-open #floating-add-food-btn {
 }
 
 #food-add-modal.fn-food-add-managed.fn-modal-view-capture-family .food-add-mode-panel,
-#food-add-modal.fn-food-add-managed.fn-modal-view-capture-family #quick-foods-card,
 #food-add-modal.fn-food-add-managed.fn-modal-view-capture-family #db-suggestions {
   display: none !important;
 }
@@ -120,7 +120,6 @@ body.food-add-modal-open #floating-add-food-btn {
   content: " — à corriger";
   opacity: .72;
 }
-
 
 /* 0.22.179 — Quand une proposition est sélectionnée, la liste reste visible
    pendant l'ouverture du sélecteur quantité. Ce garde-fou neutralise les anciens

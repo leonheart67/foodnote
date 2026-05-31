@@ -1,6 +1,8 @@
-/* FoodNote beta 0.22.103 — FOOD_ADD_SEARCH_DOMAIN_CORE
- * Façade unique pour les flux caméra / code-barres / OCR / recette, avec fermeture centralisée et verrous anti-double-action.
- * But : éviter que le contrôleur du popup appelle directement des fonctions historiques de 30/93/95.
+/*
+ * FoodNote — façade des flux de capture.
+ * Rôle : centraliser les workflows caméra, code-barres, OCR nutritionnel, recette et photo repas.
+ * Gère : ouverture/fermeture des flux, verrous anti-double-action et ponts vers le popup Ajouter.
+ * Ne doit pas gérer : calcul nutritionnel, rendu complet du Journal, données SQLite ni styles globaux.
  */
 (function FoodNoteFoodCaptureFlowsCore(){
   'use strict';
@@ -179,7 +181,7 @@
   }
 
   function hideSearchOutputs(){
-    ['db-suggestions', 'quick-foods-card'].forEach(id => {
+    ['db-suggestions'].forEach(id => {
       const el = $(id);
       if (el) {
         if (id === 'db-suggestions' && typeof window.foodnoteShouldKeepDBSuggestionsVisible === 'function' && window.foodnoteShouldKeepDBSuggestionsVisible()) {

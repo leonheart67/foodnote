@@ -1,3 +1,9 @@
+/*
+ * FoodNote — thème officiel sombre.
+ * Rôle : définir la palette sombre, les couleurs des composants et les états visuels.
+ * Gère : variables de thème, cartes, badges, icônes nutrition, panneaux et ajustements responsive liés au thème sombre.
+ * Ne doit pas gérer : logique JavaScript, données SQLite, imports CIQUAL/OpenFoodFacts, ni Theme Lab expérimental.
+ */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scrollbar-gutter: stable; }
 body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
@@ -12,7 +18,6 @@ body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--t
   --red-bg: rgba(196,86,86,0.13); --red: #ca6666; --red-dark: #ec9292;
   --blue-bg: rgba(111,139,166,0.13); --blue: #7894ad; --blue-dark: #9db3c7;
   --pill-bg: #141618;
-
 
   /* FoodNote — Journal food rows theme tokens
      Thème sombre : lignes alimentaires neutres, sans retour de dominante verte. */
@@ -199,7 +204,6 @@ tr:last-child td { border-bottom: none; }
   .db-row > button { width: 100%; }
 }
 
-
 /* ── Mobile optimisations ─────────────────────────────── */
 @media (max-width: 480px) {
   body { font-size: 15px; }
@@ -348,7 +352,6 @@ tr:last-child td { border-bottom: none; }
   .profile-name { font-size:21px; }
 }
 
-
 /* ── Dashboard statistiques en tuiles ───────────────────── */
 .stats-hero-card {
   background: var(--bg2);
@@ -395,23 +398,11 @@ tr:last-child td { border-bottom: none; }
   .stats-tile.wide { grid-column: 1 / -1; }
 }
 
-/* ── Mémoire rapide & graphiques stats ───────────────────── */
-.quick-foods-card { margin-top: 12px; padding: 10px; border-radius: 12px; background: var(--bg); border: 0.5px solid var(--border2); }
-.quick-foods-head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px; }
-.quick-foods-title { font-size:12px; font-weight:650; color:var(--text); text-transform:uppercase; letter-spacing:.04em; }
-.quick-foods-sub { font-size:11px; color:var(--text4); margin-top:2px; }
-.quick-foods-actions { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
-.quick-foods-actions button { font-size:12px; padding:5px 10px; border-radius:999px; }
-.quick-foods-list { display:flex; gap:6px; flex-wrap:wrap; }
-.quick-food-chip { display:inline-flex; align-items:center; gap:5px; max-width:100%; padding:6px 9px; border-radius:999px; background:var(--bg2); border:0.5px solid var(--border2); color:var(--text2); font-size:12px; cursor:pointer; }
-.quick-food-chip:hover { background:var(--green-bg); color:var(--green-dark); border-color:var(--green); }
-.quick-food-chip small { color:var(--text4); font-size:10px; }
 .stats-chart-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px; }
 .stats-mini-chart { background:var(--bg); border:0.5px solid var(--border2); border-radius:12px; padding:10px; min-height:170px; }
 .stats-mini-title { font-size:12px; font-weight:650; color:var(--text2); margin-bottom:6px; }
 .stats-mini-chart canvas { width:100%; height:130px; display:block; }
 @media (max-width: 700px) { .stats-chart-grid { grid-template-columns:1fr; } }
-
 
 /* ── Statistiques commerciales ───────────────────────────── */
 /* Largeur stats stabilisée : évite le léger déplacement quand on passe hebdo ↔ mensuel */
@@ -466,15 +457,6 @@ tr:last-child td { border-bottom: none; }
   .stats-month-grid { grid-template-columns:1fr 1fr; gap:8px; }
   .stats-daily-chart-grid { grid-template-columns:1fr; }
 }
-
-
-/* ── Mémoire rapide améliorée ───────────────────────────── */
-.quick-foods-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:8px 0; }
-.quick-tab { font-size:12px; padding:5px 10px; border-radius:999px; border:0.5px solid var(--border2); background:var(--bg2); color:var(--text3); }
-.quick-tab.active { background:var(--green-bg); color:var(--green-dark); border-color:var(--green); font-weight:650; }
-.quick-food-chip { text-align:left; }
-.quick-food-chip .chip-main { display:flex; flex-direction:column; gap:2px; }
-.quick-food-chip .chip-macros { display:flex; gap:6px; flex-wrap:wrap; color:var(--text4); font-size:10px; }
 
 /* ── Récap intelligent ───────────────────────────────────── */
 .recap-page-premium .stats-tile-grid { margin-top:12px; }
@@ -699,8 +681,6 @@ tr:last-child td { border-bottom: none; }
   .journal-bottom-actions { padding:10px 0 12px; }
   .journal-bottom-actions button { flex:1; }
 }
-}
-
 
 /* TEST CLEAN ACTIONS v2 — évident visuellement */
 .food-card-v2 {
@@ -764,8 +744,6 @@ tr:last-child td { border-bottom: none; }
   background: var(--bg3);
   border-top: 1px solid var(--border2);
   border-radius: 0 0 9px 9px;
-}
-
 }
 
 .food-actions-main-v2 { display:flex; gap:5px; flex-wrap:nowrap; align-items:center; flex:1; }
@@ -837,7 +815,6 @@ tr:last-child td { border-bottom: none; }
 .theme-toggle::after { content: ''; width: 14px; height: 14px; border-radius: 50%; background: var(--green); display: block; transition: transform 0.2s; }
 
 .theme-toggle.active::after { transform: translateX(16px); }
-
 
 /* ── Lignes aliments compactes : retour boutons éditer/supprimer visibles ── */
 .food-row-compact {
@@ -943,7 +920,6 @@ tr:last-child td { border-bottom: none; }
   }
 }
 
-
 /* ── Boutons sources comme avant : lisibles, colorés, toujours visibles ── */
 .food-compact-actions {
   display: inline-flex !important;
@@ -1033,7 +1009,6 @@ tr:last-child td { border-bottom: none; }
     text-overflow: ellipsis;
   }
 }
-
 
 /* Édition / suppression : petits logos en coin supérieur droit */
 .food-row-compact {
@@ -1152,7 +1127,6 @@ tr:last-child td { border-bottom: none; }
   .journal-bottom-actions button { padding-left:10px; padding-right:10px; }
 }
 
-
 /* ── UX v10.1 : boutons sources plus discrets, priorité aux données ── */
 .food-compact-actions {
   gap: 4px !important;
@@ -1214,7 +1188,6 @@ tr:last-child td { border-bottom: none; }
     font-size: 10px !important;
   }
 }
-
 
 /* ── UX v10.2 : repas = donnée aliment, actions sources à droite ── */
 .food-compact-info {
@@ -1306,7 +1279,6 @@ tr:last-child td { border-bottom: none; }
   }
 }
 
-
 /* ── UX v10.4 : jauges macros lisibles ───────────────────── */
 .macro-cell { position: relative; overflow: hidden; }
 .macro-progress {
@@ -1334,7 +1306,6 @@ tr:last-child td { border-bottom: none; }
   .journal-main-macros .macro-cell { min-height: 96px; }
   .macro-progress { margin-top: 6px; }
 }
-
 
 /* UX v10.6 — résumé sticky pendant le scroll */
 .sticky-macro-summary {
@@ -1398,7 +1369,6 @@ tr:last-child td { border-bottom: none; }
   .sticky-macro-item small { font-size: 9px; }
 }
 
-
 /* UX v10.7 — Objectif: méthode de calcul */
 .objectif-method-card { overflow: hidden; }
 .objectif-method-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
@@ -1413,7 +1383,6 @@ tr:last-child td { border-bottom: none; }
 .objectif-rules-table td, .objectif-rules-table th { padding:8px 10px; vertical-align:top; }
 .objectif-method-note { font-size:12px; color:var(--text4); line-height:1.45; margin-top:10px; }
 @media (max-width:700px) { .objectif-method-grid { grid-template-columns:1fr; } }
-
 
 /* UX v10.9 — Méthode de calcul discrète */
 .objectif-method-details { padding: 0; overflow: hidden; }
@@ -1492,7 +1461,6 @@ tr:last-child td { border-bottom: none; }
 .phase-info-panel span { color: var(--blue-dark); font-weight: 600; font-size: 11px; white-space: nowrap; }
 .phase-info-panel p { margin: 0; color: var(--text2); }
 
-
 /* Logo FoodNote intégré */
 .sb-logo-icon {
   overflow: hidden;
@@ -1539,7 +1507,6 @@ tr:last-child td { border-bottom: none; }
   color:var(--green-dark);
   margin-top:3px;
 }
-
 
 /* UX v10.19 - bascule unité / grammes pour aliments estimés */
 .qty-mode-select {
@@ -1791,7 +1758,6 @@ button:active {
   .hist-card:hover { transform: none; }
 }
 
-
 /* FoodNote v10.34 - option sans IA */
 .ai-disabled [data-feature="ia"],
 .ai-disabled .food-mini-btn.groq,
@@ -1855,7 +1821,6 @@ button:active {
 .backup-status-pill{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
 .backup-status-pill strong{display:block;font-size:18px;color:var(--text);line-height:1.1}.backup-status-pill span{font-size:11px;color:var(--text4)}
 .backup-warning{color:var(--orange);font-weight:600}.backup-ok{color:#b58948;font-weight:600}.backup-error{color:#e24b4a;font-weight:600}
-
 
 /* v10.44 - Historique renforcé */
 .history-tools-card{
@@ -2011,7 +1976,6 @@ button:active {
   .barcode-result-actions button { flex:1; min-width:130px; }
 }
 
-
 /* v10.53 — fallback scanner code-barres Html5Qrcode */
 .barcode-html5-reader {
   width: 100%;
@@ -2072,7 +2036,6 @@ button:active {
   .barcode-inline-btn { flex: 0 0 44px; }
   .db-qty-input { width: 100% !important; flex-basis: 100%; }
 }
-
 
 /* v10.57 — scanner caméra centré en modal */
 body.barcode-modal-open {
@@ -2141,7 +2104,6 @@ body.barcode-modal-open {
     inset: 35% 8%;
   }
 }
-
 
 /* v10.58 — correction WebView : vrai modal caméra hors flux */
 body.barcode-modal-open::before {
@@ -2235,7 +2197,6 @@ body > #barcode-scan-panel.barcode-inline-panel canvas {
   .floating-add-food-btn:hover { transform: none; }
 }
 
-
 /* v10.60 — champ d'ajout remplacé par une modale ouverte par le bouton flottant */
 body.food-add-modal-open { overflow: hidden; }
 .food-add-modal {
@@ -2303,7 +2264,6 @@ body.food-add-modal-open .floating-add-food-btn { transform: translateY(10px) sc
   .food-add-modal.is-open .food-add-dialog { animation: foodAddPop .16s ease-out both; }
   @keyframes foodAddPop { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 }
-
 
 /* v10.61 — correction modale ajout aliment : vraie fenêtre centrée hors flux */
 body.food-add-modal-open {
@@ -2485,7 +2445,6 @@ body.food-add-modal-open.barcode-modal-open > #barcode-scan-panel.barcode-inline
   pointer-events: auto !important;
 }
 
-
 /* v10.64 — dock d'actions journal : + Aliment intégré, plus de bouton flottant qui chevauche */
 #page-journal { padding-bottom: 108px !important; }
 #floating-add-food-btn { display: none !important; }
@@ -2571,7 +2530,6 @@ body.barcode-modal-open .journal-bottom-actions {
   .journal-bottom-actions button { font-size: 12px !important; }
   .journal-bottom-actions .journal-add-dock-btn { font-size: 13px !important; }
 }
-
 
 /* v10.65 — journal allégé : auto-save visible + action principale unique */
 .journal-autosave-inline {
@@ -2689,7 +2647,6 @@ body.barcode-modal-open .journal-bottom-actions {
   .journal-bottom-actions-lite .journal-add-dock-btn { min-width:104px !important; padding:0 10px !important; }
 }
 
-
 /* v10.66 — journal épuré : action unique + Aliment, sans libellés techniques */
 .journal-autosave-inline,
 .journal-autosave-chip,
@@ -2802,7 +2759,6 @@ body.barcode-modal-open .journal-add-only {
     padding: 0 22px !important;
   }
 }
-
 
 /* v10.70 — modale Aliment : menu sources à droite */
 body > #food-add-modal.food-add-modal .food-add-body {
@@ -3034,7 +2990,6 @@ body > #food-add-modal.food-add-modal .food-add-main .journal-add-row {
   cursor: pointer !important;
 }
 
-
 /* v10.73 — modale Aliment stable : plus de redimensionnement au changement de source */
 body > #food-add-modal.food-add-modal .food-add-dialog {
   height: min(720px, calc(100dvh - 76px)) !important;
@@ -3108,13 +3063,11 @@ body > #food-add-modal.food-add-modal .food-add-main > .journal-add-helper {
   }
 }
 
-
 /* v10.75 — suppression des textes d'aide flottants dans la modale Aliment */
 body > #food-add-modal.food-add-modal .food-add-head-helper,
 body > #food-add-modal.food-add-modal #food-add-helper {
   display: none !important;
 }
-
 
 /* v10.76 — suppression du titre visible dans la popup Aliment */
 body > #food-add-modal.food-add-modal .food-add-head-compact {
@@ -3130,7 +3083,6 @@ body > #food-add-modal.food-add-modal .food-add-head-compact .food-add-close {
 body > #food-add-modal.food-add-modal #food-add-title {
   display: none !important;
 }
-
 
 /* v10.77 — habillage léger de la modale Aliment */
 body > #food-add-modal.food-add-modal .food-add-main {
@@ -3201,7 +3153,6 @@ body > #food-add-modal.food-add-modal .food-add-panel .journal-add-btn {
     border-radius: 16px !important;
   }
 }
-
 
 /* v10.78 — modale Aliment revue : style plus proche app mobile, sans texte explicatif lourd */
 body > #food-add-modal.food-add-modal .food-add-dialog {
@@ -3295,7 +3246,6 @@ body > #food-add-modal.food-add-modal.food-add-ai-mode .food-add-kicker {
     border-radius: 18px !important;
   }
 }
-
 
 /* v10.79 — popup Aliment compacte puis expansion vers le bas + Photo sous IA */
 body > #food-add-modal.food-add-modal.is-open {
@@ -3393,7 +3343,6 @@ body > #food-add-modal.food-add-modal.food-add-expanded .db-suggestions.visible 
     margin-top: 10px !important;
   }
 }
-
 
 /* v10.80 — popup Aliment simplifiée : plus de menu à droite, contrôles sous Ajouter */
 body > #food-add-modal.food-add-modal .food-add-body {
@@ -3511,7 +3460,6 @@ body > #food-add-modal.food-add-modal.food-add-expanded .food-add-dialog {
   }
 }
 
-
 /* v10.81 — séparation discrète entre corps et menu + distinction filtres / outils */
 body > #food-add-modal.food-add-modal .food-add-actions {
   align-self: start !important;
@@ -3570,7 +3518,6 @@ body > #food-add-modal.food-add-modal .food-tools-inline .food-photo-mode-btn,
   }
 }
 
-
 /* v10.82 — OCR étiquette nutritionnelle */
 body > #food-add-modal.food-add-modal .ocr-panel {
   margin-top: 12px !important;
@@ -3616,7 +3563,6 @@ body > #food-add-modal.food-add-modal .ocr-panel {
   .ocr-grid label:first-child { grid-column: span 2 !important; }
   .ocr-actions { display:grid !important; grid-template-columns:1fr !important; }
 }
-
 
 /* v10.83 — Photo = caméra directe : code-barres/QR ou OCR tableau */
 body > #food-add-modal.food-add-modal .ocr-mode-actions {
@@ -3683,14 +3629,12 @@ body > #food-add-modal.food-add-modal .ocr-camera-actions button {
   body > #food-add-modal.food-add-modal #ocr-video { max-height:36dvh !important; }
 }
 
-
 /* v10.84 — OCR nutrition auto */
 .ocr-camera-actions #ocr-auto-btn.active {
   color: #fff !important;
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--green) 88%, #8f6a3a), color-mix(in srgb, var(--green) 62%, #d6ad6a)) !important;
 }
-
 
 /* v10.85 — caméra unifiée : scan code/QR permanent, OCR seulement avec déclencheur */
 .ocr-unified-note {
@@ -3704,7 +3648,6 @@ body > #food-add-modal.food-add-modal .ocr-camera-actions #ocr-auto-btn.active {
   border-color: color-mix(in srgb, var(--green) 62%, transparent) !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #8f6a3a), color-mix(in srgb, var(--green) 66%, #d6ad6a)) !important;
 }
-
 
 /* v10.86 — recentrage fort du scanner caméra + retour scanner fiable */
 body.barcode-modal-open > .barcode-inline-panel,
@@ -3755,7 +3698,6 @@ body.barcode-modal-open > .barcode-inline-panel #barcode-video {
   }
 }
 
-
 /* v10.87 — déclenchement OCR depuis la caméra scanner */
 body > #barcode-scan-panel.barcode-inline-panel .barcode-scan-actions-ocr {
   display: grid !important;
@@ -3790,7 +3732,6 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-hint {
   }
 }
 
-
 /* v10.96 — le cadre caméra devient la zone réellement envoyée à l'OCR */
 body.barcode-modal-open > .barcode-inline-panel .barcode-frame,
 body > #food-add-modal.food-add-modal .ocr-frame {
@@ -3803,7 +3744,6 @@ body > #food-add-modal.food-add-modal .ocr-frame {
   color: var(--green);
   font-weight: 750;
 }
-
 
 /* v11.01 — bouton OCR pouce + séparation scan/OCR */
 body > #barcode-scan-panel.barcode-inline-panel {
@@ -3846,8 +3786,6 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-btn.barcode-ocr-fab
   }
 }
 
-
-/* v11.04 — page principale simplifiée / mémoire rapide remontée */
 .journal-hero .journal-subtitle,
 .journal-hero .journal-ux-pills,
 .sticky-macro-summary {
@@ -3865,23 +3803,6 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-btn.barcode-ocr-fab
 .journal-main-card .journal-card-head {
   margin-bottom: 8px !important;
 }
-.journal-main-card .quick-foods-card {
-  margin: 0 0 14px !important;
-  padding: 12px !important;
-  border-radius: 16px !important;
-  background: color-mix(in srgb, var(--bg2) 82%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--border2) 85%, transparent) !important;
-}
-.journal-main-card .quick-foods-head {
-  margin-bottom: 6px !important;
-}
-.journal-main-card .quick-foods-title {
-  font-size: 12px !important;
-  letter-spacing: .07em !important;
-}
-.journal-main-card .quick-foods-tabs {
-  margin: 6px 0 8px !important;
-}
 @media (max-width: 760px) {
   .journal-main-macros {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -3896,7 +3817,6 @@ body > #barcode-scan-panel.barcode-inline-panel .barcode-ocr-btn.barcode-ocr-fab
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 }
-
 
 /* v11.05 — journal simple, sticky et modulable */
 #page-journal.journal-premium-page {
@@ -3996,11 +3916,6 @@ body:not(.sidebar-open) #page-journal .journal-sticky-summary,
   font-size: 18px !important;
   letter-spacing: -.02em !important;
 }
-.quick-foods-card {
-  margin-bottom: 12px !important;
-  border-radius: 18px !important;
-  border: 1px solid color-mix(in srgb, var(--green) 16%, var(--border2)) !important;
-}
 .journal-extra-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0,1fr)) !important;
@@ -4032,48 +3947,6 @@ body:not(.sidebar-open) #page-journal .journal-sticky-summary,
   .journal-main-macros-compact .macro-target { display: none !important; }
 }
 
-/* v11.06 — alimentation repliable, mémoire plus douce, sport intégré */
-.quick-foods-card {
-  padding: 14px !important;
-  border-radius: 22px !important;
-  background:
-    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--green) 15%, transparent), transparent 34%),
-    color-mix(in srgb, var(--bg) 82%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--green) 22%, var(--border2)) !important;
-  box-shadow: 0 12px 34px rgba(0,0,0,.10) !important;
-}
-.quick-foods-title {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  font-size: 14px !important;
-  text-transform: none !important;
-  letter-spacing: -.01em !important;
-}
-.quick-foods-icon {
-  display:inline-flex !important;
-  width:28px !important;
-  height:28px !important;
-  align-items:center !important;
-  justify-content:center !important;
-  border-radius: 12px !important;
-  background: color-mix(in srgb, var(--green) 18%, var(--bg2)) !important;
-}
-.quick-foods-sub { font-size: 12px !important; color: var(--text4) !important; margin-top: 4px !important; }
-.quick-foods-tabs { gap: 8px !important; margin: 10px 0 !important; }
-.quick-tab {
-  min-height: 34px !important;
-  padding: 0 12px !important;
-  border-radius: 999px !important;
-  font-weight: 750 !important;
-}
-.quick-foods-list { gap: 8px !important; }
-.quick-food-chip {
-  border-radius: 16px !important;
-  padding: 9px 11px !important;
-  background: color-mix(in srgb, var(--bg2) 86%, transparent) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.03) !important;
-}
 .journal-collapsible-card {
   margin-top: 12px !important;
   border-radius: 22px !important;
@@ -4174,7 +4047,6 @@ body:not(.sidebar-open) #page-journal .journal-sticky-summary,
   .sport-empty-intro { align-items:flex-start !important; }
   .sport-deficit-bar { overflow-x:auto !important; }
 }
-
 
 /* v11.07 — repas repliés + sport dans une vraie page */
 .journal-meals-card {
@@ -4279,81 +4151,13 @@ body:not(.sidebar-open) #page-journal .journal-sticky-summary,
   .sport-page-hero { padding:14px !important; }
 }
 
-
-/* v11.08 — Mémoire rapide en tiroir compact */
-.quick-foods-launch {
-  margin: 10px 0 12px !important;
-}
-.quick-foods-toggle {
-  width: 100% !important;
-  min-height: 58px !important;
-  display: grid !important;
-  grid-template-columns: 38px minmax(0, 1fr) 24px !important;
-  align-items: center !important;
-  gap: 10px !important;
-  padding: 10px 12px !important;
-  border-radius: 18px !important;
-  background: color-mix(in srgb, var(--bg) 86%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--green) 18%, var(--border2)) !important;
-  color: var(--text) !important;
-  text-align: left !important;
-  cursor: pointer !important;
-  box-shadow: 0 8px 22px rgba(0,0,0,.08) !important;
-}
-.quick-foods-toggle-icon {
-  width: 38px !important;
-  height: 38px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--green) 16%, var(--bg2)) !important;
-  border: 1px solid color-mix(in srgb, var(--green) 26%, transparent) !important;
-  font-size: 18px !important;
-}
-.quick-foods-toggle b {
-  display:block !important;
-  font-size: 13px !important;
-  line-height: 1.15 !important;
-}
-.quick-foods-toggle small {
-  display:block !important;
-  margin-top: 4px !important;
-  color: var(--text4) !important;
-  font-size: 11px !important;
-}
-.quick-foods-toggle-chevron {
-  color: var(--text4) !important;
-  font-size: 16px !important;
-  text-align: center !important;
-}
-.quick-foods-drawer {
-  margin-top: 0 !important;
-  animation: quickDrawerIn .16s ease-out both !important;
-}
-.quick-foods-close {
-  width: 30px !important;
-  height: 30px !important;
-  border-radius: 999px !important;
-  border: 1px solid var(--border2) !important;
-  background: var(--bg2) !important;
-  color: var(--text3) !important;
-  font-size: 18px !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-}
 @keyframes quickDrawerIn {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 520px) {
-  .quick-foods-toggle { min-height: 54px !important; border-radius: 16px !important; }
-  .quick-foods-toggle-icon { width: 34px !important; height: 34px !important; }
 }
 
-
-/* v11.09 — Mémoire rapide intégrée dans Ajouter aliment + repas cible */
-.quick-foods-launch { display: none !important; }
 body > #food-add-modal.food-add-modal .food-meal-inline,
 body > #food-add-modal.food-add-modal .food-source-inline,
 body > #food-add-modal.food-add-modal .food-tools-inline {
@@ -4363,8 +4167,7 @@ body > #food-add-modal.food-add-modal .food-tools-inline {
 body > #food-add-modal.food-add-modal .food-meal-inline {
   grid-template-columns: 1fr !important;
 }
-body > #food-add-modal.food-add-modal .food-meal-chip,
-body > #food-add-modal.food-add-modal .food-quick-mode-btn {
+body > #food-add-modal.food-add-modal .food-meal-chip {
   width: 100% !important;
   min-height: 38px !important;
   display: flex !important;
@@ -4384,15 +4187,6 @@ body > #food-add-modal.food-add-modal .food-meal-chip.active {
   color: var(--text) !important;
   background: color-mix(in srgb, var(--green) 13%, var(--bg2)) !important;
   border-color: color-mix(in srgb, var(--green) 44%, var(--border2)) !important;
-}
-body > #food-add-modal.food-add-modal .food-quick-mode-btn {
-  background: color-mix(in srgb, var(--green) 8%, var(--bg2)) !important;
-  border-color: color-mix(in srgb, var(--green) 24%, var(--border2)) !important;
-}
-body > #food-add-modal.food-add-modal .food-quick-mode-btn.active {
-  color: #fff !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #8f6a3a), color-mix(in srgb, var(--green) 58%, #d6ad6a)) !important;
-  border-color: color-mix(in srgb, var(--green) 64%, transparent) !important;
 }
 body > #food-add-modal.food-add-modal.food-add-quick-mode .db-search-wrap,
 body > #food-add-modal.food-add-modal.food-add-quick-mode #db-suggestions,
@@ -4423,8 +4217,7 @@ body > #food-add-modal.food-add-modal .food-tools-section {
 }
 @media (max-width: 720px) {
   body > #food-add-modal.food-add-modal .food-meal-inline { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
-  body > #food-add-modal.food-add-modal .food-meal-chip,
-  body > #food-add-modal.food-add-modal .food-quick-mode-btn {
+  body > #food-add-modal.food-add-modal .food-meal-chip {
     justify-content: center !important;
     min-height: 42px !important;
     padding: 0 8px !important;
@@ -4433,7 +4226,6 @@ body > #food-add-modal.food-add-modal .food-tools-section {
   body > #food-add-modal.food-add-modal .food-tools-inline { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
   body > #food-add-modal.food-add-modal .food-add-quick-panel { max-height: min(45dvh, 360px) !important; }
 }
-
 
 /* v11.10 — filtres au niveau du champ + sélection plus lisible */
 body > #food-add-modal.food-add-modal .food-inline-filters {
@@ -4483,8 +4275,7 @@ body > #food-add-modal.food-add-modal .food-meal-chip.active {
 body > #food-add-modal.food-add-modal .food-meal-chip:not(.active),
 body > #food-add-modal.food-add-modal .food-tools-inline .food-ai-mode-btn:not(.active),
 body > #food-add-modal.food-add-modal .food-tools-inline .food-photo-mode-btn:not(.active),
-body > #food-add-modal.food-add-modal .food-tools-inline .food-recipe-mode-btn:not(.active),
-body > #food-add-modal.food-add-modal .food-tools-inline .food-quick-mode-btn:not(.active) {
+body > #food-add-modal.food-add-modal .food-tools-inline .food-recipe-mode-btn:not(.active) {
   opacity: .82 !important;
 }
 body > #food-add-modal.food-add-modal .food-tools-section {
@@ -4492,8 +4283,7 @@ body > #food-add-modal.food-add-modal .food-tools-section {
   border-top: 1px dashed color-mix(in srgb, var(--border2) 78%, transparent) !important;
 }
 body > #food-add-modal.food-add-modal .food-tools-inline .food-ai-mode-btn.active,
-body > #food-add-modal.food-add-modal .food-tools-inline .food-recipe-mode-btn.active,
-body > #food-add-modal.food-add-modal .food-tools-inline .food-quick-mode-btn.active {
+body > #food-add-modal.food-add-modal .food-tools-inline .food-recipe-mode-btn.active {
   color: #fff !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--green) 92%, #8f6a3a), color-mix(in srgb, var(--green) 58%, #d6ad6a)) !important;
   border-color: color-mix(in srgb, var(--green) 66%, transparent) !important;
@@ -4518,7 +4308,6 @@ body > #food-add-modal.food-add-modal .food-source-inline {
     min-height: 36px !important;
   }
 }
-
 
 /* v11.12 — picker de date carrousel inspiré app premium */
 .journal-day-row-carousel {
@@ -4718,7 +4507,6 @@ body > #food-add-modal.food-add-modal .food-source-inline {
   .journal-day-card-bars span { width: 8px !important; height: calc(14px * var(--h, .25)) !important; }
 }
 
-
 /* v11.38 — ajustement largeur du corps + suppression Poids du jour */
 html, body {
   overflow-x: hidden !important;
@@ -4734,8 +4522,7 @@ html, body {
 #page-journal .journal-sticky-summary,
 #page-journal .journal-main-card,
 #page-journal .journal-section-card,
-#page-journal .journal-extra-grid,
-#page-journal .quick-foods-card {
+#page-journal .journal-extra-grid {
   width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
@@ -4776,13 +4563,11 @@ html, body {
   }
 }
 
-
 /* v11.39 — largeur du corps réduite + flèches plus discrètes */
 #page-journal .journal-sticky-summary,
 #page-journal .journal-main-card,
 #page-journal .journal-section-card,
-#page-journal .journal-extra-grid,
-#page-journal .quick-foods-card {
+#page-journal .journal-extra-grid {
   width: min(100%, 940px) !important;
   max-width: 940px !important;
   margin-left: auto !important;
@@ -4826,8 +4611,7 @@ html, body {
   #page-journal .journal-sticky-summary,
   #page-journal .journal-main-card,
   #page-journal .journal-section-card,
-  #page-journal .journal-extra-grid,
-  #page-journal .quick-foods-card {
+  #page-journal .journal-extra-grid {
     width: 100% !important;
     max-width: 100% !important;
   }
@@ -4848,7 +4632,6 @@ html, body {
     min-width: 24px !important;
   }
 }
-
 
 /* v11.46 — mini graphes plus efficaces avec colonne grise pleine hauteur */
 #page-journal .journal-day-card-bars {
@@ -5187,7 +4970,6 @@ html, body {
   }
 }
 
-
 /* v11.47.1 — correction clic badge */
 .fn-notification-badge, .fn-notification-modal, .fn-notification-panel, .fn-notification-panel button, .fn-notification-panel input, .fn-notification-panel textarea { pointer-events: auto !important; }
 
@@ -5255,7 +5037,6 @@ html, body {
   color: var(--text) !important;
   font-weight: 900 !important;
 }
-
 
 /* v11.51 — dashboard compact de badges sous le carrousel */
 #page-journal .journal-dashboard-badges {
@@ -5405,7 +5186,6 @@ html, body {
   #page-journal .journal-dashboard-value { font-size: 13px !important; }
   #page-journal .journal-dashboard-sub { font-size: 9px !important; }
 }
-
 
 /* v11.52 — dashboard badges configurable par appareil */
 #page-journal .journal-dashboard-badges {
@@ -5582,7 +5362,6 @@ html, body {
   }
 }
 
-/* v11.54 — Mémoire rapide : confirmation dans le panneau + quantité ajustable dans la popup */
 body > #food-add-modal.food-add-modal .food-add-panel #journal-last-added {
   margin: 0 0 12px 0 !important;
   background: color-mix(in srgb, var(--green) 14%, var(--bg2)) !important;
@@ -5888,7 +5667,6 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
   font-size:14px !important;
 }
 .stats-section-title.fn-section-title:first-child { margin-top:0 !important; }
-.quick-foods-title,
 .journal-meals-title,
 .sport-date-title,
 .fn-section-name {
@@ -5909,7 +5687,6 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
   .fn-section-label { font-size:13px !important; gap:7px !important; }
   .fn-section-icon { width:24px !important; height:24px !important; min-width:24px !important; font-size:13px !important; border-radius:9px !important; }
 }
-
 
 /* v11.72 — Sport : sections internes sobres, logo + titre seulement */
 #page-sport .sport-date-head-minimal {
@@ -6003,7 +5780,6 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
 .recap-alert,
 .recap-mini,
 .sport-only-summary > div,
-.quick-foods-card,
 .db-selected-card,
 .macro-ref,
 .meal-group,
@@ -6138,7 +5914,6 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
   }
 }
 
-
 /* v11.75 — Carrousel vraiment centré : le picker est overlay et ne réserve plus de colonne */
 #page-journal .journal-day-row-carousel,
 #page-sport .sport-day-row-carousel {
@@ -6241,7 +6016,6 @@ body > #food-add-modal.food-add-modal .journal-last-added-popup-qty span {
   }
 }
 
-
 /* v11.77 — Popup ajout : liste repas au-dessus, pleine largeur et lisible */
 body > #food-add-modal.food-add-modal .food-current-meal-card {
   margin: 0 0 12px 0 !important;
@@ -6335,8 +6109,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   body > #food-add-modal.food-add-modal .food-current-meal-row { grid-template-columns: 1fr !important; gap: 2px !important; }
   body > #food-add-modal.food-add-modal .food-current-meal-meta { white-space: normal !important; }
 }
-
-
 
 /* v11.78 — Popup ajout centrée + nettoyage du champ Groq après ajout */
 body > #food-add-modal.food-add-modal.is-open {
@@ -6451,7 +6223,6 @@ body > #food-add-modal.food-add-modal #ia-parse-status:empty {
   }
 }
 
-
 /* v11.80 — DnD repas fiable + lignes Groq fermées par défaut */
 [id^="ia-row-"]:not([data-opened-by-user="1"]) {
   display: none !important;
@@ -6468,7 +6239,6 @@ body.foodnote-meal-drag-active * {
 body.foodnote-meal-drag-active .food-row-compact {
   user-select: none !important;
 }
-
 
 /* v11.81 — Animation fluide pendant le drag & drop repas */
 .food-row-compact.food-drag-origin {
@@ -6518,7 +6288,6 @@ body.foodnote-meal-drag-active .meal-group.meal-drop-active .meal-group-head::af
     transition: none !important;
   }
 }
-
 
 /* v11.82 — Popup ajout : liste repas compacte 4 x 2, nom + quantité uniquement */
 body > #food-add-modal.food-add-modal .food-current-meal-card {
@@ -6681,13 +6450,11 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   .auto-backup-fields { grid-template-columns:1fr !important; }
 }
 
-
 /* v11.86 — garde-fou nutrition */
 .foodnote-guard-invalid {
   border-color: var(--red) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 20%, transparent) !important;
 }
-
 
 /* v11.87 — Journal : 4 cartes macros sticky + code couleur standard */
 #page-journal .journal-main-macros-four {
@@ -6787,7 +6554,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   #page-journal .journal-main-macros-four .macro-lbl { font-size: 9px !important; }
   #page-journal .journal-main-macros-four .macro-icon { width:18px !important; height:18px !important; min-width:18px !important; font-size:10px !important; }
 }
-
 
 /* v11.88 — Macros sticky + code couleur nutrition pastel global */
 /* v0.22.116 — couleurs macros alignées sur le design system FoodNote :
@@ -6917,7 +6683,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   }
 }
 
-
 /* v11.89 — Journal : macros réellement sticky sous le header + garde-fou unité plus souple */
 #page-journal .journal-floating-macro-card {
   position: sticky !important;
@@ -6928,7 +6693,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
 @media (max-width: 700px) {
   #page-journal .journal-floating-macro-card { top: 56px !important; }
 }
-
 
 /* v11.90 — Journal : les 4 cases macros suivent le scroll avec le carrousel */
 #page-journal .journal-hero .journal-floating-macro-card {
@@ -6985,7 +6749,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
     border-radius: 16px !important;
   }
 }
-
 
 /* v11.92 — Dock nutrition Journal : copie fixe fiable pendant le scroll */
 #page-journal .journal-hero .journal-floating-macro-card.is-scroll-fixed {
@@ -7068,7 +6831,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   #journal-macro-fixed-dock .macro-icon { display: none !important; }
   #journal-macro-fixed-dock .macro-val { font-size: 16px !important; }
 }
-
 
 /* v11.93 — Dock scroll : garder exactement le design/couleurs des 4 cases */
 #journal-macro-fixed-dock {
@@ -7174,7 +6936,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   #journal-macro-fixed-dock .macro-lbl { font-size: 9px !important; }
   #journal-macro-fixed-dock .macro-icon { width:18px !important; height:18px !important; min-width:18px !important; font-size:10px !important; }
 }
-
 
 /* v11.94 — Dock scroll nutrition : clone fidèle de la vraie carte */
 #page-journal #journal-macro-fixed-dock {
@@ -7320,7 +7081,6 @@ body > #food-add-modal.food-add-modal .food-current-meal-more {
   #page-journal #journal-macro-fixed-dock .journal-main-macros-four .macro-icon { width: 18px !important; height: 18px !important; min-width: 18px !important; font-size: 10px !important; }
 }
 
-
 /* v11.95 — Photo recette : OCR ingrédients → IA → aliment unique /100g */
 body > #food-add-modal.food-add-modal .recipe-ocr-result {
   margin-top:12px !important;
@@ -7395,7 +7155,6 @@ body > #food-add-modal.food-add-modal .recipe-ai-grid {
   body > #food-add-modal.food-add-modal .recipe-ai-grid { grid-template-columns:1fr !important; }
   body > #food-add-modal.food-add-modal #recipe-ocr-text { max-height:22dvh !important; }
 }
-
 
 /* v11.96 — Recette : caméra centrée comme le mode Photo */
 body > #food-add-modal.food-add-modal.food-add-recipe-mode.is-open {
@@ -7484,7 +7243,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-result .recipe-ocr-result 
   }
 }
 
-
 /* v11.97 — Recette : OCR lisible, sans doublons ni attente floue */
 body > #food-add-modal.food-add-modal.food-add-recipe-mode .recipe-ocr-result,
 body > #food-add-modal.food-add-modal.food-add-recipe-mode #recipe-ai-result {
@@ -7566,7 +7324,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing #recipe-ocr-rea
     max-height: 70dvh !important;
   }
 }
-
 
 /* v11.98 — Recette : vrai bouton de prise de photo */
 body > #food-add-modal.food-add-modal.food-add-recipe-camera #recipe-ocr-read-btn {
@@ -7879,7 +7636,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
 @media(max-width:900px){ #page-historique .history-summary-visual{grid-template-columns:repeat(3,minmax(0,1fr)) !important;} #page-historique .history-summary-card.wide{grid-column:span 2 !important;} }
 @media(max-width:720px){ #page-historique .history-purpose-grid{grid-template-columns:1fr !important;} #page-historique .history-summary-visual{grid-template-columns:repeat(2,minmax(0,1fr)) !important;} #page-historique .history-summary-card.wide{grid-column:1/-1 !important;} #page-historique .history-day-top{flex-direction:column !important;} #page-historique .history-day-actions-preview{justify-content:flex-start !important;} }
 
-
 /* v12.12 — Historique : frise lisible sans survol */
 #page-historique .history-trend-card-readable {
   padding: 14px !important;
@@ -7995,7 +7751,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   #page-historique .history-trend-day-readable .history-trend-stack { height:56px !important; }
 }
 
-
 /* beta 0.16.5 — récap repas colorisé selon le code couleur nutrition */
 .meal-group-recap .meal-recap-kcal,
 .meal-group-recap .meal-recap-prot,
@@ -8014,7 +7769,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   font-weight: 750 !important;
   white-space: nowrap !important;
 }
-
 
 /* FoodNote 0.18.1 — grammes = vérité, unités = raccourci */
 .qty-equivalent {
@@ -8534,7 +8288,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-processing .recipe-crop-st
   .recap-badge-top strong { display:block !important; margin-top:1px !important; }
 }
 
-
 /* FoodNote 0.18.4 — largeur uniforme + rendu plus léger */
 :root { --fn-page-max: 980px; }
 .page:not(#page-onboarding) {
@@ -8557,7 +8310,6 @@ button:hover,
 @media (max-width: 700px) {
   .page:not(#page-onboarding) { max-width: 100% !important; padding-left: 12px !important; padding-right: 12px !important; }
 }
-
 
 /* 0.22.78 — état canonique du flux recette photo */
 body > #food-add-modal.food-add-modal.food-add-recipe-mode #food-add-intent-chooser,
@@ -8619,7 +8371,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-resul
 .objectif-phase-guide-foot{position:relative;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;color:var(--text4);font-size:11.5px;}
 @media(max-width:760px){.objectif-method-info-wrap{justify-content:flex-start;margin:0 0 12px;}.objectif-method-info{width:100%;}.objectif-method-info-button{width:100%;justify-content:center;}.objectif-method-popover{position:static;width:100%;max-height:none;margin-top:8px;box-shadow:0 12px 28px rgba(0,0,0,.24);}.objectif-method-grid-compact{grid-template-columns:1fr;}.objectif-phase-guide{padding:14px;border-radius:19px;}.objectif-phase-guide-head strong{font-size:16px;}}
 
-
 /* 0.22.86 — Méthode de calcul : règles phases compactes, sans scroll horizontal */
 .objectif-method-popover{overflow-x:hidden;}
 .objectif-rules-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;min-width:0;}
@@ -8633,7 +8384,6 @@ body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-resul
 .objectif-rule-metrics dd{margin:0;font-size:10.5px;font-weight:800;line-height:1.18;color:var(--text2);white-space:normal;overflow-wrap:anywhere;}
 .objectif-rules-table-wrap{display:none!important;}
 @media(max-width:760px){.objectif-rules-list{grid-template-columns:1fr;gap:7px;}.objectif-rule-card{padding:9px;border-radius:14px;}.objectif-rule-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}.objectif-rule-metrics dd{font-size:10px;}}
-
 
 /* =========================================================
    FoodNote beta 0.22.181 — thème maître final
@@ -8760,7 +8510,6 @@ header {
 .capture-card,
 .capture-panel,
 .food-add-dialog,
-.quick-foods-card,
 #food-add-modal .journal-add-row,
 #food-add-modal .food-add-head {
   background: var(--bg2) !important;
@@ -8903,7 +8652,6 @@ button:hover,
 
 a { color: var(--green-dark) !important; }
 
-
 /* FoodNote beta 0.22.179 — Journal title flow fix
    Le titre "Aujourd'hui" ne doit plus être injecté via .journal-hero::before :
    le pseudo-élément redevient un simple effet décoratif, et le titre réel
@@ -9037,7 +8785,6 @@ body[data-theme="dark"] #page-journal .journal-floating-macro-card.fn-orbit-nutr
   background: rgba(255,255,255,.14) !important;
 }
 
-
 /* =========================================================
    FoodNote beta 0.22.183 — thème sombre : contraste texte adouci
    Objectif : éviter les blancs trop durs sur fond quasi noir.
@@ -9063,19 +8810,16 @@ body[data-theme="dark"] #page-journal .journal-page-title {
 
 body.dark .fn-section-title,
 body.dark .fn-section-label,
-body.dark .quick-foods-title,
 body.dark .journal-meals-title,
 body.dark .sport-date-title,
 body.dark .fn-section-name,
 body.foodnote-theme-dark .fn-section-title,
 body.foodnote-theme-dark .fn-section-label,
-body.foodnote-theme-dark .quick-foods-title,
 body.foodnote-theme-dark .journal-meals-title,
 body.foodnote-theme-dark .sport-date-title,
 body.foodnote-theme-dark .fn-section-name,
 body[data-theme="dark"] .fn-section-title,
 body[data-theme="dark"] .fn-section-label,
-body[data-theme="dark"] .quick-foods-title,
 body[data-theme="dark"] .journal-meals-title,
 body[data-theme="dark"] .sport-date-title,
 body[data-theme="dark"] .fn-section-name {
@@ -9121,7 +8865,6 @@ body[data-theme="dark"] .macro-target,
 body[data-theme="dark"] small {
   color: #858a83 !important;
 }
-
 
 /* Journal : lignes aliment non cochables
    La ligne reste une entrée de repas active, mais elle n'a plus d'affordance de sélection/suppression par clic.

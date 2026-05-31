@@ -1,3 +1,9 @@
+/*
+ * FoodNote — profil, phases nutritionnelles et réglages utilisateur.
+ * Rôle : gérer les objectifs, le programme de phases, les calculs de profil et les options d’application.
+ * Gère : affichage/sauvegarde du profil, templates de phases, préférences d’interface liées au profil.
+ * Ne doit pas gérer : champs du Journal, stockage direct SQLite, import CIQUAL/OpenFoodFacts ni orchestration IA de repas.
+ */
 
 const PHASE_INFO = {
   reverse: {
@@ -934,13 +940,6 @@ function importerReponseGroq() {
   } else if (typeof parseIAPaste === 'function') parseIAPaste();
   const resp = document.getElementById('groq-response');
   if (resp) resp.style.display = 'none';
-}
-
-function genPrompt() {
-  const q = document.getElementById('f-question');
-  if (q) q.value = 'Estime les valeurs nutritionnelles de mes aliments libres, et fais-moi un récap de la journée.';
-  const iaText = document.getElementById('ia-estimate-text');
-  if (iaText && !iaText.value.trim()) iaText.placeholder = 'Ex : boeuf grillé 120g, pommes sautées 150g, légumes 100g';
 }
 
 function activityLabelFromFactor(v) {

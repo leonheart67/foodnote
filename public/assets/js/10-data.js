@@ -1,22 +1,13 @@
-// Aliments de base disponibles dans la BDD réutilisable.
-// Ils ne sont PAS ajoutés automatiquement à la journée et ne sont jamais précochés.
-// Ils servent seulement de raccourcis dans "Réutiliser un aliment".
-const STARTER_ALIMENTS_FIRST_LAUNCH = [
-  {id:-101, nom:"Pain", kcal100:251, prot100:8.6, gluc100:51, lip100:2.9},
-  {id:-102, nom:"Œuf entier", kcal100:143, prot100:12.6, gluc100:0.7, lip100:9.5},
-  {id:-103, nom:"Pâtes cuites", kcal100:157, prot100:5.8, gluc100:31, lip100:0.9},
-  {id:-104, nom:"Riz cuit", kcal100:130, prot100:2.7, gluc100:28, lip100:0.3},
-  {id:-105, nom:"Pommes de terre cuites", kcal100:87, prot100:1.9, gluc100:20.1, lip100:0.1},
-  {id:-106, nom:"Skyr nature", kcal100:57, prot100:10, gluc100:4, lip100:0.2},
-  {id:-107, nom:"Fromage blanc", kcal100:55, prot100:8, gluc100:3.2, lip100:0.8},
-  {id:-108, nom:"Thon au naturel", kcal100:103, prot100:23, gluc100:0, lip100:1},
-  {id:-109, nom:"Jambon blanc", kcal100:115, prot100:20, gluc100:0.5, lip100:2.5},
-  {id:-110, nom:"Blanc de poulet cuit", kcal100:165, prot100:31, gluc100:0, lip100:3.6},
-  {id:-111, nom:"Banane", kcal100:89, prot100:1.1, gluc100:22.8, lip100:0.3},
-  {id:-112, nom:"Pomme", kcal100:52, prot100:0.3, gluc100:14, lip100:0.2},
-  {id:-113, nom:"Amandes", kcal100:580, prot100:20, gluc100:20, lip100:50},
-  {id:-114, nom:"Huile d’olive", kcal100:884, prot100:0, gluc100:0, lip100:100},
-];
+/*
+ * FoodNote — données statiques générales.
+ * Rôle : déclarer les constantes de référence partagées par l'interface.
+ * Gère : sports de base, catégories et phases nutritionnelles prédéfinies.
+ * Ne doit pas gérer : liste détaillée des aliments de démarrage, sauvegarde SQLite,
+ *                  import CIQUAL/OpenFoodFacts, ni logique d'interface.
+ */
+
+// Les aliments de démarrage sont isolés dans 11-starter-foods.js.
+// ALIMENTS_BASE reste volontairement vide : la base réutilisable vient de SQLite.
 const ALIMENTS_BASE = [];
 
 const SPORTS_BASE = [

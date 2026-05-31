@@ -1,16 +1,17 @@
-/* FoodNote beta 0.22.118 — JOURNAL_ADD_REAL_FREEZE_FIX
- * Contrôleur unique du popup Ajouter.
- * Correctif : recherche après ajout synchronisée avec l’ancien moteur + actions caméra détachées.
+/*
+ * FoodNote — contrôleur du popup Ajouter.
+ * Rôle : piloter l'ouverture, les vues et les actions du popup Ajouter.
+ * Gère : délégation des actions, état visuel du popup, ponts vers recherche, capture et domaine.
+ * Ne doit pas gérer : données SQLite, calcul nutritionnel, import CIQUAL/OpenFoodFacts, ni rendu des pages globales.
  */
 (function FoodNoteFoodAddModalControllerModule(){
   'use strict';
 
-  const VERSION = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const VERSION = 'foodnote_beta_0_22_179_integrated_search_health_20260531';
   const MODES = Object.freeze({
     SEARCH: 'search',
     ESTIMATE: 'estimate',
     RECIPES: 'recipes',
-    QUICK: 'quick',
     BARCODE: 'barcode',
     NUTRITION_TABLE: 'nutrition_table',
     RECIPE: 'recipe',
@@ -23,7 +24,6 @@
     search: 'Recherche aliment',
     estimate: 'Estimation IA',
     recipes: 'Recette',
-    quick: 'Mémoire rapide',
     barcode: 'Scan code-barres',
     nutrition_table: 'Tableau nutritionnel',
     recipe: 'Photo recette',
@@ -46,7 +46,7 @@
       workflow: 'idle',
       expanded: true,
       show: ['#groq-response'],
-      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions']
     },
     recipes: {
       label: 'Recettes enregistrées',
@@ -55,54 +55,47 @@
       show: [],
       hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions']
     },
-    quick: {
-      label: 'Mémoire rapide',
-      workflow: 'idle',
-      expanded: true,
-      show: ['#quick-foods-card'],
-      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions']
-    },
     barcode: {
       label: 'Scan code-barres',
       workflow: 'barcode_scan',
       expanded: true,
       show: ['#barcode-scan-panel'],
-      hide: ['#ocr-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#ocr-panel', '#db-suggestions']
     },
     nutrition_table: {
       label: 'Tableau nutritionnel',
       workflow: 'nutrition_ocr',
       expanded: true,
       show: ['#ocr-panel'],
-      hide: ['#barcode-scan-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#barcode-scan-panel', '#db-suggestions']
     },
     recipe: {
       label: 'Photo recette',
       workflow: 'recipe_ocr',
       expanded: true,
       show: ['#ocr-panel'],
-      hide: ['#barcode-scan-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#barcode-scan-panel', '#db-suggestions']
     },
     capture: {
       label: 'Photo aliment libre',
       workflow: 'capture_workflow',
       expanded: true,
       show: [],
-      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions']
     },
     saved: {
       label: 'Ajout confirmé',
       workflow: 'idle',
       expanded: true,
       show: ['#journal-last-added'],
-      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions', '#quick-foods-card']
+      hide: ['#barcode-scan-panel', '#ocr-panel', '#db-suggestions']
     },
     error: {
       label: 'Erreur',
       workflow: 'error',
       expanded: true,
       show: [],
-      hide: ['#db-suggestions', '#quick-foods-card']
+      hide: ['#db-suggestions']
     }
   });
 
@@ -303,7 +296,7 @@
       if (!el) return;
       if (selector === '#db-suggestions' && keepSearchSuggestionsVisible()) { restoreSearchSuggestionsVisibility(); return; }
       if (el.id === 'journal-last-added' && el.classList.contains('visible')) return;
-      hideElement(el, selector === '#db-suggestions' || selector === '#quick-foods-card');
+      hideElement(el, selector === '#db-suggestions');
       el.classList.remove('fn-modal-surface-active');
     });
   }
@@ -329,14 +322,6 @@
       (VIEW_REGISTRY[name].show || []).forEach(sel => allHide.add(sel));
     });
 
-    // 0.22.109 : en mode recherche, la carte de prédictions/suggestions rapides
-    // appartient au moteur FoodNoteAddV0160. Le registre de vues ne doit pas la
-    // masquer systématiquement, sinon les prédictions alimentaires disparaissent.
-    // On ne force pas son affichage ici : on lui laisse juste le droit d'exister.
-    if (key === MODES.SEARCH) {
-      allHide.delete('#quick-foods-card');
-    }
-
     (view.show || []).forEach(sel => allHide.delete(sel));
     allHide.forEach(hideSurface);
     (view.show || []).forEach(showSurface);
@@ -345,7 +330,7 @@
       badge.textContent = view.label || MODE_LABELS[key] || 'Ajouter';
       badge.dataset.fnModalView = key;
     }
-    m.classList.toggle('fn-modal-view-search-family', key === MODES.SEARCH || key === MODES.ESTIMATE || key === MODES.RECIPES || key === MODES.QUICK);
+    m.classList.toggle('fn-modal-view-search-family', key === MODES.SEARCH || key === MODES.ESTIMATE || key === MODES.RECIPES);
     m.classList.toggle('fn-modal-view-capture-family', key === MODES.BARCODE || key === MODES.NUTRITION_TABLE || key === MODES.RECIPE || key === MODES.CAPTURE);
     emit('view', Object.assign(snapshot(), { view: key, reason }));
   }
@@ -353,8 +338,6 @@
   function hideSearchOutputs(){
     if (keepSearchSuggestionsVisible()) {
       restoreSearchSuggestionsVisibility();
-      const quickKeep = $('quick-foods-card');
-      if (quickKeep) hideElement(quickKeep, true);
       return;
     }
     const suggestions = $('db-suggestions');
@@ -362,8 +345,6 @@
       suggestions.classList.remove('visible');
       suggestions.innerHTML = '';
     }
-    const quick = $('quick-foods-card');
-    if (quick) hideElement(quick, true);
     const modalEl = modal();
     if (modalEl) modalEl.classList.remove('fn-suggestions-open');
   }
@@ -588,14 +569,24 @@
   }
 
 
+  function integratedSearchAvailable(){
+    return !!$('db-search') && !!$('db-suggestions') && typeof window.handleDBSearchInput === 'function' && typeof window.pickDBSuggestion === 'function';
+  }
+
   function runSearchResultFlow(method, args = [], options = {}){
-    const flow = window.FoodNoteFoodAddSearchResults;
-    if (flow && typeof flow[method] === 'function') {
-      try { return flow[method].apply(flow, Array.isArray(args) ? args : [args]); }
+    // Recherche officielle actuelle : moteur intégré du Journal.
+    // Aucun pont vers l'ancien module 99-food-add-search-results-core.js n'est conservé.
+    if (method === 'pick' && typeof window.pickDBSuggestion === 'function') {
+      try { return window.pickDBSuggestion.apply(window, Array.isArray(args) ? args : [args]); }
       catch(e) { showError(e && e.message ? e.message : e); return undefined; }
     }
+    if (method === 'clear') {
+      try { const input = $('db-search'); if (input) input.value = ''; } catch(e) {}
+      try { const box = $('db-suggestions'); if (box) box.innerHTML = ''; } catch(e) {}
+      return true;
+    }
     if (options.fallbackAction) return runAction(options.fallbackAction, args, options);
-    if (options.required) showError(options.error || ('Flux recherche indisponible : ' + method));
+    if (options.required) showError(options.error || ('Flux recherche intégrée indisponible : ' + method));
     return undefined;
   }
 
@@ -987,7 +978,6 @@
     return {
       main: () => handleMainAction(),
       'set-intent': (el) => { const intent = el.dataset.intent || el.dataset.foodIntent || 'search'; setMode(intent, { callLegacy:true, reason:'action-set-intent', noFocus:true }); runUxAction('setIntent', [intent]); scheduleReconcile('action-set-intent', 80); },
-      'open-memory': () => { setMode(MODES.QUICK, { callLegacy:true, reason:'action-open-memory', noFocus:true }); runUxAction('openMemory', [], { required:false }); scheduleReconcile('action-open-memory', 80); },
       'focus-estimate': () => { setMode(MODES.ESTIMATE, { callLegacy:true, reason:'action-focus-estimate' }); runUxAction('focusEstimateText', [], { required:true, error:'Saisie estimation indisponible.' }); scheduleReconcile('action-focus-estimate', 80); },
       'estimate-run': () => { setMode(MODES.ESTIMATE, { callLegacy:true, reason:'action-estimate-run' }); runUxAction('runEstimate', [], { required:true, error:'Estimation IA indisponible.' }); scheduleReconcile('action-estimate-run', 120); },
       'open-plate-photo': () => { markWorkflow(MODES.CAPTURE, { reason:'action-open-plate-photo' }); runCaptureFlow('openPlatePhoto', [], { required:true, error:'Photo de plat indisponible.', fallbackAction:'openPlatePhoto' }); scheduleReconcile('action-open-plate-photo', 100); },
@@ -997,7 +987,6 @@
       'open-recipes-list': () => { setMode(MODES.RECIPES, { callLegacy:true, reason:'action-open-recipes-list', noFocus:true }); runUxAction('openRecipesList', [], { required:true, error:'Liste recettes indisponible.' }); scheduleReconcile('action-open-recipes-list', 100); },
       'toggle-source': (el) => { runAction('toggleFoodSourceFilter', [el.dataset.sourceFilter], { required:true, error:'Filtre de source indisponible.' }); scheduleReconcile('action-toggle-source', 50); },
       'set-meal': (el) => { state.targetMeal = el.dataset.foodMeal || state.targetMeal || ''; runAction('setFoodAddTargetMeal', [state.targetMeal], { required:true, error:'Sélection du repas indisponible.' }); scheduleReconcile('action-set-meal', 50); },
-      'quick-panel': (el) => { runAction('setQuickFoodsPanel', [el.dataset.quickPanel || 'recents'], { required:true, error:'Mémoire rapide indisponible.' }); scheduleReconcile('action-quick-panel', 50); },
       'search-pick': actionSearchPick,
       'history-add': actionHistoryAdd,
       'search-clear': actionSearchClear,
@@ -1163,11 +1152,6 @@
     if (suggestions) {
       suggestions.removeAttribute('aria-hidden');
       suggestions.style.removeProperty('display');
-    }
-    const quick = $('quick-foods-card');
-    if (quick) {
-      quick.removeAttribute('aria-hidden');
-      quick.style.removeProperty('display');
     }
     return hadBlockingView || hadSavedView;
   }
@@ -1374,7 +1358,7 @@
     if (!document.__fnFoodAddModalControllerActionDelegation) issues.push('action_delegation_missing');
     if (!window.FoodNoteFoodAddDomain) issues.push('domain_core_missing');
     if (!window.FoodNoteFoodCaptureFlows) issues.push('capture_flows_missing');
-    if (!window.FoodNoteFoodAddSearchResults) issues.push('search_results_core_missing');
+    if (!integratedSearchAvailable()) issues.push('integrated_search_missing');
     if (m && state.lastView && m.dataset.fnModalView !== state.lastView) issues.push('modal_view_dataset_mismatch');
     if (state.busy && state.lastAction && !isActionLocked(state.lastAction)) issues.push('busy_without_action_lock');
     if (state.observer) issues.push('controller_mutation_observer_active');
@@ -1393,7 +1377,6 @@
         modal: !!modal(),
         search: !!$('db-search'),
         suggestions: !!$('db-suggestions'),
-        quick: !!$('quick-foods-card'),
         ocr: !!$('ocr-panel'),
         barcode: !!$('barcode-scan-panel'),
         capture: !!$('capture-workflow-modal'),
@@ -1402,8 +1385,7 @@
         inlineModalInputHandlers: qa('#food-add-modal [oninput], #food-add-modal [onchange]').length,
         quantityActions: qa('#db-quantity-panel [data-food-add-action]').length,
         searchResultActions: qa('#db-suggestions [data-food-add-action="search-pick"]').length,
-        quickHistoryActions: qa('#quick-foods-card [data-food-add-action="history-add"]').length,
-        searchResultsCore: !!window.FoodNoteFoodAddSearchResults,
+        integratedSearch: integratedSearchAvailable(),
         actionDelegationInstalled: !!document.__fnFoodAddModalControllerActionDelegation,
         searchInputBridge: !!document.__fnFoodAddModalControllerSearchInputBridge,
         blockedActions: state.blockedActions,
@@ -1412,7 +1394,7 @@
         observerDisabledReason: state.observerDisabledReason,
         eventDrivenReconcile: true,
         searchAfterAddRecovery: true,
-        legacySearchRecovery: true,
+        integratedSearchRecovery: true,
         detachedCaptureActionBridge: true,
         activeActionLocks: Object.keys(state.actionLocks || {}).length,
         currentView: state.lastView,

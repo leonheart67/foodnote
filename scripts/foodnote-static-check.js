@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 
+/*
+ * FoodNote — contrôle statique du dépôt.
+ * Rôle : vérifier que l’archive complète reste cohérente après nettoyage.
+ * Gère : syntaxe JS, références d’assets, contrats frontend et métadonnées de version.
+ * Ne doit pas gérer : données utilisateur, base SQLite, appels réseau CIQUAL/OpenFoodFacts ni tests visuels.
+ */
+
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
@@ -513,11 +520,13 @@ function checkJournalMutationRefreshCore() {
     "foodnoteRefreshJournalMutationViews('food-edit-save'",
     'stats: false',
     'sportSummary: false',
-    'quickFoods: false',
     'phaseMini: false',
+    'notification: false',
+    'dashboard: false',
     "if (opts.sportSummary) foodnoteSafeViewCall('renderSportPageSummary'",
-    "if (opts.quickFoods) foodnoteSafeViewCall('renderQuickFoods'",
     "if (opts.phaseMini) foodnoteSafeViewCall('renderJournalPhaseMini'",
+    "if (opts.notification) foodnoteSafeViewCall('renderFoodnoteNotificationBadge'",
+    "if (opts.dashboard) foodnoteSafeViewCall('renderJournalDashboardBadges'",
     'if (opts.stats) refreshFoodnoteStatsAfterJournalMutation()'
   ];
   for (const token of required) {
@@ -530,6 +539,10 @@ function checkJournalMutationRefreshCore() {
   ];
   for (const token of forbiddenNutrition) {
     if (code.includes(token)) errors.push(`Ancien rafraîchissement direct encore présent dans 30: ${token}`);
+  }
+
+  for (const token of ['quickFoods', 'renderQuickFoods']) {
+    if (code.includes(token)) errors.push(`Mémoire rapide legacy encore référencée dans 30: ${token}`);
   }
 
   const smoke = path.join(JS_DIR, '00-foodnote-smoke-tests.js');
@@ -577,11 +590,14 @@ function checkJournalMutationRefreshCore() {
       if (!o.includes(token)) errors.push(`Sélection date non centralisée dans 80: ${token}`);
     }
     for (const token of [
-      "journal-date-select', { journalCarousel:true, sportCarousel:true, quickFoods:true }",
+      "journal-date-select', { journalCarousel:true, sportCarousel:true }",
       "sport-date-select', { sportSummary:true, sportCarousel:true, journalCarousel:true }",
       "journal-open-today', { journalCarousel:true, phaseMini:true }"
     ]) {
       if (!o.includes(token)) errors.push(`Options refresh date incomplètes dans 80: ${token}`);
+    }
+    for (const token of ['quickFoods', 'renderQuickFoods', 'quick-foods']) {
+      if (o.includes(token)) errors.push(`Mémoire rapide legacy encore référencée dans 80: ${token}`);
     }
   }
 }
@@ -781,6 +797,8 @@ function checkMealSelectionUiGuard() {
   const nutrition = path.join(JS_DIR, '30-nutrition-foods.js');
   const ux = path.join(JS_DIR, '95-food-add-clean.js');
   [nutrition, ux].forEach(f => exists(f, rel(f)));
+  const cssFiles = walk(CSS_DIR, '.css');
+  const cssCode = cssFiles.map(f => read(f)).join('\n');
   if (fs.existsSync(nutrition)) {
     const code = read(nutrition);
     for (const token of [
@@ -801,6 +819,11 @@ function checkMealSelectionUiGuard() {
     ]) {
       if (!code.includes(token)) errors.push(`Sélection repas visible absente côté UX: ${token}`);
     }
+  }
+  // Le fichier legacy 30-food-add-component.css a été supprimé : les styles repas
+  // peuvent désormais être répartis dans les feuilles globales/modales.
+  for (const token of ['food-meal-select', 'meal-toggle']) {
+    if (!cssCode.includes(token)) errors.push(`Style repas absent dans les CSS actifs: ${token}`);
   }
 }
 
@@ -860,7 +883,7 @@ function main() {
     errors.forEach(e => console.error('\n- ' + e));
     process.exit(1);
   }
-  console.log('OK foodnote-static-check — syntaxe JS, références index, contrats capture/suppression, métadonnées build/runtime/déploiement/startup/modules, inventaire assets/vendor, rafraîchissement journal centralisé/callers/sélections date, quantité finale DOM/recherche visible verrouillée/repas UI/persistance repas, sélection Capture quantité, fallback diagnostic.');
+  console.log('OK foodnote-static-check — syntaxe JS, références index, contrats capture/suppression, métadonnées build/runtime/déploiement/startup/modules, inventaire assets/vendor, rafraîchissement journal centralisé sans Mémoire rapide legacy, callers/sélections date, quantité finale DOM/recherche visible verrouillée/repas UI/persistance repas, sélection Capture quantité, fallback diagnostic.');
 }
 
 main();

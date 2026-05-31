@@ -1,0 +1,317 @@
+/*
+ * FoodNote — système de rappel intégré au Journal.
+ * Rôle : styliser le bilan quotidien, ses rappels et ses actions dans la page.
+ * Gère : panneau inline, cartes de rappel, accomplissements, formulaire de bilan rapide.
+ * Ne doit pas gérer : logique de calcul des rappels, sauvegarde SQLite, imports CIQUAL/OpenFoodFacts.
+ */
+
+/* Sécurité de migration : les anciennes bulles/modal globales ne doivent plus recouvrir l'app. */
+#fn-notification-badge,
+#fn-notification-modal {
+  display: none !important;
+}
+
+.fn-daily-status-panel[hidden] {
+  display: none !important;
+}
+
+.fn-daily-status-panel {
+  margin: 10px 0 14px !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 82%, transparent) !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--green) 11%, transparent), transparent 44%),
+    color-mix(in srgb, var(--bg2) 92%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 10px 22px rgba(0,0,0,.07) !important;
+  overflow: hidden !important;
+}
+
+.fn-daily-status-panel.is-compact {
+  cursor: default !important;
+}
+
+.fn-daily-status-summary {
+  display: grid !important;
+  grid-template-columns: auto minmax(0,1fr) auto !important;
+  gap: 11px !important;
+  align-items: center !important;
+  padding: 11px 13px !important;
+}
+
+.fn-daily-status-icon {
+  width: 34px !important;
+  height: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--green) 14%, var(--bg2)) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 24%, var(--border2)) !important;
+  font-size: 17px !important;
+  flex-shrink: 0 !important;
+}
+
+.fn-daily-status-copy {
+  min-width: 0 !important;
+}
+
+.fn-daily-status-title {
+  display: block !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+  letter-spacing: -.01em !important;
+}
+
+.fn-daily-status-text {
+  margin-top: 2px !important;
+  font-size: 11.5px !important;
+  line-height: 1.25 !important;
+  color: var(--text3) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.fn-daily-status-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+}
+
+.fn-daily-status-actions button,
+.fn-daily-status-panel .fn-notification-action,
+.fn-daily-status-panel .fn-notification-small-action,
+.fn-daily-status-panel .fn-review-actions-inline button,
+.fn-daily-status-panel .fn-review-choice-grid button,
+.fn-daily-status-panel .fn-review-nav button,
+.fn-daily-status-panel .fn-notification-settings button {
+  border: 1px solid color-mix(in srgb, var(--green) 42%, var(--border2)) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--green) 12%, var(--bg2)) !important;
+  color: var(--text) !important;
+  padding: 7px 11px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+}
+
+.fn-daily-status-actions button.primary,
+.fn-daily-status-panel .fn-notification-action,
+.fn-daily-status-panel .fn-review-next {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 78%, white 4%), color-mix(in srgb, var(--green) 88%, black 5%)) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--green) 70%, white 8%) !important;
+}
+
+.fn-daily-status-panel.is-warning {
+  border-color: color-mix(in srgb, var(--orange) 34%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--orange) 14%, transparent), transparent 44%),
+    color-mix(in srgb, var(--bg2) 92%, transparent) !important;
+}
+
+.fn-daily-status-panel.is-warning .fn-daily-status-icon {
+  background: color-mix(in srgb, var(--orange) 16%, var(--bg2)) !important;
+  border-color: color-mix(in srgb, var(--orange) 30%, var(--border2)) !important;
+}
+
+.fn-daily-status-panel.is-success {
+  border-color: color-mix(in srgb, var(--green) 30%, var(--border2)) !important;
+}
+
+.fn-daily-status-panel.is-open {
+  padding: 12px !important;
+}
+
+.fn-daily-status-panel.is-open .fn-daily-status-summary {
+  padding: 0 0 10px !important;
+}
+
+.fn-daily-status-panel .fn-notification-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  padding: 0 0 11px !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border2) 72%, transparent) !important;
+}
+
+.fn-daily-status-panel .fn-notification-title {
+  font-size: 16px !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+  letter-spacing: -.02em !important;
+}
+
+.fn-daily-status-panel .fn-notification-sub,
+.fn-daily-status-panel .fn-notification-foot,
+.fn-daily-status-panel .fn-notification-card-text,
+.fn-daily-status-panel .fn-review-step-sub {
+  color: var(--text3) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+.fn-daily-status-panel .fn-notification-close {
+  width: 30px !important;
+  height: 30px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 82%, transparent) !important;
+  background: color-mix(in srgb, var(--bg) 82%, transparent) !important;
+  color: var(--text3) !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+.fn-daily-status-panel .fn-notification-list {
+  display: grid !important;
+  gap: 9px !important;
+  margin-top: 11px !important;
+}
+
+.fn-daily-status-panel .fn-notification-card {
+  display: grid !important;
+  grid-template-columns: auto minmax(0,1fr) !important;
+  gap: 10px !important;
+  align-items: flex-start !important;
+  padding: 10px !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 78%, transparent) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--bg) 74%, transparent) !important;
+  box-shadow: none !important;
+}
+
+.fn-daily-status-panel .fn-notification-card-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 12px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: color-mix(in srgb, var(--green) 12%, var(--bg2)) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 24%, var(--border2)) !important;
+  font-size: 15px !important;
+}
+
+.fn-daily-status-panel .fn-notification-card-title {
+  color: var(--text) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1.2 !important;
+}
+
+.fn-daily-status-panel .fn-notification-row-actions,
+.fn-daily-status-panel .fn-notification-section-row,
+.fn-daily-status-panel .fn-review-actions-inline,
+.fn-daily-status-panel .fn-review-choice-grid,
+.fn-daily-status-panel .fn-review-nav {
+  display: flex !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  margin-top: 9px !important;
+}
+
+.fn-daily-status-panel .fn-notification-section-row {
+  justify-content: space-between !important;
+  margin-top: 4px !important;
+}
+
+.fn-daily-status-panel .fn-notification-settings {
+  margin-top: 10px !important;
+  padding: 9px 10px !important;
+  border-radius: 15px !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 78%, transparent) !important;
+  background: color-mix(in srgb, var(--bg) 72%, transparent) !important;
+  color: var(--text3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 9px !important;
+  flex-wrap: wrap !important;
+}
+
+.fn-daily-status-panel .fn-notification-settings input {
+  width: 52px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border2) !important;
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  padding: 6px 7px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+.fn-daily-status-panel .fn-review-progress {
+  height: 6px !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+  margin: 11px 0 !important;
+  background: color-mix(in srgb, var(--text) 8%, transparent) !important;
+}
+
+.fn-daily-status-panel .fn-review-progress span {
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, var(--green), color-mix(in srgb, var(--orange) 72%, var(--green))) !important;
+}
+
+.fn-daily-status-panel .fn-review-body {
+  padding: 10px !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--bg) 70%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border2) 70%, transparent) !important;
+}
+
+.fn-daily-status-panel .fn-review-step-icon {
+  font-size: 24px !important;
+  margin-bottom: 5px !important;
+}
+
+.fn-daily-status-panel .fn-review-step-title {
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  color: var(--text) !important;
+}
+
+.fn-daily-status-panel .fn-review-input,
+.fn-daily-status-panel .fn-review-textarea {
+  width: 100% !important;
+  margin-top: 9px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--border2) !important;
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  padding: 10px 11px !important;
+  font: inherit !important;
+}
+
+.fn-daily-status-panel .fn-review-textarea {
+  min-height: 86px !important;
+  resize: vertical !important;
+}
+
+@media (max-width: 560px) {
+  .fn-daily-status-panel {
+    margin: 8px 0 11px !important;
+    border-radius: 18px !important;
+  }
+  .fn-daily-status-summary {
+    grid-template-columns: auto minmax(0,1fr) !important;
+    padding: 10px !important;
+  }
+  .fn-daily-status-actions {
+    grid-column: 1 / -1 !important;
+    justify-content: flex-start !important;
+  }
+  .fn-daily-status-text {
+    white-space: normal !important;
+  }
+}

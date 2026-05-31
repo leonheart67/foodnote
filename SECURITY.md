@@ -15,6 +15,13 @@ FoodNote peut contenir :
 
 Ces données ne doivent pas être commités dans GitHub.
 
+## Bonnes pratiques
+
+- Garder `.env` hors Git.
+- Garder `database/` hors Git.
+- Utiliser `FOODNOTE_ALLOW_UI_SECRET_STORAGE=0` par défaut pour éviter de stocker une clé IA depuis l'interface.
+- Ne pas exposer FoodNote directement sur Internet sans reverse proxy, authentification et HTTPS.
+
 ## Signaler un problème
 
 Ouvrez une issue GitHub si le problème n'expose pas de secret. Pour un problème sensible, contactez le mainteneur par un canal privé si disponible.
