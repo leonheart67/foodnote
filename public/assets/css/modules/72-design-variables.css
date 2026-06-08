@@ -1,0 +1,76 @@
+/*
+ * FoodNote — pont de variables
+ * Rôle : Relier les anciens noms de variables aux tokens design actuels pour éviter les ruptures.
+ * Ne doit pas gérer : les styles visuels détaillés ou la logique JS.
+ */
+
+:root,
+body[data-theme="light"],
+body[data-theme="dark"],
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  
+  --bg:   var(--fn-ds-bg);
+  --bg2:  var(--fn-ds-surface);
+  --bg3:  var(--fn-ds-surface-soft);
+  --bg4:  var(--fn-ds-surface-muted);
+  --card: var(--fn-ds-surface);
+
+  
+  --text:  var(--fn-ds-text);
+  --text2: var(--fn-ds-text-soft);
+  --text3: var(--fn-ds-muted);
+  --text4: var(--fn-ds-muted);
+  --muted: var(--fn-ds-muted);
+
+  
+  --border:  var(--fn-ds-border);
+  --border2: var(--fn-ds-border-strong);
+
+  
+  --green:      var(--fn-ds-accent);
+  --green-dark: var(--fn-ds-accent-strong);
+  --green-bg:   var(--fn-ds-accent-soft);
+  --green-mid:  color-mix(in srgb, var(--fn-ds-accent) 35%, var(--fn-ds-surface));
+
+  
+  --orange:      var(--fn-ds-warning);
+  --orange-dark: color-mix(in srgb, var(--fn-ds-warning) 75%, #000);
+  --orange-bg:   color-mix(in srgb, var(--fn-ds-warning) 14%, var(--fn-ds-surface));
+  --red:         var(--fn-ds-danger);
+  --red-dark:    color-mix(in srgb, var(--fn-ds-danger) 75%, #000);
+  --red-bg:      color-mix(in srgb, var(--fn-ds-danger) 12%, var(--fn-ds-surface));
+  --blue:        var(--fn-ds-info);
+  --blue-dark:   color-mix(in srgb, var(--fn-ds-info) 75%, #000);
+  --blue-bg:     color-mix(in srgb, var(--fn-ds-info) 12%, var(--fn-ds-surface));
+  --pill-bg:     color-mix(in srgb, var(--fn-ds-text) 8%, transparent);
+
+  
+  --fn-macro-kcal: var(--fn-ds-kcal);
+  --fn-macro-prot: var(--fn-ds-prot);
+  --fn-macro-gluc: var(--fn-ds-gluc);
+  --fn-macro-lip:  var(--fn-ds-lip);
+
+  
+  --fn-page-card-bg: var(--fn-ds-surface);
+  --fn-page-sub-bg:  var(--fn-ds-surface-soft);
+  --fn-page-soft-bg: var(--fn-ds-bg-soft);
+  --fn-page-border:  var(--fn-ds-border);
+
+  
+  --calm-font:         var(--fn-ds-font);
+  --calm-radius-xl:    var(--fn-ds-radius-xl);
+  --calm-radius-lg:    var(--fn-ds-radius-lg);
+  --calm-radius-md:    var(--fn-ds-radius-md);
+  --calm-page-max:     var(--fn-ds-page-width);
+  --calm-line:         var(--fn-ds-border);
+  --calm-green:        var(--fn-ds-accent);
+  --calm-green-strong: var(--fn-ds-accent-strong);
+  --calm-mint:         var(--fn-ds-accent-soft);
+  --calm-blue:         var(--fn-ds-info);
+  --calm-orange:       var(--fn-ds-warning);
+  --calm-red:          var(--fn-ds-danger);
+  --calm-surface:      var(--fn-ds-surface);
+  --calm-surface-2:    var(--fn-ds-bg-soft);
+  --calm-soft:         var(--fn-ds-surface-soft);
+}

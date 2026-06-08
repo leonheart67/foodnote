@@ -1,0 +1,290 @@
+/*
+ * FoodNote — récapitulatif et tableaux de bord
+ * Rôle : Gérer les cartes Récap, badges, tuiles, alertes, indicateurs et grilles du récapitulatif.
+ * Ne doit pas gérer : le Journal, la capture alimentaire ou la persistance des données.
+ */
+
+#page-recap .stats-hero-card.recap-hero-card {
+  padding: 13px !important;
+  margin-bottom: 10px !important;
+}
+
+#page-recap .stats-hero-title {
+  font-size: 17px !important;
+}
+
+#page-recap .stats-hero-sub {
+  font-size: 11px !important;
+}
+
+#page-recap .stats-tile-grid {
+  gap: 8px !important;
+}
+
+#page-recap .stats-tile {
+  padding: 10px !important;
+  border-radius: 12px !important;
+  min-height: 0 !important;
+}
+
+#page-recap .stats-tile-value {
+  font-size: 18px !important;
+  line-height: 1.05 !important;
+}
+
+#page-recap .stats-tile-label,
+#page-recap .stats-tile-foot {
+  font-size: 10.5px !important;
+}
+
+#page-recap .stats-progress {
+  height: 4px !important;
+  margin-top: 7px !important;
+}
+
+#page-recap .recap-card {
+  padding: 12px !important;
+}
+
+#page-recap .recap-alert {
+  padding: 8px !important;
+  border-radius: 11px !important;
+}
+
+#page-recap .recap-alert-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+#page-recap .recap-alert-title {
+  font-size: 12px !important;
+}
+
+#page-recap .recap-alert-text {
+  font-size: 11px !important;
+}
+
+#page-recap .recap-week-grid {
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)) !important;
+  gap: 7px !important;
+}
+
+#page-recap .recap-mini {
+  padding: 9px !important;
+  border-radius: 11px !important;
+}
+
+#page-recap .recap-mini-val {
+  font-size: 16px !important;
+}
+
+#page-recap .recap-mini-label {
+  font-size: 10.5px !important;
+}
+
+.recap-dashboard-compact-card {
+  padding: 12px !important;
+  margin-bottom: 10px !important;
+}
+
+.recap-badge-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin-bottom: 9px !important;
+}
+
+.recap-badge-title {
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  color: var(--text) !important;
+}
+
+.recap-badge-help {
+  font-size: 10.5px !important;
+  color: var(--text4) !important;
+  margin-top: 2px !important;
+}
+
+.recap-badge-edit-btn,
+.recap-badge-editor-actions button {
+  border: 0.5px solid var(--border2) !important;
+  background: var(--bg) !important;
+  color: var(--text3) !important;
+  border-radius: 999px !important;
+  padding: 5px 9px !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+}
+
+.recap-badge-editor-actions button.primary {
+  background: var(--green) !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+
+.recap-badge-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)) !important;
+  gap: 7px !important;
+}
+
+.recap-badge-compact {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 12px !important;
+  border: 0.5px solid var(--border2) !important;
+  background: color-mix(in srgb, var(--bg) 82%, transparent) !important;
+  min-width: 0 !important;
+}
+
+.recap-badge-compact[role="button"] {
+  cursor: pointer !important;
+}
+
+.recap-badge-icon {
+  width: 25px !important;
+  height: 25px !important;
+  border-radius: 9px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  background: var(--bg2) !important;
+  border: 0.5px solid var(--border2) !important;
+  font-size: 13px !important;
+}
+
+.recap-badge-text {
+  min-width: 0 !important;
+  flex: 1 !important;
+}
+
+.recap-badge-top {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 7px !important;
+  font-size: 10.5px !important;
+  color: var(--text4) !important;
+}
+
+.recap-badge-top strong {
+  font-size: 13px !important;
+  color: var(--text) !important;
+  white-space: nowrap !important;
+}
+
+.recap-badge-sub {
+  font-size: 10.5px !important;
+  color: var(--text3) !important;
+  margin-top: 2px !important;
+  line-height: 1.25 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.recap-badge-track {
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: var(--bg2) !important;
+  overflow: hidden !important;
+  margin-top: 6px !important;
+}
+
+.recap-badge-track span {
+  display: block !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: var(--green) !important;
+}
+
+.recap-badge-compact.is-phase .recap-badge-track span {
+  background: var(--phase-color, var(--green)) !important;
+}
+
+.recap-badge-compact.macro-kcal .recap-badge-track span { background: var(--fn-macro-kcal, var(--fn-ds-text)) !important; }
+
+.recap-badge-compact.macro-prot .recap-badge-track span { background: var(--fn-macro-prot, #c15f57) !important; }
+
+.recap-badge-compact.macro-gluc .recap-badge-track span { background: var(--fn-macro-gluc, #5b8caf) !important; }
+
+.recap-badge-compact.macro-lip .recap-badge-track span { background: var(--fn-macro-lip, #c79a3f) !important; }
+
+.recap-badge-empty {
+  grid-column: 1 / -1 !important;
+  font-size: 11px !important;
+  color: var(--text4) !important;
+  padding: 8px !important;
+  border: 0.5px dashed var(--border2) !important;
+  border-radius: 12px !important;
+}
+
+.recap-badge-editor {
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 0.5px solid var(--border2) !important;
+}
+
+.recap-badge-editor-head {
+  font-size: 11px !important;
+  color: var(--text4) !important;
+  margin-bottom: 7px !important;
+}
+
+.recap-badge-editor-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.recap-badge-edit-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 8px !important;
+  border-radius: 11px !important;
+  background: var(--bg) !important;
+  border: 0.5px solid var(--border2) !important;
+  font-size: 11px !important;
+  color: var(--text3) !important;
+}
+
+.recap-badge-edit-name {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.recap-badge-edit-arrows {
+  display: flex !important;
+  gap: 3px !important;
+}
+
+.recap-badge-edit-arrows button {
+  border: 0.5px solid var(--border2) !important;
+  background: var(--bg2) !important;
+  color: var(--text3) !important;
+  border-radius: 8px !important;
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 11px !important;
+}
+
+.recap-badge-editor-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+  margin-top: 8px !important;
+}
+
+@media (max-width: 620px) {
+  .recap-badge-grid { grid-template-columns: 1fr 1fr !important; }
+  .recap-badge-top { display:block !important; }
+  .recap-badge-top strong { display:block !important; margin-top:1px !important; }
+}

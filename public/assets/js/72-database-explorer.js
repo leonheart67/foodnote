@@ -104,10 +104,10 @@
     const m = foodMacros(food);
     return `
       <div class="fn-db-macros" aria-label="Valeurs pour 100 grammes">
-        <span class="fn-db-macro">🔥 ${escapeHTML(m.kcal)} kcal</span>
-        <span class="fn-db-macro">🍖 ${escapeHTML(m.prot)}g</span>
-        <span class="fn-db-macro">🍞 ${escapeHTML(m.gluc)}g</span>
-        <span class="fn-db-macro">🥑 ${escapeHTML(m.lip)}g</span>
+        <span class="fn-db-macro fn-mini-badge fn-mini-badge-kcal">🔥 ${escapeHTML(m.kcal)} kcal</span>
+        <span class="fn-db-macro fn-mini-badge fn-mini-badge-protein">🍖 ${escapeHTML(m.prot)}g</span>
+        <span class="fn-db-macro fn-mini-badge fn-mini-badge-carbs">🍞 ${escapeHTML(m.gluc)}g</span>
+        <span class="fn-db-macro fn-mini-badge fn-mini-badge-fat">🥑 ${escapeHTML(m.lip)}g</span>
       </div>`;
   }
 

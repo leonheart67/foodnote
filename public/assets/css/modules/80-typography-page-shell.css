@@ -1,0 +1,140 @@
+/*
+ * FoodNote — typographie et shell de pages
+ * Rôle : Définir la typographie commune, les titres, les espacements de pages et les panneaux transverses.
+ * Ne doit pas gérer : les composants métier spécialisés.
+ */
+
+html body .fn-btn:active, html body .fn-pill:active { transform: translateY(1px) scale(.985) !important; }
+
+html body .page.active { animation: fnFadeUp .35s ease both; }
+
+html body .fn-v2-panel-pad {
+  padding: clamp(16px, 2.2vw, 22px);
+}
+
+html body .fn-v2-hero-main,
+html body .fn-v2-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+html body .fn-v2-hero p,
+html body .fn-v2-section-head small {
+  margin: 0;
+  font-size: .94rem;
+}
+
+html body .fn-v2-section-head {
+  margin: 0 0 14px;
+}
+
+html body .fn-v2-section-head-large > span {
+  width: 48px;
+  height: 48px;
+}
+
+html body .fn-v2-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+html body .fn-v2-indicator-grid,
+html body .fn-v2-two-col,
+html body .fn-v2-rule-grid,
+html body .fn-v2-advice-grid {
+  display: grid;
+  gap: 12px;
+}
+
+html body .fn-v2-indicator-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+html body .fn-v2-indicator-grid.fn-v2-grid-five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+html body .fn-v2-two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html body .fn-v2-rule-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html body .fn-v2-indicator-copy {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+html body .fn-v2-trend-card {
+  min-height: 104px;
+}
+
+html body .fn-v2-advice-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+html body .fn-v2-advice-card,
+html body .fn-v2-rule-card {
+  padding: 14px;
+}
+
+html body .fn-v2-details {
+  padding: 0;
+}
+
+html body .fn-v2-details-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: clamp(15px, 2vw, 20px);
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+html body .fn-v2-details-summary::-webkit-details-marker {
+  display: none;
+}
+
+html body .fn-v2-details[open] .fn-v2-details-chevron {
+  transform: rotate(180deg);
+}
+
+html body .fn-v2-details-body {
+  padding: 0 clamp(15px, 2vw, 20px) clamp(15px, 2vw, 20px);
+  display: grid;
+  gap: 12px;
+}
+
+html body .fn-v2-program-builder {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  html body .fn-v2-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  html body .fn-v2-indicator-grid,
+  html body .fn-v2-two-col,
+  html body .fn-v2-rule-grid,
+  html body .fn-v2-advice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+html body #page-recettes .recipe-hero-actions .btn-primary:hover,
+html body #page-recettes .recipe-save-row .btn-primary:hover {
+  filter: brightness(.98);
+}

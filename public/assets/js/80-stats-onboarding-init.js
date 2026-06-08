@@ -1272,24 +1272,33 @@ function foodnoteSimpleRelativeDayLabel(iso, current) {
   return '';
 }
 function renderJournalDayCarousel() {
+  // Base visuelle 0.23.0 : affichage direct de 7 jours, sans flèches de navigation visibles côté CSS.
   const box = document.getElementById('journal-day-carousel');
   const dateEl = document.getElementById('f-date');
   if (!box || !dateEl) return;
   const current = dateEl.value || new Date().toISOString().slice(0,10);
-  const offsets = [-2, -1, 0, 1, 2];
+  const offsets = [-3, -2, -1, 0, 1, 2, 3];
   box.innerHTML = offsets.map(off => {
     const iso = foodnoteISODateOffset(current, off);
     const preview = foodnoteDayPreview(iso);
     const active = iso === current ? ' active' : '';
     const today = iso === (typeof foodnoteLocalISODate === 'function' ? foodnoteLocalISODate() : new Date().toISOString().slice(0,10)) ? ' is-today' : '';
     const hasEntry = preview.hasEntry ? ' has-entry' : ' is-empty';
+    const _tgt = (window.PROFIL && Number(window.PROFIL.cibleKcal)) || 0;
+    let adh = '';
+    if (preview.hasEntry && _tgt > 0) {
+      const r = (Number(preview.kcal) || 0) / _tgt;
+      adh = r > 1.08 ? ' adh-over' : (r < 0.92 ? ' adh-under' : ' adh-ok');
+    } else if (preview.hasEntry) {
+      adh = ' adh-logged';
+    }
     const rel = foodnoteSimpleRelativeDayLabel(iso, current);
     const title = preview.hasEntry
       ? `${formatDate(iso)} · ${Math.round(preview.kcal || 0)} kcal · ${preview.foods || 0} aliment(s)`
       : `${formatDate(iso)} · aucune saisie`;
     const marker = preview.hasEntry ? '<span class="journal-simple-dot" aria-label="journée saisie"></span>' : '<span class="journal-simple-dot is-empty" aria-hidden="true"></span>';
     const sport = preview.hasSport ? '<span class="journal-simple-sport" title="Sport saisi">🏃</span>' : '';
-    return `<button type="button" class="journal-day-card journal-simple-day-card${active}${today}${hasEntry}" onclick="selectJournalDate('${iso}')" title="${title}" aria-label="${title}">
+    return `<button type="button" class="journal-day-card journal-simple-day-card${active}${today}${hasEntry}${adh}" onclick="selectJournalDate('${iso}')" title="${title}" aria-label="${title}">
       <span class="journal-simple-weekday">${foodnoteDayShort(iso)}</span>
       <span class="journal-simple-number">${foodnoteDayNumber(iso)}</span>
       <span class="journal-simple-month">${foodnoteDayMonth(iso)}</span>
@@ -1470,7 +1479,7 @@ function renderSportDayCarousel() {
   if (!box) return;
   syncSportDateProxy();
   const current = document.getElementById('sport-f-date')?.value || document.getElementById('f-date')?.value || foodnoteLocalISODate?.() || new Date().toISOString().slice(0,10);
-  const offsets = [-2, -1, 0, 1, 2];
+  const offsets = [-3, -2, -1, 0, 1, 2, 3];
   box.innerHTML = offsets.map(off => {
     const iso = foodnoteISODateOffset(current, off);
     const preview = foodnoteSportDayPreview(iso);

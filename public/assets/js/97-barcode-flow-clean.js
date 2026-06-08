@@ -1,8 +1,7 @@
 /*
- * FoodNote — flux code-barres.
- * Rôle : gérer le retour propre entre scan code-barres et préparation d’ajout.
- * Gère : états UI du scan, remplissage produit et retour vers quantité/repas/ajout.
- * Ne doit pas gérer : moteur nutritionnel, thèmes globaux, import CIQUAL/OpenFoodFacts ni stockage SQLite direct.
+ * FoodNote — code-barres retour ajout runtime
+ * Rôle : Gérer le retour du scan code-barres vers le flux Ajouter.
+ * Ne doit pas gérer : l'apparence CSS, la base OpenFoodFacts ou le moteur de recherche/quantité.
  */
 (function(){
   const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
@@ -10,42 +9,6 @@
   const q = (sel, root=document) => root.querySelector(sel);
 
   function safe(fn){ try { return fn && fn(); } catch(e) { console.warn('[FoodNote]', e); } }
-
-  function addStyle(){
-    if ($('foodnote-01617-barcode-style')) return;
-    const style = document.createElement('style');
-    style.id = 'foodnote-01617-barcode-style';
-    style.textContent = `
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-add-panel .journal-add-row{
-        display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;min-width:0!important;overflow:visible!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-selected-card.visible{
-        display:block!important;opacity:1!important;visibility:visible!important;
-        border:1px solid color-mix(in srgb, var(--green) 42%, var(--border2))!important;
-        background:color-mix(in srgb, var(--green) 8%, var(--bg))!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-add-actions{
-        display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-qty{
-        display:block!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-inline-filters,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-suggestions{
-        display:none!important;
-      }
-      .fn-barcode-ready-note{
-        font-size:12px;line-height:1.25;color:var(--text3);padding:7px 9px;border-radius:12px;
-        border:1px solid color-mix(in srgb, var(--green) 34%, var(--border2));
-        background:color-mix(in srgb, var(--green) 7%, var(--bg2));
-      }
-      .fn-barcode-ready-note b{color:var(--green);font-weight:900;}
-      @media(max-width:760px){
-        .fn-barcode-ready-note{font-size:11px;padding:6px 8px;}
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   function ensureReadyNote(){
     const card = $('db-selected-card');
@@ -68,7 +31,6 @@
   }
 
   function forceBarcodeReadyLayout(){
-    addStyle();
     const modal = $('food-add-modal');
     if (!modal) return;
 
@@ -176,7 +138,7 @@
     }, true);
   }
 
-  function init(){ addStyle(); patchBarcodeFlow(); }
+  function init(){ patchBarcodeFlow(); }
   document.addEventListener('DOMContentLoaded', init);
   [300, 900, 1800].forEach(t => setTimeout(init, t));
 

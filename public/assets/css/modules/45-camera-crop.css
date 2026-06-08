@@ -1,0 +1,239 @@
+/*
+ * FoodNote — recadrage OCR caméra
+ * Rôle : Gérer le layout du shell de recadrage OCR/tableau/recette.
+ * Ne doit pas gérer : la logique de recadrage, le traitement image, l'OCR ou la sauvegarde des résultats.
+ */
+
+body.foodnote-crop-shell-open{overflow:hidden!important;}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active{
+  position:fixed!important;
+  z-index:99998!important;
+  left:50%!important;
+  top:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:translate(-50%,-50%)!important;
+  width:min(800px, calc(100vw - 16px))!important;
+  max-width:calc(100vw - 16px)!important;
+  height:auto!important;
+  max-height:calc(100dvh - 16px)!important;
+  margin:0!important;
+  padding:10px!important;
+  border-radius:22px!important;
+  background:var(--bg2)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border2)!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.38)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active::before{
+  content:''!important;
+  position:fixed!important;
+  inset:-200vmax!important;
+  background:rgba(0,0,0,.44)!important;
+  z-index:-1!important;
+  pointer-events:none!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .ocr-panel-head{
+  flex:0 0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  margin:0!important;
+  padding:0 2px!important;
+  min-height:36px!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .ocr-panel-head strong{
+  color:var(--text)!important;
+  font-size:15px!important;
+  line-height:1.15!important;
+  font-weight:950!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .ocr-panel-head button{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:74px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0 12px!important;
+  border-radius:999px!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  background:var(--bg)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border2)!important;
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .ocr-unified-note,
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #ocr-camera-box,
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #ocr-result,
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #recipe-ocr-result,
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #recipe-ai-result{
+  display:none!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #ocr-status{
+  flex:0 0 auto!important;
+  display:block!important;
+  margin:0!important;
+  padding:7px 10px!important;
+  border-radius:14px!important;
+  background:color-mix(in srgb, var(--green) 11%, var(--bg))!important;
+  border:1px solid color-mix(in srgb, var(--green) 28%, var(--border2))!important;
+  color:var(--text)!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:800!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #recipe-crop-box{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:calc(100dvh - 112px)!important;
+  margin:0!important;
+  padding:9px!important;
+  border-radius:18px!important;
+  background:var(--bg)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border2)!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  gap:8px!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-head{
+  flex:0 0 auto!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:8px!important;
+  margin:0!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-head strong{
+  color:var(--text)!important;
+  font-size:13px!important;
+  font-weight:950!important;
+  line-height:1.15!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-head span{
+  color:var(--text3)!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  text-align:right!important;
+  max-width:430px!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-stage{
+  position:relative!important;
+  flex:0 1 auto!important;
+  width:fit-content!important;
+  max-width:100%!important;
+  min-width:0!important;
+  max-height:min(58dvh, 520px)!important;
+  margin:0 auto!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+  background:#101614!important;
+  border:1px solid var(--border2)!important;
+  touch-action:none!important;
+  user-select:none!important;
+  box-sizing:border-box!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-stage img{
+  display:block!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:100%!important;
+  max-height:min(58dvh, 520px)!important;
+  object-fit:contain!important;
+  background:#101614!important;
+  margin:0!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-selection{
+  position:absolute!important;
+  box-sizing:border-box!important;
+  border:2px solid var(--green)!important;
+  border-radius:14px!important;
+  background:rgba(29,158,117,.12)!important;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.46), inset 0 1px 0 rgba(255,255,255,.24)!important;
+  cursor:move!important;
+  touch-action:none!important;
+  z-index:3!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-selection::before{
+  content:'zone à lire'!important;
+  position:absolute!important;
+  left:8px!important;
+  top:8px!important;
+  padding:4px 8px!important;
+  border-radius:999px!important;
+  background:rgba(0,0,0,.64)!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  pointer-events:none!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-handle{
+  position:absolute!important;
+  width:28px!important;
+  height:28px!important;
+  border-radius:999px!important;
+  background:var(--green)!important;
+  border:2px solid #fff!important;
+  box-shadow:0 4px 14px rgba(0,0,0,.32)!important;
+  z-index:4!important;
+  touch-action:none!important;
+}
+.recipe-crop-handle.nw{left:-14px!important;top:-14px!important;cursor:nwse-resize!important;}
+.recipe-crop-handle.ne{right:-14px!important;top:-14px!important;cursor:nesw-resize!important;}
+.recipe-crop-handle.sw{left:-14px!important;bottom:-14px!important;cursor:nesw-resize!important;}
+.recipe-crop-handle.se{right:-14px!important;bottom:-14px!important;cursor:nwse-resize!important;}
+.recipe-crop-handle.n{left:50%!important;top:-14px!important;transform:translateX(-50%)!important;cursor:ns-resize!important;}
+.recipe-crop-handle.s{left:50%!important;bottom:-14px!important;transform:translateX(-50%)!important;cursor:ns-resize!important;}
+.recipe-crop-handle.w{left:-14px!important;top:50%!important;transform:translateY(-50%)!important;cursor:ew-resize!important;}
+.recipe-crop-handle.e{right:-14px!important;top:50%!important;transform:translateY(-50%)!important;cursor:ew-resize!important;}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-actions{
+  flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:0!important;
+  padding:0!important;
+}
+body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-actions button{
+  min-width:0!important;
+  width:100%!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0 8px!important;
+  border-radius:13px!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+@media(max-width:760px){
+  body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active{
+    width:calc(100vw - 10px)!important;
+    max-height:calc(100dvh - 10px)!important;
+    padding:8px!important;
+    border-radius:20px!important;
+  }
+  body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active #recipe-crop-box{
+    max-height:calc(100dvh - 104px)!important;
+    padding:8px!important;
+  }
+  body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-actions{
+    grid-template-columns:1fr!important;
+  }
+  body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-stage,
+  body.foodnote-crop-shell-open > #ocr-panel.foodnote-crop-shell-active .recipe-crop-stage img{
+    max-height:58dvh!important;
+  }
+}

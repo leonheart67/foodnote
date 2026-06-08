@@ -1,0 +1,412 @@
+/*
+ * FoodNote — cartes macro du Journal
+ * Rôle : Gérer les cartes calories/protéines/glucides/lipides du Journal et leurs couleurs métier.
+ * Ne doit pas gérer : les calculs nutritionnels ou les données repas.
+ */
+
+#page-journal #journal-dashboard-badges {
+  display: none !important;
+}
+
+#page-journal .journal-floating-macro-card {
+  margin-top: 8px !important;
+}
+
+#page-journal .journal-main-macros-four .macro-cell {
+  box-shadow: none !important;
+}
+
+.page.active .card,
+.page.active .data-hero-card,
+.page.active .journal-hero { animation: none !important; }
+
+:root,
+html.foodnote-theme-light,
+html.foodnote-theme-dark,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  --card: var(--bg2);
+  --surface: var(--bg2);
+  --surface-soft: var(--bg3);
+  --line: var(--border2);
+  --muted: var(--text3);
+  --calm-surface: var(--bg2);
+  --calm-surface-2: var(--bg);
+  --calm-line: var(--border2);
+  --fn-energy-page-1: var(--bg);
+  --fn-energy-page-2: var(--bg2);
+  --fn-energy-page-3: var(--bg3);
+  --fn-energy-card-tint: transparent;
+  --fn-energy-green: var(--green);
+  --fn-energy-orange: var(--orange);
+  --fn-energy-pink: var(--red);
+  --fn-energy-border: var(--border2);
+  --fn-page-card-bg: var(--bg2);
+  --fn-page-soft-bg: var(--bg3);
+  --fn-nav-surface: var(--bg2);
+  --fn-nav-surface-2: var(--bg);
+  --fn-nav-text: var(--text2);
+  --fn-nav-active-text: var(--text);
+  --fn-nav-line: var(--border2);
+  --fn-home-panel-surface: var(--bg2);
+  --fn-home-panel-surface-2: var(--bg);
+  --fn-home-panel-border: var(--border2);
+  --fn-home-calorie-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-surface: var(--bg2);
+  --fn-home-calorie-ring-inner-backdrop: var(--bg2);
+  --fn-home-macro-label-text: var(--text3);
+  --fn-home-macro-value-text: var(--text);
+  --fn-add-surface: var(--bg2);
+  --fn-add-soft: var(--bg);
+}
+
+#page-journal .journal-hero::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: 0 0 auto 0 !important;
+  width: 100% !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(90deg, transparent, var(--fn-card-sheen, rgba(255,255,255,.16)), transparent) !important;
+}
+
+#page-journal .journal-page-heading {
+  position: relative !important;
+  z-index: 2 !important;
+  margin: 0 0 clamp(10px, 1.6vw, 16px) !important;
+  padding: 0 !important;
+}
+
+#page-journal .journal-page-title {
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: clamp(28px, 3.35vw, 44px) !important;
+  line-height: .98 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  letter-spacing: -.065em !important;
+}
+
+#page-journal .journal-day-row-carousel,
+#page-journal .journal-floating-macro-card {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 700px) {
+  #page-journal .journal-page-heading {
+    margin-bottom: 10px !important;
+  }
+  #page-journal .journal-page-title {
+    font-size: clamp(32px, 9vw, 50px) !important;
+  }
+}
+
+#page-journal .food-row-compact,
+#page-journal .aliment-row.food-row-compact {
+  cursor: default !important;
+  user-select: text;
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left: 3px solid var(--fn-journal-food-row-accent) !important;
+  box-shadow: var(--fn-journal-food-row-shadow) !important;
+}
+
+#page-journal .food-row-compact:hover,
+#page-journal .aliment-row.food-row-compact:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+  border-color: color-mix(in srgb, var(--fn-journal-food-row-accent) 56%, var(--fn-journal-food-row-border)) !important;
+}
+
+#page-journal .food-row-compact .aliment-check,
+#page-journal .food-row-compact .chk-mark {
+  display: none !important;
+}
+
+#page-journal .food-row-compact.selected {
+  background: var(--fn-journal-food-row-bg) !important;
+  border-color: var(--fn-journal-food-row-border) !important;
+  border-left-color: var(--fn-journal-food-row-accent) !important;
+  border-width: 0.5px !important;
+  border-left-width: 3px !important;
+}
+
+#page-journal .food-row-compact.selected:hover {
+  background: var(--fn-journal-food-row-bg-hover) !important;
+}
+
+#page-journal .food-row-compact.selected .aliment-name {
+  color: var(--text) !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+}
+
+#page-journal .food-row-compact:not(.selected) .food-compact-qty {
+  opacity: 1 !important;
+}
+
+@media (max-width: 720px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    position: relative !important;
+    min-height: 46px !important;
+    padding-bottom: 14px !important;
+    overflow: hidden !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-copy {
+    min-width: 0 !important;
+    padding-bottom: 4px !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    display: block !important;
+    margin-top: 2px !important;
+    margin-bottom: 0 !important;
+    line-height: 1.08 !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    display: block !important;
+    position: absolute !important;
+    grid-column: 1 / -1 !important;
+    left: 6px !important;
+    right: 6px !important;
+    bottom: 4px !important;
+    width: auto !important;
+    height: 2.5px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    z-index: 1 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    min-height: 42px !important;
+    padding-bottom: 12px !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+    line-height: 1.02 !important;
+  }
+
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
+    left: 5px !important;
+    right: 5px !important;
+    bottom: 3px !important;
+    height: 2px !important;
+  }
+}
+
+#page-journal {
+  --fn-main-macro-kcal: var(--fn-badge-kcal);
+  --fn-main-macro-prot: var(--fn-badge-prot);
+  --fn-main-macro-gluc: var(--fn-badge-gluc);
+  --fn-main-macro-lip: var(--fn-badge-lip);
+}
+
+#page-journal .macro-cell-kcal,
+#page-journal .fn-ui-macro-kcal {
+  --badge-accent: var(--fn-main-macro-kcal) !important;
+  --chip-accent: var(--fn-main-macro-kcal) !important;
+  --macro-accent: var(--fn-main-macro-kcal) !important;
+  --macro-color: var(--fn-main-macro-kcal) !important;
+}
+
+#page-journal .macro-cell-prot,
+#page-journal .fn-ui-macro-prot {
+  --badge-accent: var(--fn-main-macro-prot) !important;
+  --chip-accent: var(--fn-main-macro-prot) !important;
+  --macro-accent: var(--fn-main-macro-prot) !important;
+  --macro-color: var(--fn-main-macro-prot) !important;
+}
+
+#page-journal .macro-cell-gluc,
+#page-journal .fn-ui-macro-gluc {
+  --badge-accent: var(--fn-main-macro-gluc) !important;
+  --chip-accent: var(--fn-main-macro-gluc) !important;
+  --macro-accent: var(--fn-main-macro-gluc) !important;
+  --macro-color: var(--fn-main-macro-gluc) !important;
+}
+
+#page-journal .macro-cell-lip,
+#page-journal .fn-ui-macro-lip {
+  --badge-accent: var(--fn-main-macro-lip) !important;
+  --chip-accent: var(--fn-main-macro-lip) !important;
+  --macro-accent: var(--fn-main-macro-lip) !important;
+  --macro-color: var(--fn-main-macro-lip) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 42%, var(--border2)) !important;
+  background:
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--badge-accent) 38%, transparent) 0, transparent 62%),
+    radial-gradient(circle at 4% 0%, rgba(255,255,255,.14) 0, transparent 44%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--bg2) 68%, var(--badge-accent) 15%),
+      color-mix(in srgb, var(--bg2) 76%, var(--badge-accent) 11%)
+    ) !important;
+  box-shadow:
+    0 12px 28px color-mix(in srgb, var(--badge-accent) 13%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::after,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  inset: -35% -25% auto auto !important;
+  width: 60% !important;
+  height: 75% !important;
+  background: radial-gradient(circle, color-mix(in srgb, var(--badge-accent) 32%, transparent), transparent 68%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card > *,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > *,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#page-journal .fn-home-macro-row .macro-progress-fill,
+#page-journal .fn-calorie-summary-card .macro-progress-fill,
+#page-journal .fn-home-macro-row .fn-ui-smart-progress i,
+#page-journal .fn-calorie-summary-card .fn-ui-smart-progress i {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent) 72%, #fff 6%), var(--badge-accent)) !important;
+}
+
+/* Section reprise depuis la couche de cohérence et rangée dans son module propriétaire. */
+
+html body #page-journal.active .journal-page-title {
+  font-weight: var(--fn-title-weight-clean) !important;
+}
+
+html body #page-journal.page.active.journal-premium-page > .journal-hero.card.fn-ui-surface.journal-sticky-summary.fn-page-header {
+  font-family: var(--fn-header-font) !important;
+  border-radius: var(--fn-header-radius) !important;
+  border: 1px solid var(--fn-header-border) !important;
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  padding: var(--fn-header-pad) !important;
+  margin: 0 0 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.fn-ui-smart-dot {
+  color: var(--badge-accent, var(--fn-ds-accent)) !important;
+}
+
+.fn-ui-smart-dot svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.fn-chip-ico {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  vertical-align: -1.5px;
+  margin-right: 1px;
+}
+
+.fn-ui-chip-kcal { color: var(--fn-ds-kcal, #d08a3e) !important; }
+
+.fn-ui-chip-prot { color: var(--fn-ds-prot, #2878a8) !important; }
+
+.fn-ui-chip-gluc { color: var(--fn-ds-gluc, #8266c7) !important; }
+
+.fn-ui-chip-lip { color: var(--fn-ds-lip, #c9932e) !important; }
+
+html body .fn-home-macro-row:hover, html body .macro-cell:hover {
+  background: var(--fn-ds-surface-soft) !important;
+}
+
+html body .macro-cell-kcal,
+html body .fn-calorie-summary-card {
+  --fn-current-macro: var(--fn-ds-kcal);
+  --fn-current-macro-soft: var(--fn-ds-kcal-soft);
+}
+
+html body .fn-macro-home-card,
+html body .fn-home-macro-row,
+html body .macro-cell-prot,
+html body .macro-cell-gluc,
+html body .macro-cell-lip {
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--fn-current-macro, var(--fn-ds-accent)) 15%, var(--fn-ds-surface)) 0 var(--macro-pct, 0%),
+      var(--fn-ds-surface-soft) var(--macro-pct, 0%) 100%) !important;
+  border-color: color-mix(in srgb, var(--fn-current-macro, var(--fn-ds-accent)) 28%, var(--fn-ds-border)) !important;
+}
+
+html body .fn-mini-ring,
+html body .fn-macro-icon-bubble,
+html body .fn-ui-smart-dot {
+  color: var(--fn-current-macro, var(--fn-ds-accent)) !important;
+  background: color-mix(in srgb, var(--fn-current-macro, var(--fn-ds-accent)) 11%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-current-macro, var(--fn-ds-accent)) 25%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .fn-home-macro-row.macro-state-neutral {
+  --macro-bar-color: color-mix(in srgb, var(--fn-ds-muted, #8b8172) 55%, transparent) !important;
+}
+
+html body #page-journal .fn-home-macro-row.macro-state-ok {
+  --macro-bar-color: var(--fn-ds-accent, #3f7a57) !important;
+}
+
+html body #page-journal .fn-home-macro-row.macro-state-warn {
+  --macro-bar-color: var(--fn-ds-lip, #c9932e) !important;
+}
+
+html body #page-journal .fn-home-macro-row.macro-state-over {
+  --macro-bar-color: var(--fn-ds-kcal, #df7f2a) !important;
+}
+
+html body #page-journal .fn-home-macro-row.macro-state-bad {
+  --macro-bar-color: #c0532b !important;
+}

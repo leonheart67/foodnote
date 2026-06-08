@@ -169,13 +169,13 @@ function foodnoteNutritionGuardSilentFood(food, opts = {}) {
 
 function nutrientInlineHTML(m) {
   return `
-    <span class="nutri-chip nutri-kcal macro-kcal" title="Calories">🔥 ${Math.round(m.kcal || 0)} kcal</span>
-    <span class="nutri-chip nutri-prot macro-prot" title="Protéines">🍖 ${round1(m.prot)}g</span>
-    <span class="nutri-chip nutri-gluc macro-gluc" title="Glucides">🍞 ${round1(m.gluc)}g</span>
-    <span class="nutri-chip nutri-lip macro-lip" title="Lipides">🥑 ${round1(m.lip)}g</span>`;
+    <span class="nutri-chip fn-mini-badge fn-mini-badge-kcal nutri-kcal macro-kcal" title="Calories">🔥 ${Math.round(m.kcal || 0)} kcal</span>
+    <span class="nutri-chip fn-mini-badge fn-mini-badge-protein nutri-prot macro-prot" title="Protéines">🍖 ${round1(m.prot)}g</span>
+    <span class="nutri-chip fn-mini-badge fn-mini-badge-carbs nutri-gluc macro-gluc" title="Glucides">🍞 ${round1(m.gluc)}g</span>
+    <span class="nutri-chip fn-mini-badge fn-mini-badge-fat nutri-lip macro-lip" title="Lipides">🥑 ${round1(m.lip)}g</span>`;
 }
 function nutrient100HTML(a) {
-  return nutrientInlineHTML({kcal:a.kcal100 ?? 0, prot:a.prot100 ?? 0, gluc:a.gluc100 ?? 0, lip:a.lip100 ?? 0}) + '<span class="nutri-chip" title="Valeurs pour 100g">/100g</span>';
+  return nutrientInlineHTML({kcal:a.kcal100 ?? 0, prot:a.prot100 ?? 0, gluc:a.gluc100 ?? 0, lip:a.lip100 ?? 0}) + '<span class="nutri-chip fn-mini-badge fn-mini-badge-neutral" title="Valeurs pour 100g">/100g</span>';
 }
 
 
@@ -1311,6 +1311,20 @@ function mealSummaryHTML(mealBlocks) {
   const s = mealMacroSummary(mealBlocks);
   const count = mealBlocks.length;
   if (!count) return '<span class="meal-recap-empty">vide</span>';
+
+  // Récap repas : on réutilise le composant commun FoodNoteUI.chip().
+  // Les couleurs viennent des classes macro déjà gérées par le design system.
+  const ui = window.FoodNoteUI;
+  if (ui && typeof ui.chip === 'function') {
+    return [
+      ui.chip(`${Math.round(s.kcal)} kcal`, 'kcal'),
+      ui.chip(`${Math.round(s.prot)}g prot`, 'prot'),
+      ui.chip(`${Math.round(s.gluc)}g gluc`, 'gluc'),
+      ui.chip(`${Math.round(s.lip)}g lip`, 'lip'),
+      ui.chip(`${count} aliment${count > 1 ? 's' : ''}`)
+    ].join('');
+  }
+
   return `
     <span class="meal-recap-kcal macro-kcal">${Math.round(s.kcal)} kcal</span>
     <span class="meal-recap-prot macro-prot">${Math.round(s.prot)}g prot</span>
@@ -1502,7 +1516,9 @@ function normalizeAliment(a) {
 
 function createRow(a, idx, isCustom, hidden) {
   if (!a || typeof a !== 'object') return;
-  quantities[idx] = a.defaut;
+  // Ne pas écraser une quantité déjà définie (poids saisi/édité). Sinon un re-rendu
+  // remet le defaut de la fiche et le poids saisi est perdu ("poids pas pris en compte").
+  if (!(Number(quantities[idx]) > 0)) quantities[idx] = a.defaut;
   const container = document.getElementById(CATS[a.cat]);
   if (!container) return;
   if (isCustom && typeof ensureFoodLineUid === 'function') ensureFoodLineUid(a);
@@ -1640,6 +1656,7 @@ function createRow(a, idx, isCustom, hidden) {
     }
     qi.classList.remove('foodnote-guard-invalid');
     quantities[currentIdx] = nextQty;
+    if (currentFood) currentFood.defaut = nextQty;
     updatePill(currentIdx); updateUnitHint(currentIdx); updateMacros();
     if (typeof markFoodUiWriteForImmediateSave === 'function') markFoodUiWriteForImmediateSave();
     // Moteur 0.22.9 : une quantité aliment ne reposte jamais toute la journée.
@@ -2682,6 +2699,16 @@ function updateMacroTile(id, val, unit, target, higherIsBetter) {
     cell.classList.add('macro-state-' + semanticState);
     cell.setAttribute('data-state', semanticState);
 
+    // Couleur de la barre / anneau selon l'état (cohérent avec la pastille de statut)
+    const barColorMap = {
+      neutral: 'var(--fn-ds-muted, #8b8172)',
+      ok:      'var(--fn-ds-accent, #3f7a57)',
+      warn:    'var(--fn-ds-lip, #c9932e)',
+      over:    'var(--fn-ds-kcal, #df7f2a)',
+      bad:     '#c0532b'
+    };
+    cell.style.setProperty('--macro-bar-color', barColorMap[semanticState] || 'var(--fn-ds-accent, #3f7a57)');
+
     const diff = Math.round(safeTarget - numericVal);
     let targetText = '';
 
@@ -3309,10 +3336,12 @@ function addCustomAliment(aIn) {
     return;
   }
   const f = qty > 0 ? 100/qty : 1;
-  const k = aIn ? aIn.kcal100 : Math.round(rawK * f);
-  const p = aIn ? aIn.prot100 : Math.round(rawP * f * 10) / 10;
-  const g = aIn ? aIn.gluc100 : Math.round(rawG * f * 10) / 10;
-  const l = aIn ? aIn.lip100 : Math.round(rawL * f * 10) / 10;
+  const k = aIn ? Number(aIn.kcal100 || 0) : Math.round(rawK * f);
+  const p = aIn ? Number(aIn.prot100 || 0) : Math.round(rawP * f * 10) / 10;
+  const g = aIn ? Number(aIn.gluc100 || 0) : Math.round(rawG * f * 10) / 10;
+  const l = aIn ? Number(aIn.lip100 || 0) : Math.round(rawL * f * 10) / 10;
+  const incomingNutritionIsUsable = !!aIn && (Number(k) > 0 || Number(p) > 0 || Number(g) > 0 || Number(l) > 0);
+  const forceIncomingNutrition = !!(aIn && aIn.forceNutritionUpdate);
 
   const candidateForGuard = {
     ...(aIn || {}),
@@ -3349,9 +3378,41 @@ function addCustomAliment(aIn) {
     if (customAliments[existIdx - ALIMENTS_BASE.length]) clearFoodUnitMeta(customAliments[existIdx - ALIMENTS_BASE.length]);
     const ci2 = existIdx - ALIMENTS_BASE.length;
     allAliments[existIdx].meal = targetMeal;
-    if (customAliments[ci2]) customAliments[ci2].meal = targetMeal;
+    if (incomingNutritionIsUsable && (forceIncomingNutrition || !Number(allAliments[existIdx].kcal100 || 0))) {
+      // Capture/IA photo : si la ligne existe déjà, on ne doit pas perdre les kcal/macros
+      // validés dans les cartes. On met à jour la nutrition de la ligne existante au lieu
+      // de seulement modifier la quantité.
+      allAliments[existIdx].kcal100 = k;
+      allAliments[existIdx].prot100 = p;
+      allAliments[existIdx].gluc100 = g;
+      allAliments[existIdx].lip100 = l;
+      allAliments[existIdx].source = (aIn && aIn.source) || allAliments[existIdx].source || 'capture';
+    }
+    if (customAliments[ci2]) {
+      customAliments[ci2].meal = targetMeal;
+      if (incomingNutritionIsUsable && (forceIncomingNutrition || !Number(customAliments[ci2].kcal100 || 0))) {
+        customAliments[ci2].kcal100 = k;
+        customAliments[ci2].prot100 = p;
+        customAliments[ci2].gluc100 = g;
+        customAliments[ci2].lip100 = l;
+        customAliments[ci2].source = (aIn && aIn.source) || customAliments[ci2].source || 'capture';
+        saveCustomList();
+      }
+    }
+    if (incomingNutritionIsUsable && forceIncomingNutrition && allAliments[existIdx].bddId) {
+      try {
+        const bdd = getBDD();
+        const bi = bdd.findIndex(b => String(b.id) === String(allAliments[existIdx].bddId));
+        if (bi >= 0) {
+          bdd[bi].kcal100 = k; bdd[bi].prot100 = p; bdd[bi].gluc100 = g; bdd[bi].lip100 = l;
+          saveBDD(bdd);
+        }
+      } catch(e) { console.warn('[FoodNote] mise à jour nutrition BDD existante impossible', e); }
+    }
     selected.add(existIdx);
     quantities[existIdx] = qty2;
+    allAliments[existIdx].defaut = qty2;
+    if (customAliments[ci2]) customAliments[ci2].defaut = qty2;
     showJournalLastAdded(existIdx);
     if (typeof resetFoodAddGroqVisualState === 'function') resetFoodAddGroqVisualState();
     foodnoteScheduleAfterFoodAdd(existIdx, 'add-existing');
@@ -3377,6 +3438,16 @@ function addCustomAliment(aIn) {
     // Réutilise la même fiche BDD pour éviter de dupliquer la base,
     // mais crée bien une ligne distincte dans le repas cible.
     bddId = allAliments[sameNameIdx].bddId;
+    if (incomingNutritionIsUsable && forceIncomingNutrition) {
+      try {
+        const bdd = getBDD();
+        const bi = bdd.findIndex(b => String(b.id) === String(bddId));
+        if (bi >= 0) {
+          bdd[bi].kcal100 = k; bdd[bi].prot100 = p; bdd[bi].gluc100 = g; bdd[bi].lip100 = l;
+          saveBDD(bdd);
+        }
+      } catch(e) { console.warn('[FoodNote] mise à jour fiche BDD existante impossible', e); }
+    }
   }
   if (shouldSaveToBase && !bddId) {
     bddId = Date.now();
@@ -4854,15 +4925,6 @@ function foodnoteStabilizeSearchPickSurface(food, index, options = {}) {
         if (Number.isFinite(Number(index))) box.dataset.foodnotePickedIndex = String(Number(index));
         box.classList.add('visible');
         box.removeAttribute('aria-hidden');
-        box.style.setProperty('display', 'block', 'important');
-        box.style.setProperty('visibility', 'visible', 'important');
-        box.style.setProperty('pointer-events', 'auto', 'important');
-        box.style.setProperty('height', 'min(42dvh, 360px)', 'important');
-        box.style.setProperty('max-height', 'min(42dvh, 360px)', 'important');
-        box.style.setProperty('opacity', '1', 'important');
-        box.style.setProperty('overflow-y', 'auto', 'important');
-        box.style.setProperty('padding-top', '4px', 'important');
-        box.style.setProperty('padding-bottom', '4px', 'important');
         box.querySelectorAll('.db-suggestion').forEach(el => {
           const active = Number(el.dataset.index) === Number(index);
           el.classList.toggle('active', active);
@@ -4914,15 +4976,6 @@ function keepDBSuggestionsVisibleAfterPick(index, ms = 9000) {
   box.classList.add('visible');
   box.removeAttribute('aria-hidden');
   try {
-    box.style.setProperty('display', 'block', 'important');
-    box.style.setProperty('visibility', 'visible', 'important');
-    box.style.setProperty('pointer-events', 'auto', 'important');
-    box.style.setProperty('height', 'min(42dvh, 360px)', 'important');
-    box.style.setProperty('max-height', 'min(42dvh, 360px)', 'important');
-    box.style.setProperty('opacity', '1', 'important');
-    box.style.setProperty('overflow-y', 'auto', 'important');
-    box.style.setProperty('padding-top', '4px', 'important');
-    box.style.setProperty('padding-bottom', '4px', 'important');
     const modal = document.getElementById('food-add-modal');
     if (modal) modal.classList.add('food-add-expanded', 'fn-suggestions-open');
   } catch(e) {}

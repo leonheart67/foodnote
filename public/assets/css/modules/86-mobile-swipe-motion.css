@@ -1,0 +1,135 @@
+/*
+ * FoodNote — gestes, swipe et animations mobiles
+ * Rôle : Gérer les gestes horizontaux, les règles touch-action et les micro-animations de navigation mobile.
+ * Ne doit pas gérer : le contenu des pages, le choix de page active ou les handlers JavaScript.
+ */
+/* Source de vérité CSS pour le swipe horizontal.
+ * Anciennement injecté depuis 122-swipe-nav.js ; conservé ici pour éviter les styles runtime.
+ */
+html,
+body,
+.page,
+#app,
+.app,
+.app-shell,
+.app-main,
+main,
+.fn-app,
+.fn-main,
+.content {
+  touch-action: pan-y !important;
+}
+
+.journal-day-carousel,
+.journal-day-carousel-wrap,
+.fn-hscroll {
+  touch-action: pan-x !important;
+}
+
+input,
+textarea,
+select,
+.slider,
+.noUi-target,
+.frigate-card,
+canvas,
+[data-no-swipe] {
+  touch-action: auto !important;
+}
+
+
+
+@media (prefers-reduced-motion: reduce) {
+  html body .page.active { animation: none; }
+}
+
+@keyframes fnPgNext { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+
+@keyframes fnPgPrev { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+
+html body .page.active.fn-pg-next { animation: fnPgNext .28s cubic-bezier(.22,.61,.36,1) both !important; }
+
+html body .page.active.fn-pg-prev { animation: fnPgPrev .28s cubic-bezier(.22,.61,.36,1) both !important; }
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add) i,
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add) .fn-mobile-nav-emoji {
+  transition: transform .24s cubic-bezier(.34,1.56,.64,1) !important;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add) i,
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add) .fn-mobile-nav-emoji {
+  transform: translateY(-3px) scale(1.14) !important;
+  animation: fnNavPop .34s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes fnNavPop {
+  0%   { transform: translateY(-3px) scale(.85); }
+  55%  { transform: translateY(-4px) scale(1.26); }
+  100% { transform: translateY(-3px) scale(1.14); }
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add) { position: relative; }
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add)::after {
+  content: ""; position: absolute; left: 50%; top: 5px;
+  width: 5px; height: 5px; border-radius: 999px;
+  background: var(--fn-ds-accent, #3f7a57);
+  transform: translateX(-50%) scale(0); opacity: 0;
+  transition: transform .26s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+  pointer-events: none;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add)::after {
+  transform: translateX(-50%) scale(1); opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body .page.active.fn-pg-next, html body .page.active.fn-pg-prev { animation: none !important; }
+  .fn-mobile-nav-bar .fn-mobile-nav-btn i,
+  .fn-mobile-nav-bar .fn-mobile-nav-btn .fn-mobile-nav-emoji,
+  .fn-mobile-nav-bar .fn-mobile-nav-btn::after { transition: none !important; animation: none !important; }
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add) { position: relative !important; overflow: visible !important; }
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add) > * { position: relative; z-index: 1; }
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add)::before {
+  content: ""; position: absolute; inset: 5px 8px; border-radius: 14px; z-index: 0;
+  background: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 30%, transparent);
+  transform: scale(.55); opacity: 0;
+  transition: transform .26s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add)::before {
+  transform: scale(1); opacity: 1;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn:not(.fn-mobile-nav-add)::after {
+  content: ""; position: absolute; left: 50%; top: 1px; width: 26px; height: 3px; border-radius: 3px; z-index: 2;
+  background: var(--fn-ds-accent, #3f7a57); transform-origin: center;
+  transform: translateX(-50%) scaleX(0); opacity: 0;
+  transition: transform .26s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add)::after {
+  transform: translateX(-50%) scaleX(1); opacity: 1;
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add) i,
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add) .fn-mobile-nav-emoji {
+  transform: translateY(-2px) scale(1.18) !important;
+  color: var(--fn-ds-accent-strong, #2e5d42) !important;
+  animation: fnNavPop .34s cubic-bezier(.34,1.56,.64,1);
+}
+
+.fn-mobile-nav-bar .fn-mobile-nav-btn.is-active:not(.fn-mobile-nav-add) span {
+  color: var(--fn-ds-accent-strong, #2e5d42) !important; font-weight: 700 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fn-mobile-nav-bar .fn-mobile-nav-btn::before,
+  .fn-mobile-nav-bar .fn-mobile-nav-btn::after,
+  .fn-mobile-nav-bar .fn-mobile-nav-btn i { transition: none !important; animation: none !important; }
+}

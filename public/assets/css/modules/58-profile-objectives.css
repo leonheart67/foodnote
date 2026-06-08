@@ -1,0 +1,126 @@
+/*
+ * FoodNote — objectifs et phases nutritionnelles
+ * Rôle : Gérer les cartes d’objectifs, phases, règles nutritionnelles et panneaux d’aide du profil/objectifs.
+ * Ne doit pas gérer : le calcul des objectifs ou la sauvegarde du profil.
+ */
+
+.objectif-method-info-wrap{display:flex;justify-content:flex-end;position:relative;margin:-6px 0 14px;z-index:12;}
+
+.objectif-method-info{position:relative;display:inline-block;max-width:100%;}
+
+.objectif-method-info>summary{list-style:none;}
+
+.objectif-method-info>summary::-webkit-details-marker{display:none;}
+
+.objectif-method-info-button{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--border2) 70%,transparent);background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--text2);font-size:12px;font-weight: var(--fn-ds-w-bold);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.16);}
+
+.objectif-method-i{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px;background:color-mix(in srgb,var(--green) 20%,var(--bg));color:color-mix(in srgb,var(--green) 80%,white);font-weight: var(--fn-ds-w-heavy);font-style:normal;font-size:13px;line-height:1;}
+
+.objectif-method-popover{position:absolute;right:0;top:calc(100% + 9px);width:min(560px,calc(100vw - 30px));max-height:min(70vh,560px);overflow:auto;padding:14px;border-radius:20px;border:1px solid color-mix(in srgb,var(--border2) 74%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--card) 94%,black 6%),color-mix(in srgb,var(--bg2) 88%,var(--green-bg) 12%));box-shadow:0 22px 60px rgba(0,0,0,.32);}
+
+.objectif-method-popover-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+
+.objectif-method-popover-head strong{font-size:14px;color:var(--text);}
+
+.objectif-method-popover-head span{font-size:11px;color:var(--text4);text-align:right;}
+
+.objectif-method-grid-compact{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px;}
+
+.objectif-method-grid-compact .objectif-method-box{padding:10px;border-radius:14px;background:color-mix(in srgb,var(--bg) 82%,transparent);}
+
+.objectif-phase-guide{position:relative;overflow:hidden;border-radius:22px;border:1px solid color-mix(in srgb,var(--phase-color,var(--green)) 24%,var(--border2));background:linear-gradient(145deg,color-mix(in srgb,var(--phase-color,var(--green)) 10%,var(--card)),color-mix(in srgb,var(--bg) 88%,transparent));padding:16px;box-shadow:0 12px 32px rgba(0,0,0,.18);}
+
+.objectif-phase-guide::before{content:"";position:absolute;inset:-40% auto auto -18%;width:220px;height:220px;border-radius:999px;background:radial-gradient(circle,color-mix(in srgb,var(--phase-color,var(--green)) 18%,transparent),transparent 66%);pointer-events:none;}
+
+.objectif-phase-guide-head{position:relative;display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+
+.objectif-phase-guide-dot{width:13px;height:13px;border-radius:999px;background:var(--phase-color,var(--green));box-shadow:0 0 0 6px color-mix(in srgb,var(--phase-color,var(--green)) 12%,transparent);}
+
+.objectif-phase-guide-head strong{display:block;font-size:18px;color:var(--text);line-height:1.1;}
+
+.objectif-phase-guide-head small{display:block;margin-top:3px;font-size:12px;color:var(--text3);}
+
+.objectif-phase-guide-desc{position:relative;margin:0 0 12px;color:var(--text2);font-size:13px;line-height:1.5;}
+
+.objectif-phase-guide-advice{position:relative;padding:11px 12px;border-radius:16px;background:color-mix(in srgb,var(--bg) 72%,transparent);border:1px solid color-mix(in srgb,var(--phase-color,var(--green)) 18%,transparent);}
+
+.objectif-phase-guide-advice span{display:block;margin-bottom:4px;font-size:10px;font-weight: var(--fn-ds-w-heavy);letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--phase-color,var(--green)) 72%,var(--text));}
+
+.objectif-phase-guide-advice p{margin:0;color:var(--text);font-size:13px;line-height:1.45;}
+
+.objectif-phase-guide-progress{position:relative;height:7px;margin:13px 0 9px;border-radius:999px;overflow:hidden;background:color-mix(in srgb,var(--phase-color,var(--green)) 14%,var(--bg));}
+
+.objectif-phase-guide-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--phase-color,var(--green)),color-mix(in srgb,var(--phase-color,var(--green)) 62%,white));}
+
+.objectif-phase-guide-foot{position:relative;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;color:var(--text4);font-size:11.5px;}
+
+@media(max-width:760px){.objectif-method-info-wrap{justify-content:flex-start;margin:0 0 12px;}.objectif-method-info{width:100%;}.objectif-method-info-button{width:100%;justify-content:center;}.objectif-method-popover{position:static;width:100%;max-height:none;margin-top:8px;box-shadow:0 12px 28px rgba(0,0,0,.24);}.objectif-method-grid-compact{grid-template-columns:1fr;}.objectif-phase-guide{padding:14px;border-radius:19px;}.objectif-phase-guide-head strong{font-size:16px;}}
+
+.objectif-method-popover{overflow-x:hidden;}
+
+.objectif-rules-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;min-width:0;}
+
+.objectif-rule-card{min-width:0;border-radius:15px;border:1px solid color-mix(in srgb,var(--border2) 58%,transparent);background:color-mix(in srgb,var(--bg) 84%,transparent);padding:10px;box-shadow:none;}
+
+.objectif-rule-phase{display:flex;flex-direction:column;gap:3px;min-width:0;margin-bottom:8px;}
+
+.objectif-rule-phase strong{font-size:12px;line-height:1.2;color:var(--text);white-space:normal;overflow-wrap:anywhere;}
+
+.objectif-rule-phase span{font-size:10.5px;line-height:1.25;color:var(--text4);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+.objectif-rule-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0;}
+
+.objectif-rule-metrics div{min-width:0;border-radius:11px;background:color-mix(in srgb,var(--card) 72%,transparent);padding:6px;}
+
+.objectif-rule-metrics dt{margin:0 0 2px;font-size:9px;font-weight: var(--fn-ds-w-heavy);letter-spacing:.04em;text-transform:uppercase;color:var(--text4);}
+
+.objectif-rule-metrics dd{margin:0;font-size:10.5px;font-weight: var(--fn-ds-w-bold);line-height:1.18;color:var(--text2);white-space:normal;overflow-wrap:anywhere;}
+
+.objectif-rules-table-wrap{display:none!important;}
+
+@media(max-width:760px){.objectif-rules-list{grid-template-columns:1fr;gap:7px;}.objectif-rule-card{padding:9px;border-radius:14px;}.objectif-rule-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;}.objectif-rule-metrics dd{font-size:10px;}}
+
+#page-journal .fn-home-objectif-icon,
+#page-journal .fn-calorie-flame.fn-home-objectif-icon,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  border-radius: 15px !important;
+  background: color-mix(in srgb, var(--badge-accent) 20%, var(--bg2)) !important;
+  border: 1px solid color-mix(in srgb, var(--badge-accent) 34%, var(--border2)) !important;
+  color: var(--text) !important;
+  box-shadow: none !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  text-shadow: none !important;
+}
+
+#page-journal .fn-calorie-flame.fn-home-objectif-icon {
+  margin: 0 auto 4px !important;
+}
+
+#page-journal .fn-home-objectif-icon::before,
+#page-journal .fn-home-objectif-icon::after {
+  display: none !important;
+  content: none !important;
+}
+
+@media (max-width: 620px) {
+  #page-journal .fn-home-objectif-icon,
+  #page-journal .fn-calorie-flame.fn-home-objectif-icon,
+  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon,
+  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-nutri-home-icon.fn-home-objectif-icon {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    border-radius: 13px !important;
+    font-size: 15px !important;
+  }
+}

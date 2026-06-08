@@ -1,0 +1,722 @@
+/*
+ * FoodNote — ponts de variables de thème
+ * Rôle : Relier les noms de variables conservés par compatibilité au thème clair/sombre validé.
+ * Ne doit pas gérer : les composants visuels ou les pages.
+ */
+
+:root { --fn-page-max: 980px; }
+
+.page:not(#page-onboarding) {
+  width: 100% !important;
+  max-width: var(--fn-page-max) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html,
+body,
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+:root {
+  --fn-badge-kcal: #d08a3e !important;
+  --fn-badge-prot: #c15f57 !important;
+  --fn-badge-gluc: #5b8caf !important;
+  --fn-badge-lip: #c79a3f !important;
+}
+
+/* Section reprise depuis la couche de cohérence et rangée dans son module propriétaire. */
+
+:root {
+  --fn-font-ui-clean: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --fn-title-weight-clean: 650;
+  --fn-panel-title-weight-clean: 650;
+  --fn-text-weight-clean: 400;
+
+  --fn-title-color-clean: var(--fn-ds-text, var(--text, #20231f));
+  --fn-muted-color-clean: var(--fn-ds-muted, var(--text3, #6b7168));
+  --fn-border-clean: rgba(33, 37, 31, .11);
+  --fn-panel-radius-clean: 22px;
+  --fn-panel-pad-clean: clamp(16px, 2vw, 22px);
+}
+
+html body,
+html body .page,
+html body .page *,
+html body button,
+html body input,
+html body select,
+html body textarea {
+  font-family: var(--fn-font-ui-clean) !important;
+}
+
+html body .app-title,
+html body #page-title,
+html body .page.active h1,
+html body .page.active .fn-ui-title,
+html body .page.active .journal-page-title,
+html body .page.active .profile-name,
+html body .page.active .recipe-hero-title {
+  font-weight: var(--fn-title-weight-clean) !important;
+  letter-spacing: -.018em !important;
+  color: var(--fn-title-color-clean) !important;
+}
+
+html body .page.active h2,
+html body .page.active h3,
+html body .page.active .card-title,
+html body .page.active .fn-section-title,
+html body .page.active .fn-ui-section-title,
+html body .page.active .fn-ui-title-inline,
+html body .page.active .recipe-block-title,
+html body .page.active .fn-ui-chart-title {
+  font-weight: var(--fn-panel-title-weight-clean) !important;
+  letter-spacing: -.005em !important;
+}
+
+html body .page.active p,
+html body .page.active small,
+html body .page.active .mini,
+html body .page.active .fn-ui-sub,
+html body .page.active .profile-muted,
+html body .page.active .recipe-hero-sub,
+html body .page.active .fn-ui-muted {
+  font-weight: var(--fn-text-weight-clean) !important;
+}
+
+html body .page.active .fn-ui-kicker,
+html body .page.active .profile-chip,
+html body .page.active .fn-orbit-kicker {
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: .095em !important;
+}
+
+:root {
+  --fn-header-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --fn-header-title-size: 24px;
+  --fn-header-title-weight: 520;
+  --fn-header-text-weight: 400;
+  --fn-header-border: rgba(33, 37, 31, .11);
+  --fn-header-radius: 22px;
+  --fn-header-pad: clamp(16px, 2vw, 22px);
+}
+
+:root {
+  --fn-radius-panel: var(--fn-ds-radius-lg) !important;   
+  --fn-header-radius: var(--fn-ds-radius-lg) !important;  
+}
+
+html[data-theme="dark"], body.foodnote-theme-dark {
+  --fn-radius-panel: var(--fn-ds-radius-lg) !important;
+  --fn-header-radius: var(--fn-ds-radius-lg) !important;
+}
+
+:root { --fn-header-title-weight: 700 !important; }
+
+:root {
+  --fn-border-clean: var(--fn-ds-border) !important;
+  --fn-header-border: var(--fn-ds-border) !important;
+  --fn-unified-panel-border: var(--fn-ds-border) !important;
+  --fn-panel-border-clean: var(--fn-ds-border) !important;
+}
+
+:root {
+  --fn-panel-pad-clean: var(--fn-ds-card-padding, 24px) !important;
+}
+
+:root,
+body[data-theme="light"],
+body[data-theme="dark"],
+body.foodnote-theme-light,
+body.foodnote-theme-dark {
+  
+  --surface:       var(--fn-ds-surface);
+  --surface-soft:  var(--fn-ds-surface-soft);
+  --line:          var(--fn-ds-border);
+
+  
+  --orange-bg: color-mix(in srgb, var(--fn-ds-warning) 13%, transparent);
+  --red-bg:    color-mix(in srgb, var(--fn-ds-danger) 13%, transparent);
+  --blue-bg:   color-mix(in srgb, var(--fn-ds-info) 13%, transparent);
+
+  
+  --fn-badge-kcal: var(--fn-ds-kcal) !important;
+  --fn-badge-prot: var(--fn-ds-prot) !important;
+  --fn-badge-gluc: var(--fn-ds-gluc) !important;
+  --fn-badge-lip:  var(--fn-ds-lip) !important;
+
+  
+  --badge-accent: var(--fn-ds-kcal) !important;
+  --chip-accent:  var(--fn-ds-accent) !important;
+  --macro-accent: var(--fn-ds-accent) !important;
+
+  
+  --fn-journal-food-row-bg:       var(--fn-ds-surface);
+  --fn-journal-food-row-bg-hover: var(--fn-ds-surface-soft);
+  --fn-journal-food-row-border:   var(--fn-ds-border);
+  --fn-journal-food-row-accent:   var(--fn-ds-accent);
+  --fn-journal-food-row-shadow:   0 1px 3px rgba(0,0,0,.05);
+
+  
+  --fn-home-calorie-card-surface: var(--fn-ds-surface);
+  --fn-home-calorie-border:       var(--fn-ds-border);
+  --fn-home-calorie-ring-inner-backdrop: var(--fn-ds-surface);
+
+  
+  --fn-home-progress-track: color-mix(in srgb, var(--fn-ds-text) 12%, transparent) !important;
+
+  
+  --fn-energy-page-1: var(--fn-ds-bg);
+  --fn-energy-page-2: var(--fn-ds-bg);
+  --fn-energy-page-3: var(--fn-ds-bg);
+  --fn-energy-card-tint: var(--fn-ds-surface);
+  --fn-energy-border: var(--fn-ds-border);
+
+  
+  --fn-glow-green:  transparent;
+  --fn-glow-orange: transparent;
+  --fn-card-sheen:  transparent;
+  --fn-page-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+body.dark,
+body.foodnote-theme-dark,
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  --fn-ds-bg: #161513 !important;
+  --fn-ds-bg-soft: #1b1916 !important;
+  --fn-ds-surface: #221f1c !important;
+  --fn-ds-surface-soft: #2b2824 !important;
+  --fn-ds-surface-muted: #34302b !important;
+  --fn-ds-text: #f2efe7 !important;
+  --fn-ds-text-soft: #c7c0b2 !important;
+  --fn-ds-muted: #9c968c !important;
+  --fn-ds-border: rgba(255, 255, 255, .12) !important;
+  --fn-ds-border-strong: rgba(159, 189, 142, .46) !important;
+  --fn-ds-accent: #82ac8c !important;
+  --fn-ds-accent-strong: #bdd2b0 !important;
+  --fn-ds-accent-soft: rgba(159, 189, 142, .17) !important;
+}
+
+html body .sb-item:hover { transform: translateY(-1px) !important; color: var(--fn-ds-accent-strong) !important; }
+
+:root,
+html[data-theme="light"],
+body.foodnote-theme-light {
+  color-scheme: light;
+
+  
+  --fn-ds-bg: #efe7da;
+  --fn-ds-bg-soft: #f8f1e7;
+  --fn-ds-surface: #fffdf8;
+  --fn-ds-surface-soft: #f3eadf;
+  --fn-ds-surface-muted: #e7dcca;
+
+  --fn-ds-text: #211f1a;
+  --fn-ds-text-soft: #5b5b51;
+  --fn-ds-muted: #8b8172;
+
+  --fn-ds-border: rgba(97, 74, 46, .14);
+  --fn-ds-border-strong: rgba(63, 122, 87, .38);
+
+  --fn-ds-accent: #3f7a57;
+  --fn-ds-accent-strong: #2e5d42;
+  --fn-ds-accent-soft: #e1efe2;
+
+  --fn-ds-warning: #d9822b;
+  --fn-ds-info: #4a93b8;
+  --fn-ds-danger: #bf5c4b;
+
+  
+  --fn-ds-kcal: #df7f2a;
+  --fn-ds-kcal-soft: #faead9;
+  --fn-ds-prot: #2878a8;
+  --fn-ds-prot-soft: #e2f0f7;
+  --fn-ds-gluc: #8266c7;
+  --fn-ds-gluc-soft: #eee8fa;
+  --fn-ds-lip: #c9932e;
+  --fn-ds-lip-soft: #f7edce;
+  --fn-ds-neutral-line: #d8ccb8;
+
+  
+  --fn-v3-bg: var(--fn-ds-bg);
+  --fn-v3-bg-soft: var(--fn-ds-bg-soft);
+  --fn-v3-surface: var(--fn-ds-surface);
+  --fn-v3-surface-soft: var(--fn-ds-surface-soft);
+  --fn-v3-surface-muted: var(--fn-ds-surface-muted);
+  --fn-v3-text: var(--fn-ds-text);
+  --fn-v3-text-soft: var(--fn-ds-text-soft);
+  --fn-v3-muted: var(--fn-ds-muted);
+  --fn-v3-border: var(--fn-ds-border);
+  --fn-v3-border-strong: var(--fn-ds-border-strong);
+  --fn-v3-green: var(--fn-ds-accent);
+  --fn-v3-green-dark: var(--fn-ds-accent-strong);
+  --fn-v3-green-soft: var(--fn-ds-accent-soft);
+  --fn-v3-header: rgba(255, 253, 248, .90);
+
+  --fn-macro-kcal: var(--fn-ds-kcal);
+  --fn-macro-prot: var(--fn-ds-prot);
+  --fn-macro-gluc: var(--fn-ds-gluc);
+  --fn-macro-lip: var(--fn-ds-lip);
+
+  --fn-kcal: var(--fn-ds-kcal);
+  --fn-kcal-soft: var(--fn-ds-kcal-soft);
+  --fn-protein: var(--fn-ds-prot);
+  --fn-protein-soft: var(--fn-ds-prot-soft);
+  --fn-carbs: var(--fn-ds-gluc);
+  --fn-carbs-soft: var(--fn-ds-gluc-soft);
+  --fn-fat: var(--fn-ds-lip);
+  --fn-fat-soft: var(--fn-ds-lip-soft);
+
+  --fn-mini-kcal: var(--fn-ds-kcal);
+  --fn-mini-protein: var(--fn-ds-prot);
+  --fn-mini-carbs: var(--fn-ds-gluc);
+  --fn-mini-fat: var(--fn-ds-lip);
+}
+
+body.dark,
+body.foodnote-theme-dark,
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  color-scheme: dark;
+
+  --fn-ds-bg: #11170f !important;
+  --fn-ds-bg-soft: #161d14 !important;
+  --fn-ds-surface: #1e261d !important;
+  --fn-ds-surface-soft: #273025 !important;
+  --fn-ds-surface-muted: #323b2f !important;
+
+  --fn-ds-text: #f4efe4 !important;
+  --fn-ds-text-soft: #cfc5b5 !important;
+  --fn-ds-muted: #a79d8d !important;
+
+  --fn-ds-border: rgba(236, 226, 207, .12) !important;
+  --fn-ds-border-strong: rgba(134, 182, 126, .46) !important;
+
+  --fn-ds-accent: #8fbd86 !important;
+  --fn-ds-accent-strong: #c7dfb6 !important;
+  --fn-ds-accent-soft: rgba(143, 189, 134, .18) !important;
+
+  --fn-ds-warning: #e0a143 !important;
+  --fn-ds-info: #77b7dc !important;
+  --fn-ds-danger: #d67a67 !important;
+
+  --fn-ds-kcal: #f2a65a !important;
+  --fn-ds-kcal-soft: rgba(242, 166, 90, .16) !important;
+  --fn-ds-prot: #7fc2e6 !important;
+  --fn-ds-prot-soft: rgba(127, 194, 230, .15) !important;
+  --fn-ds-gluc: #b7a1f2 !important;
+  --fn-ds-gluc-soft: rgba(183, 161, 242, .16) !important;
+  --fn-ds-lip: #e4bf62 !important;
+  --fn-ds-lip-soft: rgba(228, 191, 98, .15) !important;
+  --fn-ds-neutral-line: rgba(236, 226, 207, .16) !important;
+
+  --fn-v3-bg: var(--fn-ds-bg) !important;
+  --fn-v3-bg-soft: var(--fn-ds-bg-soft) !important;
+  --fn-v3-surface: var(--fn-ds-surface) !important;
+  --fn-v3-surface-soft: var(--fn-ds-surface-soft) !important;
+  --fn-v3-surface-muted: var(--fn-ds-surface-muted) !important;
+  --fn-v3-text: var(--fn-ds-text) !important;
+  --fn-v3-text-soft: var(--fn-ds-text-soft) !important;
+  --fn-v3-muted: var(--fn-ds-muted) !important;
+  --fn-v3-border: var(--fn-ds-border) !important;
+  --fn-v3-border-strong: var(--fn-ds-border-strong) !important;
+  --fn-v3-green: var(--fn-ds-accent) !important;
+  --fn-v3-green-dark: var(--fn-ds-accent-strong) !important;
+  --fn-v3-green-soft: var(--fn-ds-accent-soft) !important;
+  --fn-v3-header: rgba(17, 23, 15, .90) !important;
+
+  --fn-macro-kcal: var(--fn-ds-kcal) !important;
+  --fn-macro-prot: var(--fn-ds-prot) !important;
+  --fn-macro-gluc: var(--fn-ds-gluc) !important;
+  --fn-macro-lip: var(--fn-ds-lip) !important;
+
+  --fn-kcal: var(--fn-ds-kcal) !important;
+  --fn-kcal-soft: var(--fn-ds-kcal-soft) !important;
+  --fn-protein: var(--fn-ds-prot) !important;
+  --fn-protein-soft: var(--fn-ds-prot-soft) !important;
+  --fn-carbs: var(--fn-ds-gluc) !important;
+  --fn-carbs-soft: var(--fn-ds-gluc-soft) !important;
+  --fn-fat: var(--fn-ds-lip) !important;
+  --fn-fat-soft: var(--fn-ds-lip-soft) !important;
+
+  --fn-mini-kcal: var(--fn-ds-kcal) !important;
+  --fn-mini-protein: var(--fn-ds-prot) !important;
+  --fn-mini-carbs: var(--fn-ds-gluc) !important;
+  --fn-mini-fat: var(--fn-ds-lip) !important;
+}
+
+html,
+body {
+  background:
+    radial-gradient(circle at 8% 0%, color-mix(in srgb, var(--fn-ds-accent-soft) 70%, transparent), transparent 28%),
+    radial-gradient(circle at 94% 10%, color-mix(in srgb, var(--fn-ds-kcal-soft) 70%, transparent), transparent 24%),
+    linear-gradient(180deg, var(--fn-ds-bg-soft) 0%, var(--fn-ds-bg) 48%, var(--fn-ds-bg) 100%) !important;
+}
+
+body.dark,
+body.foodnote-theme-dark,
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 6% 0%, rgba(143, 189, 134, .11), transparent 30%),
+    radial-gradient(circle at 94% 8%, rgba(242, 166, 90, .08), transparent 24%),
+    linear-gradient(180deg, var(--fn-ds-bg-soft) 0%, var(--fn-ds-bg) 56%, var(--fn-ds-bg) 100%) !important;
+}
+
+html body .fn-ui-surface-soft,
+html body .journal-floating-macro-card,
+html body .food-add-panel,
+html body .db-selected-card,
+html body .ocr-panel {
+  background-color: var(--fn-ds-surface-soft) !important;
+  border-color: var(--fn-ds-border) !important;
+}
+
+html body .btn-primary,
+html body .fn-ui-button-primary,
+html body .journal-add-btn,
+html body button[data-food-add-action="main"] {
+  background: var(--fn-ds-accent) !important;
+  border-color: var(--fn-ds-accent) !important;
+  color: #fff !important;
+}
+
+html body .btn-primary:hover,
+html body .fn-ui-button-primary:hover,
+html body .journal-add-btn:hover {
+  background: var(--fn-ds-accent-strong) !important;
+  border-color: var(--fn-ds-accent-strong) !important;
+}
+
+html body .macro-cell-prot,
+html body .fn-ui-macro-prot,
+html body .macro-prot {
+  --fn-current-macro: var(--fn-ds-prot);
+  --fn-current-macro-soft: var(--fn-ds-prot-soft);
+}
+
+html body .macro-cell-gluc,
+html body .fn-ui-macro-gluc,
+html body .macro-gluc {
+  --fn-current-macro: var(--fn-ds-gluc);
+  --fn-current-macro-soft: var(--fn-ds-gluc-soft);
+}
+
+html body .macro-cell-lip,
+html body .fn-ui-macro-lip,
+html body .macro-lip {
+  --fn-current-macro: var(--fn-ds-lip);
+  --fn-current-macro-soft: var(--fn-ds-lip-soft);
+}
+
+html body .fn-calorie-ring-visual {
+  background: conic-gradient(var(--macro-bar-color, var(--fn-ds-kcal)) var(--macro-pct, 0%), var(--fn-ds-neutral-line) 0) !important;
+}
+
+html body .food-source-chip.active,
+html body .food-meal-chip.active {
+  background: var(--fn-ds-accent-soft) !important;
+  border-color: var(--fn-ds-border-strong) !important;
+  color: var(--fn-ds-accent-strong) !important;
+}
+
+html body .fn-v2-page {
+  --fn-v2-panel-bg: var(--fn-ds-surface);
+  --fn-v2-panel-border: var(--fn-ds-border);
+  width: min(1120px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: clamp(12px, 2vw, 22px) 0 40px;
+  display: grid;
+  gap: clamp(14px, 2vw, 20px);
+}
+
+html body .fn-v2-panel {
+  background: var(--fn-v2-panel-bg);
+  border: 1px solid var(--fn-v2-panel-border);
+  border-radius: var(--fn-ds-radius-xl, 22px);
+  box-shadow: 0 12px 34px rgba(27, 32, 25, .045);
+  overflow: hidden;
+}
+
+html body .fn-v2-hero {
+  padding: clamp(18px, 2.4vw, 26px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: var(--fn-v2-panel-bg);
+}
+
+html body .fn-v2-hero-icon,
+html body .fn-v2-section-head > span {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  color: var(--fn-ds-accent-strong);
+  background: var(--fn-ds-accent-soft);
+  border: 1px solid color-mix(in srgb, var(--fn-ds-accent) 24%, var(--fn-ds-border));
+}
+
+html body .fn-v2-kicker,
+html body .fn-v2-indicator-label {
+  display: block;
+  font-size: .76rem;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  color: var(--fn-ds-muted);
+}
+
+html body .fn-v2-hero h1 {
+  margin: 4px 0 3px;
+  font-size: clamp(1.55rem, 3.2vw, 2.35rem);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+  color: var(--fn-ds-text);
+}
+
+html body .fn-v2-hero p,
+html body .fn-v2-section-head small,
+html body .fn-v2-muted,
+html body .fn-v2-indicator-copy small,
+html body .fn-v2-rule-card span {
+  color: var(--fn-ds-muted);
+}
+
+html body .fn-v2-section-head b {
+  display: block;
+  color: var(--fn-ds-text);
+  font-size: 1rem;
+  letter-spacing: -.01em;
+}
+
+html body .fn-v2-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--fn-ds-border);
+  background: var(--fn-ds-surface-soft);
+  color: var(--fn-ds-text-soft);
+  font-size: .86rem;
+  font-weight: 650;
+}
+
+html body .fn-v2-indicator-card,
+html body .fn-v2-rule-card,
+html body .fn-v2-advice-card {
+  position: relative;
+  min-width: 0;
+  border-radius: 18px;
+  border: 1px solid var(--fn-ds-border);
+  background: var(--fn-ds-surface-soft);
+}
+
+html body .fn-v2-indicator-card {
+  --fn-v2-accent: var(--fn-ds-text-soft);
+  --fn-v2-accent-soft: var(--fn-ds-surface-soft);
+  min-height: 118px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  grid-template-rows: 1fr auto;
+  column-gap: 12px;
+  row-gap: 12px;
+  border-color: var(--fn-ds-border);
+  background: var(--fn-ds-surface-soft);
+  box-shadow: 0 8px 20px rgba(27, 32, 25, .03);
+}
+
+html body .fn-v2-indicator-card[data-macro] {
+  border-color: color-mix(in srgb, var(--fn-v2-accent) 28%, var(--fn-ds-border));
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--fn-v2-accent) 14%, var(--fn-ds-surface)),
+      color-mix(in srgb, var(--fn-v2-accent) 6%, var(--fn-ds-surface))
+    );
+}
+
+html body .fn-v2-indicator-card[data-macro="kcal"] {
+  --fn-v2-accent: var(--fn-ds-kcal);
+  --fn-v2-accent-soft: var(--fn-ds-kcal-soft);
+}
+
+html body .fn-v2-indicator-card[data-macro="prot"] {
+  --fn-v2-accent: var(--fn-ds-prot);
+  --fn-v2-accent-soft: var(--fn-ds-prot-soft);
+}
+
+html body .fn-v2-indicator-card[data-macro="gluc"] {
+  --fn-v2-accent: var(--fn-ds-gluc);
+  --fn-v2-accent-soft: var(--fn-ds-gluc-soft);
+}
+
+html body .fn-v2-indicator-card[data-macro="lip"] {
+  --fn-v2-accent: var(--fn-ds-lip);
+  --fn-v2-accent-soft: var(--fn-ds-lip-soft);
+}
+
+html body .fn-v2-indicator-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 15px;
+  color: var(--fn-v2-accent);
+  background: color-mix(in srgb, var(--fn-v2-accent) 10%, var(--fn-ds-surface));
+  border: 1px solid color-mix(in srgb, var(--fn-v2-accent) 22%, var(--fn-ds-border));
+  font-size: 1.18rem;
+}
+
+html body .fn-v2-indicator-card:not([data-macro]) .fn-v2-indicator-icon {
+  color: var(--fn-ds-text-soft);
+  background: var(--fn-ds-surface);
+  border-color: var(--fn-ds-border);
+}
+
+html body .fn-v2-indicator-copy strong {
+  color: var(--fn-ds-text);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  line-height: 1;
+  letter-spacing: -.035em;
+}
+
+html body .fn-v2-indicator-copy strong em {
+  font-style: normal;
+  font-size: .82rem;
+  color: var(--fn-ds-muted);
+  letter-spacing: 0;
+}
+
+html body .fn-v2-progress {
+  grid-column: 1 / -1;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--fn-ds-text) 8%, transparent);
+}
+
+html body .fn-v2-progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--fn-v2-accent);
+}
+
+html body .fn-v2-advice-card b,
+html body .fn-v2-rule-card b {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--fn-ds-text);
+}
+
+html body .fn-v2-advice-card p {
+  margin: 0;
+  color: var(--fn-ds-muted);
+  font-size: .92rem;
+}
+
+html body .fn-v2-advice-card[data-tone="ok"] {
+  border-color: color-mix(in srgb, var(--fn-ds-accent) 24%, var(--fn-ds-border));
+  background: color-mix(in srgb, var(--fn-ds-accent-soft) 38%, var(--fn-ds-surface));
+}
+
+html body .fn-v2-advice-card[data-tone="warn"] {
+  border-color: color-mix(in srgb, var(--fn-ds-warning) 24%, var(--fn-ds-border));
+  background: color-mix(in srgb, var(--fn-ds-warning) 7%, var(--fn-ds-surface));
+}
+
+html body .fn-v2-details-summary strong {
+  display: block;
+  color: var(--fn-ds-text);
+}
+
+html body .fn-v2-details-summary small {
+  display: block;
+  margin-top: 2px;
+  color: var(--fn-ds-muted);
+}
+
+html body .fn-v2-details-icon {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--fn-ds-accent-soft);
+  color: var(--fn-ds-accent-strong);
+  border: 1px solid color-mix(in srgb, var(--fn-ds-accent) 24%, var(--fn-ds-border));
+}
+
+html body .fn-v2-details-chevron {
+  color: var(--fn-ds-muted);
+  transition: transform .18s ease;
+}
+
+html body .fn-v2-calc-box {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--fn-ds-border);
+  background: var(--fn-ds-surface-soft);
+  color: var(--fn-ds-text-soft);
+  line-height: 1.55;
+}
+
+html body .fn-v2-subhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+  color: var(--fn-ds-text);
+}
+
+html body .fn-v2-subhead small {
+  color: var(--fn-ds-muted);
+  font-weight: 500;
+}
+
+html body #page-recettes .recipe-editor-col > .card,
+html body #page-recettes .card {
+  border-radius: 16px !important;
+  box-shadow: var(--fn-panel-shadow) !important;
+}
+
+html body #page-recettes .recipe-hero-actions button,
+html body #page-recettes .recipe-search-line button,
+html body #page-recettes .recipe-quick-actions button,
+html body #page-recettes .recipe-save-row button {
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text-soft) !important;
+  font-weight: var(--fn-ds-w-bold, 700) !important;
+  box-shadow: none !important;
+  padding: 9px 16px !important;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+
+html body #page-recettes .recipe-hero-actions button:hover,
+html body #page-recettes .recipe-search-line button:hover,
+html body #page-recettes .recipe-quick-actions button:hover,
+html body #page-recettes .recipe-save-row button:hover {
+  border-color: var(--fn-ds-accent) !important;
+  color: var(--fn-ds-text) !important;
+}
+
+html body #page-recettes .recipe-hero-actions .btn-primary,
+html body #page-recettes .recipe-save-row .btn-primary {
+  border-color: transparent !important;
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+}

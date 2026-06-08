@@ -1,0 +1,10 @@
+/*
+ * FoodNote — composants partagés de pages
+ * Rôle : Gérer les composants transverses qui ne sont pas rattachés à une seule page métier.
+ * Ne doit pas gérer : les corrections ponctuelles ; si un composant devient spécifique, il doit rejoindre son module propriétaire.
+ */
+
+@keyframes fnFadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

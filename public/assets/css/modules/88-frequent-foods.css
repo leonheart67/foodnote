@@ -1,0 +1,166 @@
+/*
+ * FoodNote — 88-frequent-foods.css
+ * Rôle : Affichage du bouton “aliments fréquents”, de la bulle de sélection et du toast de confirmation.
+ * Ne doit pas gérer : le calcul des aliments fréquents, l’ajout au journal, les observers DOM ou la logique de positionnement dynamique.
+ */
+
+.fn-freq-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: 6px;
+  border: 1px solid var(--fn-ds-border, rgba(97, 74, 46, .14));
+  border-radius: 999px;
+  background: var(--fn-ds-surface-soft, #f3eadf);
+  color: var(--fn-ds-accent-strong, #2e5d42);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.fn-freq-btn:hover {
+  border-color: var(--fn-ds-accent, #3f7a57);
+  background: var(--fn-ds-accent-soft, #e1efe2);
+}
+
+#fn-freq-bubble {
+  position: fixed;
+  z-index: 2147483600;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  max-height: 60vh;
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--fn-ds-border, rgba(97, 74, 46, .18));
+  border-radius: 16px;
+  background: var(--fn-ds-surface, #fffdf8);
+  box-shadow: 0 12px 34px rgba(35, 30, 22, .22);
+}
+
+#fn-freq-bubble .fn-freq-h {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 4px 8px;
+  color: var(--fn-ds-text-soft, #5b5b51);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+#fn-freq-bubble .fn-freq-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 6px 9px;
+  border: 1px solid var(--fn-ds-border, rgba(97, 74, 46, .12));
+  border-radius: 11px;
+  background: var(--fn-ds-bg, #efe7da);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .12s, transform .05s;
+}
+
+#fn-freq-bubble .fn-freq-item:hover {
+  border-color: var(--fn-ds-accent, #3f7a57);
+}
+
+#fn-freq-bubble .fn-freq-item:active {
+  transform: scale(.99);
+}
+
+#fn-freq-bubble .fn-freq-main {
+  flex: 1;
+  min-width: 0;
+}
+
+#fn-freq-bubble .fn-freq-name {
+  overflow: hidden;
+  color: var(--fn-ds-text, #211f1a);
+  font-size: 13.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#fn-freq-bubble .fn-freq-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+#fn-freq-bubble .fn-freq-macros .mk {
+  color: var(--fn-ds-kcal, #df7f2a);
+}
+
+#fn-freq-bubble .fn-freq-macros .mp {
+  color: var(--fn-ds-prot, #2878a8);
+}
+
+#fn-freq-bubble .fn-freq-macros .mg {
+  color: var(--fn-ds-gluc, #8266c7);
+}
+
+#fn-freq-bubble .fn-freq-macros .ml {
+  color: var(--fn-ds-lip, #c9932e);
+}
+
+#fn-freq-bubble .fn-freq-qty {
+  flex: 0 0 auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--fn-ds-accent-soft, #e1efe2);
+  color: var(--fn-ds-accent-strong, #2e5d42);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#fn-freq-bubble .fn-freq-empty {
+  padding: 14px;
+  color: var(--fn-ds-muted, #8b8172);
+  font-size: 13px;
+  text-align: center;
+}
+
+#fn-freq-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  z-index: 2147483600;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--fn-ds-accent-strong, #2e5d42);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity .2s;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+}
+
+
+#fn-freq-toast.is-visible,
+.fn-freq-toast.is-visible {
+  opacity: 1;
+}
+
+#fn-freq-bubble.is-mobile-sheet {
+  right: 8px;
+  bottom: 88px;
+  left: 8px;
+  top: auto;
+  width: auto;
+  max-height: 58vh;
+}

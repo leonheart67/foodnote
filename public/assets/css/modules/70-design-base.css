@@ -1,0 +1,1513 @@
+/*
+ * FoodNote — base design FoodNote
+ * Rôle : Définir les fondations finales du design visuel validé : espacements, surfaces et cohérence générale.
+ * Ne doit pas gérer : les composants métier déjà couverts par les modules précédents.
+ */
+
+:root {
+  --fn-v3-bg: #efe7da;
+  --fn-v3-bg-soft: #f8f1e7;
+  --fn-v3-surface: #fffdf8;
+  --fn-v3-surface-soft: #f3eadf;
+  --fn-v3-surface-muted: #e7dcca;
+  --fn-v3-text: #211f1a;
+  --fn-v3-text-soft: #5b5b51;
+  --fn-v3-muted: #8b8172;
+  --fn-v3-border: rgba(97, 74, 46, .14);
+  --fn-v3-border-strong: rgba(63, 122, 87, .38);
+  --fn-v3-green: #3f7a57;
+  --fn-v3-green-dark: #2e5d42;
+  --fn-v3-green-soft: #e1efe2;
+  --fn-v3-header: #ffffffd9;
+  --fn-v3-shadow: 0 18px 45px rgba(45, 43, 36, .055);
+  --fn-v3-shadow-soft: 0 8px 20px rgba(45, 43, 36, .04);
+  --fn-v3-radius-xl: 20px;
+  --fn-v3-radius-lg: 14px;
+  --fn-v3-radius-md: 10px;
+  --fn-v3-page-width: 1140px;
+  --fn-v3-wide-width: 1240px;
+  --fn-v3-header-height: 64px;
+  --fn-v3-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html[data-theme="dark"],
+body.foodnote-theme-dark,
+body.dark {
+  --fn-v3-bg: #161513;
+  --fn-v3-bg-soft: #1b1916;
+  --fn-v3-surface: #221f1c;
+  --fn-v3-surface-soft: #2b2824;
+  --fn-v3-surface-muted: #34302b;
+  --fn-v3-text: #f2efe7;
+  --fn-v3-text-soft: #c7c0b2;
+  --fn-v3-muted: #9a9489;
+  --fn-v3-border: rgba(255, 255, 255, .11);
+  --fn-v3-border-strong: rgba(141, 176, 126, .46);
+  --fn-v3-green: #82ac8c;
+  --fn-v3-green-dark: #bdd2b0;
+  --fn-v3-green-soft: rgba(159, 189, 142, .17);
+  --fn-v3-header: rgba(18, 21, 16, .90);
+  --fn-v3-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+  --fn-v3-shadow-soft: 0 8px 20px rgba(0, 0, 0, .18);
+}
+
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--fn-v3-bg) !important; }
+body {
+  min-height: 100vh !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  font-family: var(--fn-v3-font) !important;
+  color: var(--fn-v3-text) !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.65), transparent 28%),
+    linear-gradient(180deg, var(--fn-v3-bg-soft) 0%, var(--fn-v3-bg) 52%, var(--fn-v3-bg) 100%) !important;
+}
+
+body.foodnote-theme-dark,
+body.dark {
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.05), transparent 26%),
+    linear-gradient(180deg, #1a1714 0%, var(--fn-v3-bg) 56%, var(--fn-v3-bg) 100%) !important;
+}
+
+button, input, select, textarea { font-family: inherit !important; }
+button { cursor: pointer; }
+
+
+.page { display: none; }
+.page.active { display: block; }
+
+
+.sb-overlay,
+.sb-toggle,
+.sb-collapse-btn,
+.sb-section,
+.app-header,
+.fn-page-title-icon,
+.app-title { display: none !important; }
+
+.app-layout {
+  display: block !important;
+  min-height: 100vh !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  height: var(--fn-v3-header-height) !important;
+  min-height: var(--fn-v3-header-height) !important;
+  max-height: var(--fn-v3-header-height) !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 18px !important;
+  padding: 0 28px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-header) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+.sb-header,
+.sb-footer,
+.sb-user,
+.sb-logo,
+.sb-nav { min-width: 0 !important; }
+
+.sb-header {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.sb-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.sb-logo-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--fn-v3-green) !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+.sb-logo-icon img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+.sb-logo-name {
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.02em !important;
+  color: var(--fn-v3-text) !important;
+  text-transform: none !important;
+}
+.sb-logo-phase,
+#header-subtitle {
+  margin-top: 2px !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  color: var(--fn-v3-muted) !important;
+  white-space: nowrap !important;
+}
+
+.sb-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.sb-nav::-webkit-scrollbar { display: none !important; }
+
+.sb-item,
+.sb-sub-item {
+  min-height: 32px !important;
+  height: 32px !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 0 13px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--fn-v3-text-soft) !important;
+  font-size: 12px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transition: background .15s ease, color .15s ease, transform .15s ease !important;
+}
+.sb-item:hover,
+.sb-sub-item:hover { background: var(--fn-v3-surface-soft) !important; color: var(--fn-v3-text) !important; }
+.sb-item.active,
+.sb-sub-item.active {
+  background: var(--fn-v3-surface-soft) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+}
+.sb-item i:not(.sb-chevron) { display: none !important; }
+.sb-chevron { display: none !important; }
+.sb-sub {
+  display: none !important;
+  position: fixed !important;
+  top: var(--fn-v3-header-height) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1005 !important;
+  min-width: 280px !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 10px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 18px !important;
+  background: var(--fn-v3-surface) !important;
+  box-shadow: var(--fn-v3-shadow) !important;
+}
+
+.sb-footer {
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+.theme-toggle {
+  width: 34px !important;
+  height: 28px !important;
+  min-width: 34px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+}
+.sb-user {
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 2px 10px 2px 4px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+}
+.sb-avatar {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: var(--fn-v3-green-soft) !important;
+  color: var(--fn-v3-green-dark) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+.fn-ui-sidebar-name,
+#sb-prenom { font-size: 12px !important; font-weight: var(--fn-ds-w-bold) !important; color: var(--fn-v3-text) !important; white-space: nowrap !important; }
+.fn-ui-sidebar-macros,
+#header-macros { display: none !important; }
+
+
+.main-wrap {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 22px 72px !important;
+  background: transparent !important;
+}
+
+#page-journal,
+#page-sport,
+#page-historique,
+#page-stats,
+#page-objectif,
+#page-recap,
+#page-ia,
+#page-bases,
+#page-donnees,
+#page-profil,
+#page-themelab,
+#page-onboarding,
+.fn-ui-page,
+.fn-ui-page-narrow {
+  width: min(100%, var(--fn-v3-page-width)) !important;
+  max-width: var(--fn-v3-page-width) !important;
+  margin: 0 auto !important;
+  padding-top: 32px !important;
+}
+
+#page-stats,
+#page-bases,
+#page-donnees,
+#page-themelab { max-width: var(--fn-v3-wide-width) !important; }
+
+.card,
+.fn-ui-surface,
+.fn-ui-panel,
+.journal-section-card,
+.journal-tile-card,
+details.card,
+.food-add-panel,
+.food-add-dialog,
+.food-current-meal-card,
+.ocr-panel,
+.recipe-ai-result,
+.barcode-result,
+.database-explorer-card,
+.notification-card {
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: var(--fn-v3-radius-xl) !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+}
+
+.fn-ui-surface-soft,
+.card.fn-ui-surface-soft,
+.food-current-meal-card,
+.ocr-panel,
+.recipe-ai-result,
+.barcode-result {
+  background: var(--fn-v3-bg-soft) !important;
+}
+
+.fn-ui-panel-pad,
+.card,
+.journal-section-card,
+.journal-tile-card { padding: 24px !important; }
+
+
+.journal-hero {
+  padding: 30px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.journal-page-heading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin: 0 0 24px !important;
+}
+.journal-page-title {
+  margin: 0 !important;
+  font-size: clamp(28px, 3.1vw, 34px) !important;
+  line-height: 1 !important;
+  letter-spacing: -.045em !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  color: var(--fn-v3-text) !important;
+}
+.journal-page-title::after {
+  content: "Lundi 1 juin · cible 2346 kcal";
+  display: block;
+  margin-top: 12px;
+  color: var(--fn-v3-muted);
+  font-size: 11px;
+  font-weight: var(--fn-ds-w-medium);
+  letter-spacing: 0;
+}
+.journal-date-actions { display: flex !important; align-items: center !important; justify-content: flex-end !important; }
+.journal-date-launch,
+.journal-date-launch-heading {
+  min-width: 114px !important;
+  height: 28px !important;
+  padding: 0 13px !important;
+  border-radius: 7px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text-soft) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  box-shadow: none !important;
+}
+.journal-date-launch-heading { font-size: 0 !important; }
+.journal-date-launch-heading::after { content: "Choisir une date"; font-size: 11px; }
+
+
+.journal-day-row-carousel,
+#page-journal .journal-day-row-carousel,
+#page-sport .journal-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 0 18px !important;
+  padding: 12px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--fn-v3-surface) 86%, transparent) !important;
+  box-shadow: none !important;
+}
+.journal-day-carousel-wrap { min-width: 0 !important; overflow: hidden !important; }
+.journal-day-carousel,
+#page-journal .journal-day-carousel,
+#page-sport .journal-day-carousel {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  overflow: visible !important;
+  padding: 0 !important;
+}
+.journal-day-nav {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-muted) !important;
+  font-size: 18px !important;
+  box-shadow: none !important;
+}
+.journal-day-card,
+#page-journal .journal-day-card,
+#page-sport .journal-day-card {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 74px !important;
+  min-height: 74px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  padding: 10px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+}
+.journal-day-card.active,
+#page-journal .journal-day-card.active,
+#page-sport .journal-day-card.active {
+  background: color-mix(in srgb, var(--fn-v3-green-soft) 36%, var(--fn-v3-surface)) !important;
+  border-color: var(--fn-v3-border-strong) !important;
+}
+.journal-day-card-weekday { font-size: 9px !important; text-transform: uppercase !important; letter-spacing: .05em !important; color: var(--fn-v3-muted) !important; font-weight: var(--fn-ds-w-bold) !important; }
+.journal-day-card-number { font-size: 18px !important; line-height: 1 !important; font-weight: var(--fn-ds-w-medium) !important; letter-spacing: -.03em !important; color: var(--fn-v3-text) !important; }
+.journal-day-card-month { font-size: 9px !important; text-transform: lowercase !important; color: var(--fn-v3-muted) !important; font-weight: var(--fn-ds-w-medium) !important; }
+.journal-day-card-year,
+.journal-day-card-kcal,
+.journal-day-card-foot,
+.journal-day-card-bars,
+.journal-day-sport-badge,
+.journal-day-status-dot,
+.journal-day-status-empty { display: none !important; }
+
+.journal-floating-macro-card,
+.fn-home-nutrition-panel,
+.fn-orbit-nutrition-card {
+  margin: 0 0 16px !important;
+  padding: 26px 24px !important;
+  border-radius: 13px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+  box-shadow: none !important;
+}
+.fn-orbit-card-top,
+.fn-home-panel-head {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin: 0 0 22px !important;
+}
+.fn-orbit-kicker {
+  margin-bottom: 6px !important;
+  color: var(--fn-v3-muted) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+}
+.fn-orbit-title {
+  margin: 0 !important;
+  color: var(--fn-v3-text) !important;
+  font-size: clamp(20px, 2vw, 22px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.035em !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+}
+.fn-orbit-status {
+  min-height: 26px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  background: var(--fn-v3-green-soft) !important;
+  color: var(--fn-v3-green-dark) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.fn-home-nutrition-layout {
+  display: grid !important;
+  grid-template-columns: 138px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+.fn-calorie-summary-card,
+.macro-cell-kcal {
+  min-height: 150px !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.fn-calorie-ring-wrap { width: 128px !important; height: 128px !important; display: grid !important; place-items: center !important; }
+.fn-calorie-ring-visual {
+  width: 126px !important;
+  height: 126px !important;
+  border-radius: 50% !important;
+  display: grid !important;
+  place-items: center !important;
+  background: conic-gradient(var(--macro-bar-color, var(--fn-v3-green)) var(--macro-pct, 0%), var(--fn-v3-surface-muted) 0) !important;
+}
+.fn-calorie-ring-core {
+  width: 108px !important;
+  height: 108px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--fn-v3-surface) !important;
+}
+.fn-calorie-flame { display: none !important; }
+.fn-calorie-summary-card::before,
+.fn-calorie-summary-card::after,
+.macro-cell-kcal::before,
+.macro-cell-kcal::after,
+.fn-calorie-ring-wrap::before,
+.fn-calorie-ring-wrap::after,
+.fn-calorie-ring-visual::before,
+.fn-calorie-ring-visual::after,
+.fn-calorie-ring-core::before,
+.fn-calorie-ring-core::after {
+  content: none !important;
+  display: none !important;
+}
+.fn-calorie-ring-wrap,
+.fn-calorie-ring-visual,
+.fn-calorie-ring-core { overflow: visible !important; }
+.fn-calorie-summary-card .macro-val,
+.macro-cell-kcal .macro-val,
+#m-kcal {
+  color: var(--fn-v3-text) !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: .04em !important;
+}
+.fn-calorie-unit { margin-top: 6px !important; color: var(--fn-v3-muted) !important; font-size: 10px !important; font-weight: var(--fn-ds-w-bold) !important; letter-spacing: .08em !important; }
+.fn-calorie-copy { text-align: center !important; }
+.fn-calorie-copy .macro-lbl { display: none !important; }
+.fn-calorie-target-line { color: var(--fn-v3-text-soft) !important; font-size: 11px !important; font-weight: var(--fn-ds-w-medium) !important; }
+.fn-calorie-percent,
+.fn-calorie-state-line,
+.macro-status-badge { display: none !important; }
+
+.macro-bar,
+.fn-home-macro-list,
+.fn-home-macro-grid,
+.journal-main-macros {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.fn-macro-home-card,
+.fn-home-macro-row,
+.macro-cell-prot,
+.macro-cell-gluc,
+.macro-cell-lip {
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 26px 8px 12px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--fn-v3-surface-soft) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+.fn-macro-home-card::after,
+.fn-home-macro-row::after,
+.macro-cell-prot::after,
+.macro-cell-gluc::after,
+.macro-cell-lip::after {
+  content: "";
+  position: absolute;
+  left: 52px;
+  right: 26px;
+  bottom: 10px;
+  height: 4px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg,
+      var(--macro-bar-color, var(--fn-v3-green)) 0 var(--macro-pct, 0%),
+      rgba(46, 53, 43, .13) var(--macro-pct, 0%) 100%);
+}
+.fn-mini-ring,
+.fn-macro-icon-bubble,
+.fn-nutri-home-icon {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: color-mix(in srgb, var(--fn-v3-green-soft) 70%, var(--fn-v3-surface)) !important;
+  color: var(--fn-v3-green-dark) !important;
+  font-size: 0 !important;
+}
+.fn-mini-ring::before { content: ""; width: 100%; height: 100%; border-radius: inherit; background: color-mix(in srgb, var(--fn-v3-green) 13%, transparent); }
+.fn-macro-copy {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+.macro-head { min-width: 0 !important; }
+.macro-lbl {
+  color: var(--fn-v3-muted) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+}
+.fn-macro-copy .macro-val,
+.macro-cell-prot .macro-val,
+.macro-cell-gluc .macro-val,
+.macro-cell-lip .macro-val {
+  color: var(--fn-v3-text) !important;
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  white-space: nowrap !important;
+}
+.macro-target { display: none !important; }
+
+
+.journal-main-card,
+.journal-section-card {
+  margin: 16px 0 !important;
+  padding: 24px !important;
+  background: var(--fn-v3-surface) !important;
+  border-radius: 16px !important;
+}
+.journal-card-head { margin-bottom: 18px !important; }
+.card-title,
+.fn-section-title,
+.journal-meals-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  color: var(--fn-v3-text) !important;
+  font-size: 20px !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: -.03em !important;
+}
+.fn-section-icon,
+.journal-meals-icon {
+  width: 26px !important;
+  height: 26px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 8px !important;
+  background: var(--fn-v3-green-soft) !important;
+  color: var(--fn-v3-green-dark) !important;
+  font-size: 13px !important;
+}
+.food-add-dialog { max-width: 920px !important; width: min(920px, calc(100vw - 28px)) !important; }
+.food-add-body { padding: 0 !important; }
+.food-add-main { padding: 22px !important; }
+.food-add-panel { padding: 20px !important; border-radius: 14px !important; }
+.db-search-wrap { display: grid !important; grid-template-columns: minmax(0, 1fr) 84px !important; gap: 8px !important; }
+input,
+select,
+textarea,
+.db-search-input,
+.db-qty-input {
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 8px !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+}
+button,
+.fn-ui-button,
+.btn-primary,
+.journal-add-btn,
+.food-source-chip,
+.food-meal-chip {
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text-soft) !important;
+  box-shadow: none !important;
+}
+.btn-primary,
+.journal-add-btn,
+.food-meal-chip.active,
+.food-source-chip.active {
+  border-color: transparent !important;
+  background: var(--fn-v3-green-soft) !important;
+  color: var(--fn-v3-green-dark) !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+
+.journal-foods-block,
+.journal-meals-card {
+  margin: 16px 0 !important;
+  padding: 22px 24px !important;
+  border-radius: 16px !important;
+  background: var(--fn-v3-surface) !important;
+}
+.journal-meals-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+.journal-meals-subtitle { color: var(--fn-v3-muted) !important; font-size: 12px !important; }
+.meal-collapsible-list,
+.aliment-list { display: grid !important; gap: 8px !important; }
+.meal-card,
+.meal-section,
+.meal-group,
+.aliment-item,
+.food-line,
+.custom-food-row,
+.entry-row {
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .07) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+
+.fn-ui-title-row,
+.profile-summary-main {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+.fn-ui-title-left { display: flex !important; align-items: flex-start !important; gap: 14px !important; }
+.fn-ui-icon {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 12px !important;
+  background: var(--fn-v3-green-soft) !important;
+  color: var(--fn-v3-green-dark) !important;
+}
+.fn-ui-kicker,
+.profile-chip {
+  display: inline-block !important;
+  color: var(--fn-v3-muted) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+.fn-ui-title,
+.profile-name {
+  margin: 3px 0 0 !important;
+  color: var(--fn-v3-text) !important;
+  font-size: clamp(22px, 2.2vw, 28px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.035em !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+}
+.fn-ui-title-inline { font-size: clamp(20px, 1.8vw, 24px) !important; }
+.fn-ui-sub,
+.profile-muted {
+  margin: 7px 0 0 !important;
+  color: var(--fn-v3-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+.fn-ui-actions { display: flex !important; align-items: center !important; gap: 10px !important; flex-wrap: wrap !important; }
+.fn-ui-section-head {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+.fn-ui-section-head b { color: var(--fn-v3-text) !important; font-size: 18px !important; }
+.fn-ui-section-head em { color: var(--fn-v3-muted) !important; font-size: 12px !important; font-style: normal !important; }
+.fn-ui-feature-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 12px !important; }
+.fn-ui-feature,
+.fn-ui-tile,
+.fn-ui-alert,
+.fn-ui-chart-tile,
+.fn-ui-chart-wide,
+.stat-card,
+.chart-card {
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 16px !important;
+  background: var(--fn-v3-surface) !important;
+  box-shadow: none !important;
+}
+.fn-ui-feature,
+.fn-ui-tile,
+.fn-ui-alert { background: var(--fn-v3-bg-soft) !important; }
+
+#page-sport .fn-ui-panel,
+#page-profil .card,
+#page-objectif .card,
+#page-ia .card,
+#page-bases .card,
+#page-donnees .card,
+#page-stats .card,
+#page-recap .card,
+#page-themelab .card,
+#hist-list > * {
+  background: var(--fn-v3-surface) !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+#page-historique #hist-list { display: grid !important; gap: 12px !important; }
+#page-stats canvas,
+#page-stats .chart-card,
+#page-stats .stat-card { max-width: 100% !important; }
+
+
+@media (max-width: 760px) {
+  :root { --fn-v3-header-height: 58px; }
+  body { padding-bottom: 86px !important; }
+
+  .sidebar {
+    height: var(--fn-v3-header-height) !important;
+    min-height: var(--fn-v3-header-height) !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    padding: 0 10px !important;
+    overflow: hidden !important;
+  }
+  .sb-logo-text { display: none !important; }
+  .sb-logo-icon { width: 34px !important; height: 34px !important; border-radius: 10px !important; }
+  .sb-nav { justify-content: flex-start !important; }
+  .sb-item { min-height: 34px !important; height: 34px !important; padding: 0 12px !important; font-size: 11px !important; }
+  .sb-footer { gap: 6px !important; }
+  .theme-toggle { display: none !important; }
+  .sb-user { padding: 0 !important; border: 0 !important; background: transparent !important; }
+  #sb-prenom { display: none !important; }
+  .sb-avatar { width: 32px !important; height: 32px !important; }
+
+  .main-wrap { padding: 0 12px 110px !important; }
+  .fn-ui-title-row,
+  .profile-summary-main,
+  .fn-ui-title-left { flex-direction: column !important; align-items: flex-start !important; }
+  .fn-ui-feature-grid { grid-template-columns: 1fr !important; }
+  #page-journal,
+  #page-sport,
+  #page-historique,
+  #page-stats,
+  #page-objectif,
+  #page-recap,
+  #page-ia,
+  #page-bases,
+  #page-donnees,
+  #page-profil,
+  #page-themelab,
+  #page-onboarding,
+  .fn-ui-page,
+  .fn-ui-page-narrow {
+    width: 100% !important;
+    padding-top: 18px !important;
+  }
+  .journal-page-heading { align-items: flex-start !important; margin-bottom: 18px !important; }
+  .journal-page-title { font-size: 28px !important; }
+  .journal-date-launch-heading { min-width: 44px !important; width: 44px !important; padding: 0 !important; font-size: 0 !important; }
+  .journal-date-launch-heading::after { content: "📅"; font-size: 15px; }
+  .journal-day-row-carousel { grid-template-columns: minmax(0, 1fr) !important; padding: 10px !important; margin-bottom: 14px !important; }
+  .journal-day-nav { display: none !important; }
+  .journal-day-carousel-wrap { overflow-x: auto !important; scrollbar-width: none !important; }
+  .journal-day-carousel-wrap::-webkit-scrollbar { display: none !important; }
+  .journal-day-carousel {
+    display: flex !important;
+    gap: 8px !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+  .journal-day-card { width: 84px !important; min-width: 84px !important; height: 66px !important; min-height: 66px !important; }
+  .journal-floating-macro-card { padding: 20px 18px !important; }
+  .fn-orbit-card-top { align-items: flex-start !important; }
+  .fn-home-nutrition-layout {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .fn-calorie-summary-card { min-height: 138px !important; }
+  .fn-calorie-ring-wrap { width: 116px !important; height: 116px !important; }
+  .fn-calorie-ring-visual { width: 116px !important; height: 116px !important; }
+  .fn-calorie-ring-core { width: 98px !important; height: 98px !important; }
+  .fn-macro-home-card { padding-right: 14px !important; }
+  .fn-macro-home-card::after,
+  .fn-home-macro-row::after,
+  .macro-cell-prot::after,
+  .macro-cell-gluc::after,
+  .macro-cell-lip::after { right: 14px !important; }
+  .journal-main-card,
+  .journal-foods-block,
+  .journal-section-card,
+  .journal-tile-card,
+  .card,
+  .fn-ui-panel-pad { padding: 18px !important; }
+  .food-add-dialog { width: calc(100vw - 16px) !important; max-height: calc(100vh - 26px) !important; border-radius: 18px !important; }
+  .food-add-main { padding: 16px !important; }
+  .food-add-panel { padding: 14px !important; }
+  .db-row,
+  .journal-add-row,
+  .db-search-wrap { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 430px) {
+  .sb-nav .sb-item:nth-of-type(n+5) { display: none !important; }
+  .journal-page-title { font-size: 26px !important; }
+  .journal-floating-macro-card { border-radius: 14px !important; }
+  .fn-orbit-status { display: none !important; }
+}
+
+
+:root {
+  --fn-v3-page-width: 1140px;
+  --fn-v3-wide-width: 1240px;
+}
+
+#page-journal.page,
+#page-sport.page,
+#page-profil.page,
+#page-objectif.page,
+#page-ia.page,
+#page-recap.page,
+#page-historique.page,
+#page-stats.page,
+#page-bases.page,
+#page-donnees.page {
+  width: min(100%, var(--fn-v3-page-width)) !important;
+  max-width: var(--fn-v3-page-width) !important;
+}
+#page-stats.page,
+#page-bases.page,
+#page-donnees.page {
+  max-width: var(--fn-v3-wide-width) !important;
+}
+
+#page-journal .journal-hero.card.fn-ui-surface.journal-sticky-summary {
+  padding: 30px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#page-journal .journal-hero.card.fn-ui-surface.journal-sticky-summary::before,
+#page-journal .journal-hero.card.fn-ui-surface.journal-sticky-summary::after {
+  content: none !important;
+  display: none !important;
+}
+
+#page-journal .journal-day-row.journal-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 0 18px !important;
+  padding: 12px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 16px !important;
+  background: var(--fn-v3-surface) !important;
+  box-shadow: none !important;
+}
+
+#page-journal .journal-floating-macro-card.card.fn-ui-surface.fn-orbit-nutrition-card.fn-home-nutrition-panel {
+  margin: 0 0 16px !important;
+  padding: 26px 24px !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 16px !important;
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#page-journal .journal-floating-macro-card.card.fn-ui-surface.fn-orbit-nutrition-card.fn-home-nutrition-panel::before,
+#page-journal .journal-floating-macro-card.card.fn-ui-surface.fn-orbit-nutrition-card.fn-home-nutrition-panel::after {
+  content: none !important;
+  display: none !important;
+}
+#page-journal .journal-floating-macro-card .fn-orbit-title,
+#page-journal .journal-floating-macro-card .fn-orbit-kicker,
+#page-journal .journal-floating-macro-card .macro-val,
+#page-journal .journal-floating-macro-card .macro-lbl,
+#page-journal .journal-floating-macro-card .macro-target,
+#page-journal .journal-floating-macro-card .fn-calorie-target-line {
+  text-shadow: none !important;
+}
+#page-journal .journal-floating-macro-card .fn-orbit-title { color: var(--fn-v3-text) !important; }
+#page-journal .journal-floating-macro-card .fn-orbit-kicker,
+#page-journal .journal-floating-macro-card .macro-lbl { color: var(--fn-v3-muted) !important; }
+#page-journal .journal-floating-macro-card .macro-val { color: var(--fn-v3-text) !important; }
+#page-journal .journal-floating-macro-card .fn-calorie-target-line,
+#page-journal .journal-floating-macro-card .macro-target { color: var(--fn-v3-text-soft) !important; }
+
+#page-journal .journal-floating-macro-card .fn-home-nutrition-layout {
+  display: grid !important;
+  grid-template-columns: 138px minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 24px !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-kcal.fn-calorie-summary-card {
+  min-height: 150px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-kcal.fn-calorie-summary-card::before,
+#page-journal .journal-floating-macro-card .macro-cell-kcal.fn-calorie-summary-card::after,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-wrap::before,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-wrap::after,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-visual::before,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-visual::after,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-core::before,
+#page-journal .journal-floating-macro-card .fn-calorie-ring-core::after {
+  content: none !important;
+  display: none !important;
+}
+#page-journal .journal-floating-macro-card .fn-calorie-ring-visual {
+  background: conic-gradient(var(--macro-bar-color, var(--fn-v3-green)) var(--macro-pct, 0%), var(--fn-v3-surface-muted) 0) !important;
+  box-shadow: none !important;
+}
+#page-journal .journal-floating-macro-card #m-kcal {
+  font-size: 30px !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: .02em !important;
+  color: var(--fn-v3-text) !important;
+}
+#page-journal .journal-floating-macro-card .fn-calorie-unit {
+  color: var(--fn-v3-muted) !important;
+}
+
+#page-journal .journal-floating-macro-card .journal-main-macros-four,
+#page-journal .journal-floating-macro-card .fn-home-macro-list,
+#page-journal .journal-floating-macro-card .fn-home-macro-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card,
+#page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card,
+#page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card {
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 26px 8px 12px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--fn-v3-surface-soft) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  position: relative !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card::before,
+#page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card::before,
+#page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card::before {
+  content: none !important;
+  display: none !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card::after,
+#page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card::after,
+#page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: 52px !important;
+  right: 26px !important;
+  bottom: 10px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--macro-bar-color, var(--fn-v3-green)) 0 var(--macro-pct, 0%), rgba(46, 53, 43, .14) var(--macro-pct, 0%) 100%) !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+#page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card > *,
+#page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card > *,
+#page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 760px) {
+  #page-journal .journal-day-row.journal-day-row-carousel {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 10px !important;
+    margin-bottom: 14px !important;
+  }
+  #page-journal .journal-floating-macro-card .fn-home-nutrition-layout {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  #page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card,
+  #page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card,
+  #page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card {
+    padding-right: 14px !important;
+  }
+  #page-journal .journal-floating-macro-card .macro-cell-prot.fn-macro-home-card::after,
+  #page-journal .journal-floating-macro-card .macro-cell-gluc.fn-macro-home-card::after,
+  #page-journal .journal-floating-macro-card .macro-cell-lip.fn-macro-home-card::after {
+    right: 14px !important;
+  }
+}
+
+
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+  min-height: 150px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: visible !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card::before,
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card::after,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card::before,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card::after {
+  content: none !important;
+  display: none !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual {
+  background: conic-gradient(var(--macro-bar-color, var(--fn-v3-green)) var(--macro-pct, 0%), var(--fn-v3-surface-muted) 0) !important;
+  box-shadow: none !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+  background: var(--fn-v3-surface) !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 26px 8px 12px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: var(--fn-v3-surface-soft) !important;
+  color: var(--fn-v3-text) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::before,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::before {
+  content: none !important;
+  display: none !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::after,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: 52px !important;
+  right: 26px !important;
+  bottom: 10px !important;
+  width: auto !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--macro-bar-color, var(--fn-v3-green)) 0 var(--macro-pct, 0%), rgba(46, 53, 43, .14) var(--macro-pct, 0%) 100%) !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > *,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val {
+  color: var(--fn-v3-text) !important;
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl,
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
+  color: var(--fn-v3-muted) !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+    padding-right: 14px !important;
+  }
+  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row::after,
+  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+    right: 14px !important;
+  }
+}
+
+
+html body #page-journal .journal-page-title {
+  color: var(--fn-v3-text) !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+html body #page-journal .journal-page-title::after {
+  color: var(--fn-v3-muted) !important;
+  opacity: 1 !important;
+}
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .macro-progress,
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .macro-progress-fill,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .macro-progress,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .macro-progress-fill {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+    min-height: 138px !important;
+    width: 100% !important;
+  }
+}
+
+
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .macro-progress,
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .macro-progress-fill {
+  display: none !important;
+}
+@media (max-width: 760px) {
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+    display: block !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+    width: 100% !important;
+    min-height: 132px !important;
+    margin: 0 0 14px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .journal-main-macros-four {
+    width: 100% !important;
+  }
+}
+
+
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  left: 52px !important;
+  right: 14px !important;
+  bottom: 7px !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--macro-bar-color, #3f7a57) 0 var(--macro-pct, 0%), #d8ccb8 var(--macro-pct, 0%) 100%) !important;
+  opacity: 1 !important;
+  z-index: 5 !important;
+}
+
+@media (max-width: 760px) {
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-height: 170px !important;
+    margin-bottom: 14px !important;
+    text-align: center !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-wrap {
+    width: 118px !important;
+    height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual {
+    width: 118px !important;
+    height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core {
+    width: 100px !important;
+    height: 100px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel #m-kcal {
+    font-size: 28px !important;
+  }
+}
+
+
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
+  background:
+    linear-gradient(to bottom, var(--fn-v3-surface-soft) 0 calc(100% - 6px), transparent calc(100% - 6px) 100%),
+    linear-gradient(90deg, var(--macro-bar-color, #3f7a57) 0 var(--macro-pct, 0%), #d8ccb8 var(--macro-pct, 0%) 100%) !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row::after {
+  display: none !important;
+}
+
+
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-wrap {
+  width: 128px !important;
+  height: 128px !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: visible !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual {
+  width: 126px !important;
+  height: 126px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 50% !important;
+  overflow: visible !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+  width: 108px !important;
+  height: 108px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  overflow: visible !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-flame {
+  width: 28px !important;
+  height: 28px !important;
+  display: grid !important;
+  place-items: center !important;
+  margin: 0 0 3px !important;
+  font-size: 13px !important;
+}
+@media (max-width: 760px) {
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-wrap {
+    width: 118px !important;
+    height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual {
+    width: 118px !important;
+    height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-wrap,
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual,
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+  min-width: initial !important;
+  max-width: none !important;
+  min-height: initial !important;
+  max-height: none !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-wrap {
+  min-width: 128px !important;
+  max-width: 128px !important;
+  min-height: 128px !important;
+  max-height: 128px !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual {
+  min-width: 126px !important;
+  max-width: 126px !important;
+  min-height: 126px !important;
+  max-height: 126px !important;
+}
+html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+  min-width: 108px !important;
+  max-width: 108px !important;
+  min-height: 108px !important;
+  max-height: 108px !important;
+}
+@media (max-width: 760px) {
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-wrap {
+    min-width: 118px !important;
+    max-width: 118px !important;
+    min-height: 118px !important;
+    max-height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-visual {
+    min-width: 118px !important;
+    max-width: 118px !important;
+    min-height: 118px !important;
+    max-height: 118px !important;
+  }
+  html body #page-journal.page.journal-premium-page .journal-hero.card.fn-ui-surface.journal-sticky-summary .journal-floating-macro-card.card.fn-ui-surface.fn-ui-surface-soft.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card .fn-calorie-ring-core {
+    min-width: 100px !important;
+    max-width: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+  }
+}
+
+
+html body #page-profil input,
+html body #page-profil select,
+html body #page-profil textarea,
+html body #page-objectif input,
+html body #page-objectif select,
+html body #page-objectif textarea,
+html body #page-ia input,
+html body #page-ia select,
+html body #page-ia textarea,
+html body #page-bases input,
+html body #page-bases select,
+html body #page-bases textarea,
+html body #page-donnees input,
+html body #page-donnees select,
+html body #page-donnees textarea,
+html body #page-stats input,
+html body #page-stats select,
+html body #page-stats textarea,
+html body .fn-ui-field input,
+html body .fn-ui-field select,
+html body .fn-ui-field textarea {
+  background: var(--fn-v3-surface) !important;
+  color: var(--fn-v3-text) !important;
+  border: 1px solid var(--fn-v3-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+html body .fn-ui-field,
+html body .fn-ui-field label,
+html body label.fn-ui-field {
+  color: var(--fn-v3-muted) !important;
+}
+html body .fn-ui-feature b,
+html body .fn-ui-tile b,
+html body .fn-ui-alert b,
+html body .profile-name,
+html body .fn-ui-title,
+html body .fn-ui-section-head b {
+  color: var(--fn-v3-text) !important;
+  opacity: 1 !important;
+}
+html body .fn-ui-feature small,
+html body .fn-ui-feature p,
+html body .fn-ui-tile p,
+html body .fn-ui-alert p,
+html body .fn-ui-sub,
+html body .profile-muted {
+  color: var(--fn-v3-muted) !important;
+  opacity: 1 !important;
+}

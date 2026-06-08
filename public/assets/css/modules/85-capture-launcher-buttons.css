@@ -1,0 +1,79 @@
+/*
+ * FoodNote — boutons de capture
+ * Rôle : Gérer les boutons de lancement Recherche, code-barres, photo, tableau nutritionnel, recette et texte IA.
+ * Ne doit pas gérer : les flux de capture ou l’envoi aux services IA.
+ */
+
+html body #page-journal .capture-launcher-actions button {
+  transition: background .14s ease, border-color .14s ease, color .14s ease, transform .12s ease !important;
+}
+
+html body #page-journal .capture-launcher-actions button:hover {
+  transform: translateY(-1px) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="search"] {
+  background: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 10%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 32%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="search"]:hover {
+  background: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 18%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 52%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, var(--fn-ds-accent, #3f7a57) 72%, var(--fn-ds-text)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="barcode"] {
+  background: color-mix(in srgb, var(--fn-ds-prot, #2878a8) 10%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-prot, #2878a8) 32%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="barcode"]:hover {
+  background: color-mix(in srgb, var(--fn-ds-prot, #2878a8) 18%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-prot, #2878a8) 52%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, var(--fn-ds-prot, #2878a8) 72%, var(--fn-ds-text)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="photo_food"] {
+  background: color-mix(in srgb, var(--fn-ds-gluc, #8266c7) 10%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-gluc, #8266c7) 32%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="photo_food"]:hover {
+  background: color-mix(in srgb, var(--fn-ds-gluc, #8266c7) 18%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-gluc, #8266c7) 52%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, var(--fn-ds-gluc, #8266c7) 72%, var(--fn-ds-text)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="nutrition_table"] {
+  background: color-mix(in srgb, var(--fn-ds-lip, #c9932e) 11%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-lip, #c9932e) 34%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="nutrition_table"]:hover {
+  background: color-mix(in srgb, var(--fn-ds-lip, #c9932e) 20%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-lip, #c9932e) 54%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, var(--fn-ds-lip, #c9932e) 70%, var(--fn-ds-text)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="recipe"] {
+  background: color-mix(in srgb, var(--fn-ds-kcal, #df7f2a) 10%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-kcal, #df7f2a) 32%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="recipe"]:hover {
+  background: color-mix(in srgb, var(--fn-ds-kcal, #df7f2a) 18%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, var(--fn-ds-kcal, #df7f2a) 52%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, var(--fn-ds-kcal, #df7f2a) 72%, var(--fn-ds-text)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="ia_text"] {
+  background: color-mix(in srgb, #1f9b8e 10%, var(--fn-ds-surface, #fffdf8)) !important;
+  border-color: color-mix(in srgb, #1f9b8e 32%, var(--fn-ds-border)) !important;
+}
+
+html body #page-journal .capture-launcher-actions button[data-capture-mode="ia_text"]:hover {
+  background: color-mix(in srgb, #1f9b8e 18%, var(--fn-ds-surface)) !important;
+  border-color: color-mix(in srgb, #1f9b8e 52%, var(--fn-ds-border)) !important;
+  color: color-mix(in srgb, #1f9b8e 74%, var(--fn-ds-text)) !important;
+}

@@ -1,0 +1,630 @@
+/*
+ * FoodNote — fondations et mise en page
+ * Rôle : Définir les bases visuelles, les surfaces générales, la grille d’application et les règles communes de layout.
+ * Ne doit pas gérer : la logique nutritionnelle, les appels API, SQLite, CIQUAL/OpenFoodFacts ou les flux IA.
+ */
+
+:root {
+  --calm-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --calm-radius-xl: 28px;
+  --calm-radius-lg: 22px;
+  --calm-radius-md: 16px;
+  --calm-pad-page: clamp(14px, 2.2vw, 30px);
+  --calm-page-max: 1080px;
+  --calm-shadow-soft: 0 18px 50px rgba(0,0,0,.16);
+  --calm-shadow-card: 0 12px 34px rgba(0,0,0,.10);
+  --calm-line: color-mix(in srgb, var(--border) 68%, transparent);
+  --calm-green: #82ac8c;
+  --calm-green-strong: #8ccf99;
+  --calm-mint: rgba(127,178,138,.18);
+  --calm-blue: #8ecae6;
+  --calm-orange: #efb366;
+  --calm-yellow: #e5d86e;
+  --calm-red: #ee8f8f;
+}
+
+body[data-theme="light"] {
+  --bg: #f6f5f0;
+  --bg2: rgba(255,255,249,.92);
+  --bg3: #eeeee7;
+  --bg4: #e5e3da;
+  --text: #263027;
+  --text2: #4e584e;
+  --text3: #7c867b;
+  --text4: #a8afa6;
+  --border: rgba(46,56,44,.10);
+  --border2: rgba(46,56,44,.16);
+  --green: #4f8761;
+  --green-dark: #305d3a;
+  --green-bg: #e9f4e9;
+  --green-mid: #cfe6d2;
+  --orange: #b46d1d;
+  --orange-bg: #fff1df;
+  --blue: #4e7890;
+  --blue-bg: #e6f1f4;
+  --red: #b65c5c;
+  --red-bg: #fbebeb;
+  --pill-bg: rgba(78,88,78,.08);
+  --calm-surface: rgba(255,255,249,.82);
+  --calm-surface-strong: rgba(255,255,252,.97);
+  --calm-soft: rgba(234,241,230,.92);
+  --calm-glass: rgba(255,255,249,.72);
+  --calm-shadow-card: 0 12px 36px rgba(65,75,55,.10);
+  --calm-shadow-soft: 0 22px 60px rgba(65,75,55,.16);
+}
+
+body:not([data-theme="light"]),
+body.dark,
+body[data-theme="dark"] {
+  --bg: #151a16;
+  --bg2: rgba(31,38,33,.92);
+  --bg3: #232c25;
+  --bg4: #2d382f;
+  --text: #f2f5ef;
+  --text2: #d7ded5;
+  --text3: #a9b3aa;
+  --text4: #7f897f;
+  --border: rgba(238,245,235,.09);
+  --border2: rgba(238,245,235,.14);
+  --green: #82ac8c;
+  --green-dark: #a6d7ad;
+  --green-bg: rgba(127,178,138,.16);
+  --green-mid: rgba(127,178,138,.28);
+  --orange: #efb366;
+  --orange-bg: rgba(239,179,102,.15);
+  --blue: #8ecae6;
+  --blue-bg: rgba(142,202,230,.14);
+  --red: #ee8f8f;
+  --red-bg: rgba(238,143,143,.13);
+  --pill-bg: rgba(242,245,239,.08);
+  --calm-surface: rgba(30,38,33,.78);
+  --calm-surface-strong: rgba(33,42,36,.96);
+  --calm-soft: rgba(38,48,41,.78);
+  --calm-glass: rgba(28,36,31,.72);
+}
+
+html {
+  background: var(--bg) !important;
+}
+body {
+  font-family: var(--calm-font) !important;
+  background:
+    radial-gradient(circle at 16% -8%, color-mix(in srgb, var(--green) 18%, transparent) 0, transparent 30vw),
+    radial-gradient(circle at 95% 8%, color-mix(in srgb, var(--orange) 12%, transparent) 0, transparent 32vw),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, var(--green) 6%), var(--bg) 54%, color-mix(in srgb, var(--bg) 92%, #000 8%)) !important;
+  color: var(--text) !important;
+  letter-spacing: -.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body[data-theme="light"] {
+  background:
+    radial-gradient(circle at 12% -10%, rgba(205,230,204,.95) 0, transparent 30vw),
+    radial-gradient(circle at 92% 4%, rgba(239,215,178,.60) 0, transparent 32vw),
+    linear-gradient(180deg, #f8f7f1 0%, #f3f1eb 58%, #f6f5f0 100%) !important;
+}
+
+
+.app-layout { min-height: 100vh !important; }
+.main-wrap {
+  background: transparent !important;
+  min-height: 100vh !important;
+}
+.page {
+  width: min(100%, var(--calm-page-max)) !important;
+  max-width: var(--calm-page-max) !important;
+  padding: var(--calm-pad-page) !important;
+}
+.page.active { animation: fnCalmFade .20s ease both; }
+@keyframes fnCalmFade { from { opacity: .01; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .page.active { animation: none !important; } }
+
+.card,
+.hist-card,
+.macro-ref,
+.profile-hero,
+.stats-panel,
+.data-card,
+.sport-box,
+.journal-meals-card,
+.journal-section-card,
+.journal-tile-card,
+.food-add-panel,
+.food-current-meal-card,
+.ocr-panel,
+.barcode-result,
+.recipe-ai-result {
+  background: var(--calm-surface) !important;
+  border: 1px solid var(--calm-line) !important;
+  border-radius: var(--calm-radius-lg) !important;
+  box-shadow: var(--calm-shadow-card) !important;
+  backdrop-filter: blur(16px) saturate(1.06) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.06) !important;
+}
+.card { padding: clamp(16px, 2.2vw, 24px) !important; }
+.card-title,
+.fn-section-title,
+.stats-mini-title {
+  color: var(--text) !important;
+  letter-spacing: -.015em !important;
+  text-transform: none !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+}
+.card-title { font-size: 14px !important; margin-bottom: 14px !important; }
+label, .add-lbl, .sec-label { color: var(--text3) !important; }
+
+button,
+.btn-primary,
+input,
+select,
+textarea {
+  font-family: var(--calm-font) !important;
+}
+button {
+  border-radius: 999px !important;
+  border: 1px solid var(--calm-line) !important;
+  background: color-mix(in srgb, var(--bg2) 76%, transparent) !important;
+  color: var(--text2) !important;
+}
+button:hover { background: color-mix(in srgb, var(--bg3) 86%, var(--green) 7%) !important; }
+.btn-primary,
+button.btn-primary,
+.journal-add-btn,
+.sport-add-btn {
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--green) 76%, transparent) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 95%, #133a26), color-mix(in srgb, var(--green) 68%, #7dd3a0)) !important;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--green) 26%, transparent) !important;
+}
+input[type=text], input[type=number], input[type=date], input[type=password], textarea, select {
+  background: color-mix(in srgb, var(--bg2) 86%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+  border-radius: 16px !important;
+  min-height: 42px;
+  color: var(--text) !important;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: color-mix(in srgb, var(--green) 58%, var(--border2)) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 16%, transparent) !important;
+}
+
+
+.app-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 150 !important;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, transparent), color-mix(in srgb, var(--bg) 58%, transparent)) !important;
+  border-bottom: 0 !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+.app-header-inner {
+  width: min(100%, calc(var(--calm-page-max) + (var(--calm-pad-page) * 2))) !important;
+  margin: 0 auto !important;
+  padding: 14px var(--calm-pad-page) 8px !important;
+}
+.app-title {
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: -.04em !important;
+  color: var(--text) !important;
+}
+.fn-page-title-icon {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--green) 14%, var(--bg2)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.sidebar {
+  width: 236px !important;
+  background: color-mix(in srgb, var(--bg) 72%, var(--bg2) 28%) !important;
+  border-right: 1px solid var(--calm-line) !important;
+  box-shadow: 12px 0 42px rgba(0,0,0,.10) !important;
+}
+.main-wrap { margin-left: 236px !important; }
+body.sidebar-collapsed .sidebar { width: 74px !important; }
+body.sidebar-collapsed .main-wrap { margin-left: 74px !important; }
+.sb-header { border-bottom: 0 !important; padding: 18px 16px 10px !important; }
+.sb-logo-name {
+  letter-spacing: -.045em !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  text-transform: none !important;
+}
+.sb-logo-phase { color: var(--text3) !important; }
+.sb-nav { padding: 10px !important; gap: 5px !important; }
+.sb-section { color: var(--text4) !important; padding: 16px 12px 6px !important; }
+.sb-item,
+.sb-sub-item {
+  border-radius: 16px !important;
+  min-height: 42px !important;
+  color: var(--text3) !important;
+  border: 1px solid transparent !important;
+}
+.sb-item:hover,
+.sb-sub-item:hover { background: color-mix(in srgb, var(--green) 8%, var(--bg2)) !important; color: var(--text) !important; }
+.sb-item.active,
+.sb-sub-item.active {
+  color: var(--text) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 18%, var(--bg2)), color-mix(in srgb, var(--green) 9%, transparent)) !important;
+  border-color: color-mix(in srgb, var(--green) 22%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+.sb-footer { border-top: 0 !important; padding: 10px 12px 16px !important; }
+.theme-toggle, .sb-user {
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+}
+
+
+#page-journal.journal-premium-page {
+  width: min(100%, 1040px) !important;
+  max-width: 1040px !important;
+}
+.journal-hero {
+  position: relative !important;
+  overflow: hidden !important;
+  padding: clamp(16px, 2.4vw, 26px) !important;
+  border-radius: 32px !important;
+  background:
+    radial-gradient(circle at 15% 8%, color-mix(in srgb, var(--green) 18%, transparent) 0, transparent 230px),
+    radial-gradient(circle at 94% 0%, color-mix(in srgb, var(--orange) 13%, transparent) 0, transparent 250px),
+    linear-gradient(135deg, color-mix(in srgb, var(--bg2) 88%, var(--green) 4%), color-mix(in srgb, var(--bg2) 78%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 13%, var(--border)) !important;
+  box-shadow: var(--calm-shadow-soft) !important;
+}
+.journal-hero::before {
+  content: "Aujourd'hui" !important;
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  pointer-events: none !important;
+  background: none !important;
+  margin: 2px 0 12px !important;
+  color: var(--text) !important;
+  font-size: clamp(26px, 3.5vw, 42px) !important;
+  line-height: .96 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  letter-spacing: -.06em !important;
+}
+.journal-sticky-summary { top: 62px !important; }
+
+
+.journal-day-row-carousel,
+#page-journal .journal-day-row-carousel,
+#page-sport .journal-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: 38px minmax(0, 1fr) 38px 0 40px !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+.journal-day-carousel,
+#page-journal .journal-day-carousel,
+#page-sport .journal-day-carousel {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(54px, 1fr)) !important;
+  gap: 8px !important;
+}
+.journal-day-nav,
+.journal-date-launch {
+  min-height: 58px !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
+  box-shadow: none !important;
+  color: var(--text3) !important;
+}
+.journal-day-card,
+#page-journal .journal-day-card,
+#page-sport .journal-day-card {
+  min-height: 64px !important;
+  padding: 8px 6px !important;
+  border-radius: 19px !important;
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  place-items: center !important;
+  gap: 2px !important;
+  transform: none !important;
+  opacity: 1 !important;
+  color: var(--text3) !important;
+  background: color-mix(in srgb, var(--bg2) 68%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+  box-shadow: none !important;
+}
+.journal-day-card.active,
+#page-journal .journal-day-card.active,
+#page-sport .journal-day-card.active {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--green) 18%, var(--bg2)), color-mix(in srgb, var(--green) 9%, var(--bg2))) !important;
+  border-color: color-mix(in srgb, var(--green) 34%, var(--border)) !important;
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--green) 18%, transparent) !important;
+}
+.journal-day-card-top {
+  position: absolute !important;
+  top: 8px !important;
+  right: 9px !important;
+  width: auto !important;
+  min-width: 10px !important;
+}
+.journal-day-status-dot, .journal-day-status-empty {
+  width: 6px !important; height: 6px !important;
+}
+.journal-day-status-dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 14%, transparent) !important; }
+.journal-day-card-weekday { font-size: 11px !important; font-weight: var(--fn-ds-w-bold) !important; color: var(--text3) !important; text-transform: uppercase !important; }
+.journal-day-card-number { font-size: 24px !important; font-weight: var(--fn-ds-w-heavy) !important; color: var(--text) !important; letter-spacing: -.05em !important; }
+.journal-day-card-month { font-size: 10px !important; font-weight: var(--fn-ds-w-semibold) !important; color: var(--text4) !important; }
+.journal-day-card-year,
+.journal-day-card-kcal,
+.journal-day-card-foot,
+.journal-day-card-bars { display: none !important; }
+.journal-day-sport-badge,
+#page-journal .sport-day-badge {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  padding: 0 !important;
+  font-size: 10px !important;
+  background: color-mix(in srgb, var(--orange) 16%, var(--bg2)) !important;
+}
+
+
+.journal-floating-macro-card {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.journal-main-macros,
+.journal-main-macros-four {
+  display: grid !important;
+  grid-template-columns: minmax(190px, 1.15fr) repeat(3, minmax(112px, .72fr)) !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+.journal-main-macros .macro-cell {
+  position: relative !important;
+  overflow: hidden !important;
+  min-height: 116px !important;
+  border-radius: 24px !important;
+  padding: 16px !important;
+  text-align: left !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  background: color-mix(in srgb, var(--bg2) 76%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+  box-shadow: none !important;
+}
+.journal-main-macros .macro-cell::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 16px !important;
+  right: 16px !important;
+  bottom: 12px !important;
+  top: auto !important;
+  height: 5px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--text4) 22%, transparent) !important;
+  opacity: 1 !important;
+}
+.journal-main-macros .macro-cell::after {
+  content: "";
+  position: absolute;
+  left: 16px; bottom: 12px;
+  width: 48%; height: 5px;
+  border-radius: 999px;
+  background: var(--green);
+}
+.journal-main-macros .macro-cell-kcal::after { width: 58%; background: linear-gradient(90deg, var(--green), var(--calm-green-strong)); }
+.journal-main-macros .macro-cell-prot::after { width: 68%; background: var(--blue); }
+.journal-main-macros .macro-cell-gluc::after { width: 52%; background: var(--orange); }
+.journal-main-macros .macro-cell-lip::after { width: 42%; background: var(--green); }
+.journal-main-macros .macro-head { display: flex !important; align-items: center !important; gap: 8px !important; }
+.journal-main-macros .macro-icon { font-size: 12px !important; opacity: .8; }
+.journal-main-macros .macro-lbl { font-size: 12px !important; color: var(--text3) !important; font-weight: var(--fn-ds-w-semibold) !important; letter-spacing: .01em !important; }
+.journal-main-macros .macro-val {
+  font-size: clamp(25px, 2.8vw, 40px) !important;
+  line-height: 1 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  letter-spacing: -.055em !important;
+  color: var(--text) !important;
+  margin-top: 8px !important;
+}
+.journal-main-macros .macro-target { font-size: 12px !important; color: var(--text3) !important; padding-bottom: 10px !important; }
+
+
+.journal-main-card {
+  margin-top: 14px !important;
+  border-radius: 30px !important;
+  background: color-mix(in srgb, var(--calm-surface) 90%, transparent) !important;
+}
+.journal-meals-head { margin-bottom: 14px !important; }
+.journal-meals-icon,
+.fn-section-icon {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 13px !important;
+  background: color-mix(in srgb, var(--green) 12%, var(--bg2)) !important;
+}
+.journal-meals-title { font-size: 18px !important; font-weight: var(--fn-ds-w-heavy) !important; }
+.journal-meals-subtitle { color: var(--text3) !important; font-size: 12px !important; }
+.meal-group {
+  border-radius: 22px !important;
+  border: 1px solid var(--calm-line) !important;
+  background: color-mix(in srgb, var(--bg2) 62%, transparent) !important;
+  margin-bottom: 12px !important;
+  box-shadow: none !important;
+}
+.meal-group-head {
+  padding: 13px 14px !important;
+  background: transparent !important;
+  border-bottom: 1px solid var(--calm-line) !important;
+}
+.meal-title, .meal-group-title { font-weight: var(--fn-ds-w-bold) !important; color: var(--text) !important; }
+.meal-summary, .meal-group-summary { color: var(--text3) !important; }
+.journal-food-row,
+.food-log-row,
+.hist-food-row,
+.aliment-row {
+  border-radius: 16px !important;
+  background: color-mix(in srgb, var(--bg2) 58%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent) !important;
+}
+.food-action-btn, .del-btn, .edit-btn {
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--bg3) 64%, transparent) !important;
+}
+.macro-pill, .tag-ok, .tag-warn, .tag-bad, .source-badge {
+  border-radius: 999px !important;
+}
+
+
+.journal-add-only {
+  background: color-mix(in srgb, var(--calm-glass) 92%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 22%, var(--border)) !important;
+  box-shadow: 0 22px 52px rgba(0,0,0,.22) !important;
+  backdrop-filter: blur(20px) saturate(1.12) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.12) !important;
+}
+.journal-add-only .journal-add-dock-btn {
+  min-height: 58px !important;
+  min-width: 168px !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0b3821), color-mix(in srgb, var(--green) 62%, #a7f3d0)) !important;
+  box-shadow: 0 18px 34px color-mix(in srgb, var(--green) 26%, transparent) !important;
+}
+
+
+body > #food-add-modal.food-add-modal {
+  background: rgba(0,0,0,.38) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+body > #food-add-modal.food-add-modal .food-add-dialog {
+  border-radius: 32px !important;
+  border: 1px solid var(--calm-line) !important;
+  background: var(--calm-surface-strong) !important;
+  box-shadow: 0 28px 90px rgba(0,0,0,.38) !important;
+  overflow: hidden !important;
+}
+.food-add-head { background: transparent !important; border: 0 !important; }
+.food-add-close {
+  background: color-mix(in srgb, var(--bg3) 75%, transparent) !important;
+  border-radius: 999px !important;
+}
+.food-add-kicker,
+.food-current-meal-pill,
+.food-source-chip {
+  border-radius: 999px !important;
+}
+.db-search-wrap {
+  border-radius: 20px !important;
+  padding: 6px !important;
+  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+}
+.db-suggestions {
+  border-radius: 20px !important;
+  background: var(--calm-surface-strong) !important;
+  border: 1px solid var(--calm-line) !important;
+  box-shadow: 0 22px 54px rgba(0,0,0,.24) !important;
+}
+.db-suggestion { padding: 12px 14px !important; }
+
+
+.recap-card,
+.recap-badge,
+.recap-smart-card,
+.stats-card,
+.stats-mini-card,
+.profile-kpi,
+.data-summary-card,
+.unit-weight-row,
+.anomaly-row {
+  border-radius: 22px !important;
+  background: color-mix(in srgb, var(--bg2) 66%, transparent) !important;
+  border: 1px solid var(--calm-line) !important;
+  box-shadow: none !important;
+}
+.profile-kpi-value, .stats-big-number, .recap-main-value {
+  font-weight: var(--fn-ds-w-heavy) !important;
+  letter-spacing: -.045em !important;
+}
+
+
+table { border-collapse: separate !important; border-spacing: 0 6px !important; }
+th { border: 0 !important; color: var(--text3) !important; }
+td {
+  border-top: 1px solid var(--calm-line) !important;
+  border-bottom: 1px solid var(--calm-line) !important;
+  background: color-mix(in srgb, var(--bg2) 54%, transparent) !important;
+}
+td:first-child { border-left: 1px solid var(--calm-line) !important; border-radius: 14px 0 0 14px !important; }
+td:last-child { border-right: 1px solid var(--calm-line) !important; border-radius: 0 14px 14px 0 !important; }
+
+
+@media (max-width: 900px) {
+  .sidebar { width: 236px !important; transform: translateX(-246px) !important; }
+  .sidebar.open { transform: translateX(0) !important; }
+  .main-wrap { margin-left: 0 !important; }
+  body.sidebar-collapsed .main-wrap { margin-left: 0 !important; }
+  .app-header-inner { padding-left: 60px !important; }
+  .sb-toggle {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 16px !important;
+    top: 12px !important;
+    left: 12px !important;
+    background: var(--calm-glass) !important;
+    border: 1px solid var(--calm-line) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+  }
+}
+@media (max-width: 700px) {
+  .page { padding: 12px !important; }
+  .app-header-inner { padding-top: 10px !important; padding-bottom: 6px !important; }
+  .app-title { font-size: 19px !important; }
+  .journal-hero { border-radius: 28px !important; padding: 15px !important; }
+  .journal-hero::before { font-size: 32px !important; margin-bottom: 10px !important; }
+  .journal-day-row-carousel,
+  #page-journal .journal-day-row-carousel,
+  #page-sport .journal-day-row-carousel {
+    grid-template-columns: 0 minmax(0, 1fr) 0 0 34px !important;
+    gap: 6px !important;
+  }
+  .journal-day-nav { display: none !important; }
+  .journal-date-launch { min-height: 58px !important; font-size: 14px !important; }
+  .journal-day-carousel { gap: 6px !important; }
+  .journal-day-card,
+  #page-journal .journal-day-card,
+  #page-sport .journal-day-card {
+    min-height: 58px !important;
+    border-radius: 18px !important;
+  }
+  .journal-day-card-number { font-size: 22px !important; }
+  .journal-main-macros,
+  .journal-main-macros-four {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .journal-main-macros .macro-cell { min-height: 94px !important; padding: 13px !important; border-radius: 21px !important; }
+  .journal-main-macros .macro-cell-kcal { grid-column: 1 / -1 !important; min-height: 108px !important; }
+  .journal-main-macros .macro-val { font-size: 28px !important; }
+  .journal-main-card { border-radius: 26px !important; padding: 14px !important; }
+  .meal-group { border-radius: 20px !important; }
+  body > #food-add-modal.food-add-modal .food-add-dialog { border-radius: 28px 28px 0 0 !important; }
+  body > #food-add-modal.food-add-modal .food-add-body { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 390px) {
+  .journal-main-macros .macro-cell { min-height: 88px !important; }
+  .journal-main-macros .macro-val { font-size: 25px !important; }
+  .journal-day-card-weekday { font-size: 10px !important; }
+  .journal-day-card-number { font-size: 20px !important; }
+}

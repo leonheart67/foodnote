@@ -27,7 +27,7 @@ const DEFAULT_USER_ID = process.env.FOODNOTE_DEFAULT_USER || 'default';
 const OFFLINE_MODE = process.env.FOODNOTE_OFFLINE_MODE === '1';
 const APP_VERSION = '0.22.179';
 const APP_LABEL = process.env.FOODNOTE_APP_LABEL || 'FoodNote beta 0.22.179';
-const APP_BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+const APP_BUILD = 'foodnote_beta_0_22_179_photo_groq_nutri_v4_force_batch_20260531';
 const FOODNOTE_DEBUG_SYNC = process.env.FOODNOTE_DEBUG_SYNC === '1';
 const APP_RELEASE = 'Refactor code journal : sélections date via refresh centralisé';
 
@@ -109,6 +109,23 @@ CREATE TABLE IF NOT EXISTS secrets (
   PRIMARY KEY (user_id, key),
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS groq_usage_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id TEXT NOT NULL,
+  day_key TEXT NOT NULL,
+  feature TEXT NOT NULL DEFAULT 'IA',
+  model TEXT NOT NULL,
+  prompt_tokens INTEGER NOT NULL DEFAULT 0,
+  completion_tokens INTEGER NOT NULL DEFAULT 0,
+  total_tokens INTEGER NOT NULL DEFAULT 0,
+  image_bytes INTEGER NOT NULL DEFAULT 0,
+  rate_limit_json TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_groq_usage_user_day ON groq_usage_events(user_id, day_key, model);
+CREATE INDEX IF NOT EXISTS idx_groq_usage_created ON groq_usage_events(user_id, created_at);
 
 CREATE TABLE IF NOT EXISTS foods (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -401,6 +418,15 @@ ensureColumn('data_anomalies', 'detected_value', 'TEXT');
 ensureColumn('data_anomalies', 'status', "TEXT DEFAULT 'open'");
 ensureColumn('data_anomalies', 'raw_json', 'TEXT');
 ensureColumn('data_anomalies', 'updated_at', 'TEXT');
+
+ensureColumn('groq_usage_events', 'day_key', "TEXT DEFAULT ''");
+ensureColumn('groq_usage_events', 'feature', "TEXT DEFAULT 'IA'");
+ensureColumn('groq_usage_events', 'model', "TEXT DEFAULT 'unknown'");
+ensureColumn('groq_usage_events', 'prompt_tokens', 'INTEGER DEFAULT 0');
+ensureColumn('groq_usage_events', 'completion_tokens', 'INTEGER DEFAULT 0');
+ensureColumn('groq_usage_events', 'total_tokens', 'INTEGER DEFAULT 0');
+ensureColumn('groq_usage_events', 'image_bytes', 'INTEGER DEFAULT 0');
+ensureColumn('groq_usage_events', 'rate_limit_json', 'TEXT');
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(String(token)).digest('hex');
@@ -6118,6 +6144,529 @@ function foodnoteResolveGroqApiKey(userId) {
   return { key: '', source: stored.source === 'sqlite_disabled' ? 'sqlite_disabled' : 'none', configured: false, masked: '', storage_enabled: storageEnabled };
 }
 
+function foodnoteJsonNumber(value, fallback = 0) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'object') {
+    const keys = ['value', 'amount', 'total', 'estimated', 'estimate', 'estime', 'estimé', 'qty', 'quantity', 'grams', 'grammes', 'g', 'kcal'];
+    for (const key of keys) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        const n = foodnoteJsonNumber(value[key], NaN);
+        if (Number.isFinite(n)) return n;
+      }
+    }
+    const firstPrimitive = Object.values(value).find(v => typeof v === 'number' || typeof v === 'string');
+    if (firstPrimitive !== undefined) return foodnoteJsonNumber(firstPrimitive, fallback);
+    return fallback;
+  }
+  const match = String(value)
+    .replace(/\u00a0/g, ' ')
+    .replace(/,/g, '.')
+    .replace(/≈|~|environ|env\.?/gi, ' ')
+    .match(/[-+]?\d+(?:\.\d+)?/);
+  if (!match) return fallback;
+  const n = Number(match[0]);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function foodnoteJsonText(value, fallback = '') {
+  const txt = String(value ?? '').trim();
+  return txt || fallback;
+}
+
+function foodnoteExtractJsonBlock(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return '';
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const candidate = fenced ? fenced[1].trim() : raw;
+  const firstObj = candidate.indexOf('{');
+  const firstArr = candidate.indexOf('[');
+  const first = firstObj < 0 ? firstArr : firstArr < 0 ? firstObj : Math.min(firstObj, firstArr);
+  if (first < 0) return candidate;
+  const lastObj = candidate.lastIndexOf('}');
+  const lastArr = candidate.lastIndexOf(']');
+  const last = Math.max(lastObj, lastArr);
+  return last > first ? candidate.slice(first, last + 1) : candidate;
+}
+
+function foodnoteNormalizeVisionMealItemType(value) {
+  const raw = foodnoteJsonText(value, '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s-]+/g, '_');
+  if (['aliment_simple', 'simple', 'ingredient_simple', 'aliment'].includes(raw)) return 'aliment_simple';
+  if (['plat_compose', 'composed_dish', 'plat', 'recette', 'dish'].includes(raw)) return 'plat_compose';
+  if (['sauce_extra', 'sauce', 'extra', 'condiment', 'huile'].includes(raw)) return 'sauce_extra';
+  if (['boisson', 'drink', 'liquide'].includes(raw)) return 'boisson';
+  if (['incertain', 'uncertain', 'a_verifier', 'unknown'].includes(raw)) return 'incertain';
+  return 'aliment_simple';
+}
+
+function foodnoteJsonBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  const raw = foodnoteJsonText(value, '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (['true', 'vrai', 'yes', 'oui', '1'].includes(raw)) return true;
+  if (['false', 'faux', 'no', 'non', '0'].includes(raw)) return false;
+  return fallback;
+}
+
+function foodnoteNormalizeVisionMealSuggestions(parsed) {
+  const list = Array.isArray(parsed)
+    ? parsed
+    : Array.isArray(parsed?.suggestions)
+      ? parsed.suggestions
+      : Array.isArray(parsed?.items)
+        ? parsed.items
+        : Array.isArray(parsed?.aliments)
+          ? parsed.aliments
+          : [];
+
+  const normKey = key => String(key || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+  const pickValue = (obj, keys) => {
+    if (!obj || typeof obj !== 'object') return undefined;
+    for (const key of keys) {
+      if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') return obj[key];
+    }
+    const entries = Object.keys(obj).map(k => [k, normKey(k)]);
+    for (const wanted of keys.map(normKey)) {
+      const found = entries.find(([, nk]) => nk === wanted || nk.includes(wanted) || wanted.includes(nk));
+      if (found && obj[found[0]] !== undefined && obj[found[0]] !== null && obj[found[0]] !== '') return obj[found[0]];
+    }
+    return undefined;
+  };
+
+  const pickNumber = (item, nutrition, itemKeys, nutritionKeys = itemKeys, fallback = 0) => {
+    const direct = pickValue(item, itemKeys);
+    if (direct !== undefined) return foodnoteJsonNumber(direct, fallback);
+    const nested = pickValue(nutrition, nutritionKeys);
+    if (nested !== undefined) return foodnoteJsonNumber(nested, fallback);
+    return fallback;
+  };
+
+  const keys = {
+    qty: ['qty', 'quantity_g', 'quantite', 'quantité', 'poids', 'grammes', 'grams', 'g', 'portion_g'],
+    kcal100: ['kcal100', 'kcal_100g', 'kcalPer100', 'calories100', 'calories_100g', 'caloriesPer100', 'energy_kcal_100g', 'energie_100g', 'énergie_100g', 'kcal_per_100g', 'calories_per_100g'],
+    prot100: ['prot100', 'prot_100g', 'protPer100', 'proteins100', 'protein100', 'proteines100', 'protéines100', 'proteins_100g', 'protein_100g', 'proteines_100g', 'protéines_100g', 'protein_per_100g', 'proteins_per_100g'],
+    gluc100: ['gluc100', 'gluc_100g', 'glucPer100', 'carbs100', 'carbohydrates100', 'glucides100', 'carbohydrates_100g', 'carbs_100g', 'glucides_100g', 'carbs_per_100g', 'carbohydrates_per_100g'],
+    lip100: ['lip100', 'lip_100g', 'lipPer100', 'fat100', 'lipides100', 'graisses100', 'fat_100g', 'lipides_100g', 'graisses_100g', 'matières_grasses_100g', 'matieres_grasses_100g', 'fat_per_100g'],
+    kcal: ['kcal', 'calories', 'calorie', 'calories_kcal', 'energy_kcal', 'energie', 'énergie', 'energie_kcal', 'kcal_total', 'total_kcal', 'calories_total', 'total_calories'],
+    prot: ['prot', 'proteines', 'protéines', 'proteins', 'protein', 'protein_g', 'proteins_g', 'proteines_g', 'protéines_g', 'prot_g', 'protein_total', 'total_prot', 'total_protein'],
+    gluc: ['gluc', 'glucides', 'carbohydrates', 'carbs', 'hydrates', 'carbs_g', 'glucides_g', 'gluc_g', 'carbohydrates_g', 'glucides_total', 'total_gluc', 'total_carbs', 'total_carbohydrates'],
+    lip: ['lip', 'lipides', 'fat', 'graisses', 'matières grasses', 'matieres grasses', 'fat_g', 'lipides_g', 'lip_g', 'fat_total', 'total_lip', 'total_fat']
+  };
+
+  return list.map(item => {
+    const nom = foodnoteJsonText(item?.nom || item?.name || item?.aliment || item?.food || item?.ingredient || item?.plat, '');
+    if (!nom) return null;
+    const itemType = foodnoteNormalizeVisionMealItemType(item?.item_type || item?.type || item?.food_type || item?.categorie || item?.category);
+    const nutrition = item?.nutrition || item?.nutriments || item?.macros || item?.macro || item?.nutrition_estimee || item?.nutrition_estimee_par_portion || item?.nutrition_per_serving || item?.per_serving || {};
+    const qty = Math.max(1, Math.round(pickNumber(item, nutrition, keys.qty, keys.qty, 100)));
+    const kcal100 = pickNumber(item, nutrition, keys.kcal100);
+    const prot100 = pickNumber(item, nutrition, keys.prot100);
+    const gluc100 = pickNumber(item, nutrition, keys.gluc100);
+    const lip100 = pickNumber(item, nutrition, keys.lip100);
+    let kcal = Math.max(0, Math.round(pickNumber(item, nutrition, keys.kcal)));
+    let prot = Math.max(0, Math.round(pickNumber(item, nutrition, keys.prot) * 10) / 10);
+    let gluc = Math.max(0, Math.round(pickNumber(item, nutrition, keys.gluc) * 10) / 10);
+    let lip = Math.max(0, Math.round(pickNumber(item, nutrition, keys.lip) * 10) / 10);
+    if (!kcal && kcal100 > 0) kcal = Math.round(kcal100 * qty / 100);
+    if (!prot && prot100 > 0) prot = Math.round((prot100 * qty / 100) * 10) / 10;
+    if (!gluc && gluc100 > 0) gluc = Math.round((gluc100 * qty / 100) * 10) / 10;
+    if (!lip && lip100 > 0) lip = Math.round((lip100 * qty / 100) * 10) / 10;
+    const notes = foodnoteJsonText(item?.notes || item?.note || item?.commentaire || item?.reason, itemType === 'plat_compose' ? 'Plat composé : détail des ingrédients non estimé depuis la photo.' : '');
+    return {
+      idx: Number.isFinite(Number(item?.idx)) ? Number(item.idx) : null,
+      nom,
+      item_type: itemType,
+      decomposition_recommended: foodnoteJsonBoolean(item?.decomposition_recommended ?? item?.decomposition ?? item?.decomposer, false),
+      save_to_base: item?.save_to_base === undefined ? itemType !== 'incertain' : foodnoteJsonBoolean(item.save_to_base, itemType !== 'incertain'),
+      qty,
+      kcal,
+      prot,
+      gluc,
+      lip,
+      kcal100: kcal100 > 0 ? Math.round(kcal100) : (qty > 0 && kcal > 0 ? Math.round(kcal * 100 / qty) : 0),
+      prot100: prot100 > 0 ? Math.round(prot100 * 10) / 10 : (qty > 0 && prot > 0 ? Math.round(prot * 1000 / qty) / 10 : 0),
+      gluc100: gluc100 > 0 ? Math.round(gluc100 * 10) / 10 : (qty > 0 && gluc > 0 ? Math.round(gluc * 1000 / qty) / 10 : 0),
+      lip100: lip100 > 0 ? Math.round(lip100 * 10) / 10 : (qty > 0 && lip > 0 ? Math.round(lip * 1000 / qty) / 10 : 0),
+      confidence_food: foodnoteJsonText(item?.confidence_food || item?.confiance_aliment || item?.confiance || item?.food_confidence, ''),
+      confidence_quantity: foodnoteJsonText(item?.confidence_quantity || item?.confiance_quantite || item?.['confiance_quantité'] || item?.quantity_confidence, ''),
+      notes,
+      nutrition_source: foodnoteJsonText(item?.nutrition_source || item?.source_nutrition, ''),
+      source: 'Groq Vision'
+    };
+  }).filter(Boolean);
+}
+
+
+function foodnoteNormalizeGroqUsage(usage) {
+  if (!usage || typeof usage !== 'object') return null;
+  const num = value => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const prompt = num(usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokens ?? usage.inputTokens);
+  const completion = num(usage.completion_tokens ?? usage.output_tokens ?? usage.completionTokens ?? usage.outputTokens);
+  const total = num(usage.total_tokens ?? usage.totalTokens ?? (prompt + completion));
+  const normalized = {
+    prompt_tokens: Math.round(prompt),
+    completion_tokens: Math.round(completion),
+    total_tokens: Math.round(total || prompt + completion)
+  };
+  // Groq ajoute parfois des durées dans usage ; on les conserve pour diagnostic sans les afficher comme coût.
+  ['queue_time', 'prompt_time', 'completion_time', 'total_time'].forEach(key => {
+    if (usage[key] !== undefined) normalized[key] = num(usage[key]);
+  });
+  return normalized.total_tokens > 0 || normalized.prompt_tokens > 0 || normalized.completion_tokens > 0 ? normalized : null;
+}
+
+
+function foodnoteMergeGroqUsage(...items) {
+  const out = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+  for (const item of items) {
+    const usage = foodnoteNormalizeGroqUsage(item);
+    if (!usage) continue;
+    out.prompt_tokens += Number(usage.prompt_tokens || 0);
+    out.completion_tokens += Number(usage.completion_tokens || 0);
+    out.total_tokens += Number(usage.total_tokens || 0);
+  }
+  return out.total_tokens > 0 || out.prompt_tokens > 0 || out.completion_tokens > 0 ? out : null;
+}
+
+function foodnoteVisionHasNutritionTotals(item) {
+  if (!item || typeof item !== 'object') return false;
+  const kcal = Number(item.kcal ?? item.calories ?? item.energy_kcal ?? 0);
+  const prot = Number(item.prot ?? item.proteines ?? item.protéines ?? item.protein ?? item.proteins ?? 0);
+  const gluc = Number(item.gluc ?? item.glucides ?? item.carbs ?? item.carbohydrates ?? 0);
+  const lip = Number(item.lip ?? item.lipides ?? item.fat ?? item.graisses ?? 0);
+  if (!Number.isFinite(kcal) || !Number.isFinite(prot) || !Number.isFinite(gluc) || !Number.isFinite(lip)) return false;
+  // Une ligne photo plat n'est exploitable que si les calories existent vraiment.
+  // Les macros peuvent légitimement contenir des zéros (ex. poulet = glucides 0),
+  // mais au moins une macro doit être positive pour éviter une carte nutrition vide.
+  return kcal > 0 && (prot > 0 || gluc > 0 || lip > 0);
+}
+
+function foodnoteGroqRateLimitHeaders(headers) {
+  if (!headers || typeof headers.get !== 'function') return null;
+  const pick = name => headers.get(name) || headers.get(name.toLowerCase()) || headers.get(name.toUpperCase()) || '';
+  const raw = {
+    limit_requests: pick('x-ratelimit-limit-requests'),
+    remaining_requests: pick('x-ratelimit-remaining-requests'),
+    reset_requests: pick('x-ratelimit-reset-requests'),
+    limit_tokens: pick('x-ratelimit-limit-tokens'),
+    remaining_tokens: pick('x-ratelimit-remaining-tokens'),
+    reset_tokens: pick('x-ratelimit-reset-tokens'),
+    retry_after: pick('retry-after')
+  };
+  return Object.values(raw).some(Boolean) ? raw : null;
+}
+
+
+const FOODNOTE_GROQ_LIMITS_UPDATED_AT = '2026-05-31';
+const FOODNOTE_GROQ_LIMITS = {
+  'meta-llama/llama-4-scout-17b-16e-instruct': {
+    label: 'Llama 4 Scout Vision', plan: 'Free plan', rpm: 30, rpd: 1000, tpm: 30000, tpd: 500000,
+    input_price_per_million: 0.11, output_price_per_million: 0.34
+  },
+  'llama-3.3-70b-versatile': {
+    label: 'Llama 3.3 70B texte', plan: 'Free plan', rpm: 30, rpd: 1000, tpm: 12000, tpd: 100000,
+    input_price_per_million: 0.59, output_price_per_million: 0.79
+  },
+  'llama-3.1-8b-instant': {
+    label: 'Llama 3.1 8B instant', plan: 'Free plan', rpm: 30, rpd: 14400, tpm: 6000, tpd: 500000,
+    input_price_per_million: 0.05, output_price_per_million: 0.08
+  }
+};
+
+function foodnoteNormalizeGroqModelId(model) {
+  const raw = String(model || '').trim();
+  if (!raw) return 'unknown';
+  const exact = Object.keys(FOODNOTE_GROQ_LIMITS).find(k => k === raw);
+  if (exact) return exact;
+  const lower = raw.toLowerCase();
+  return Object.keys(FOODNOTE_GROQ_LIMITS).find(k => lower.includes(k.toLowerCase()) || k.toLowerCase().includes(lower)) || raw;
+}
+
+function foodnoteGroqLimitForModel(model) {
+  const id = foodnoteNormalizeGroqModelId(model);
+  return FOODNOTE_GROQ_LIMITS[id] ? { model: id, ...FOODNOTE_GROQ_LIMITS[id] } : null;
+}
+
+function foodnoteGroqDayKey(date = new Date()) {
+  const tz = process.env.FOODNOTE_USAGE_TIMEZONE || process.env.TZ || 'Europe/Paris';
+  try {
+    return new Intl.DateTimeFormat('fr-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  } catch (_) {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+function foodnoteGroqUsageRemaining(used, limit) {
+  if (!Number.isFinite(Number(limit)) || Number(limit) <= 0) return null;
+  return Math.max(0, Math.round(Number(limit) - Number(used || 0)));
+}
+
+function foodnoteGroqUsageSummary(userId, options = {}) {
+  const day = String(options.day || foodnoteGroqDayKey()).slice(0, 10);
+  const rows = db.prepare(`
+    SELECT model,
+           COUNT(*) AS calls,
+           COALESCE(SUM(prompt_tokens),0) AS prompt_tokens,
+           COALESCE(SUM(completion_tokens),0) AS completion_tokens,
+           COALESCE(SUM(total_tokens),0) AS total_tokens,
+           MAX(created_at) AS last_at
+    FROM groq_usage_events
+    WHERE user_id=? AND day_key=?
+    GROUP BY model
+    ORDER BY total_tokens DESC, calls DESC
+  `).all(userId, day);
+  const total = rows.reduce((acc, r) => {
+    acc.calls += Number(r.calls || 0);
+    acc.prompt_tokens += Number(r.prompt_tokens || 0);
+    acc.completion_tokens += Number(r.completion_tokens || 0);
+    acc.total_tokens += Number(r.total_tokens || 0);
+    return acc;
+  }, { calls:0, prompt_tokens:0, completion_tokens:0, total_tokens:0 });
+  const models = rows.map(r => {
+    const id = foodnoteNormalizeGroqModelId(r.model);
+    const limits = foodnoteGroqLimitForModel(id);
+    const calls = Number(r.calls || 0);
+    const tokens = Number(r.total_tokens || 0);
+    return {
+      model: r.model,
+      normalized_model: id,
+      label: limits?.label || r.model,
+      calls,
+      prompt_tokens: Number(r.prompt_tokens || 0),
+      completion_tokens: Number(r.completion_tokens || 0),
+      total_tokens: tokens,
+      limit_tokens_day: limits?.tpd || null,
+      remaining_tokens_day: foodnoteGroqUsageRemaining(tokens, limits?.tpd),
+      limit_calls_day: limits?.rpd || null,
+      remaining_calls_day: foodnoteGroqUsageRemaining(calls, limits?.rpd),
+      limit_tokens_minute: limits?.tpm || null,
+      limit_calls_minute: limits?.rpm || null,
+      plan: limits?.plan || '',
+      last_at: r.last_at || null
+    };
+  });
+  return {
+    ok: true,
+    day,
+    timezone: process.env.FOODNOTE_USAGE_TIMEZONE || process.env.TZ || 'Europe/Paris',
+    limits_updated_at: FOODNOTE_GROQ_LIMITS_UPDATED_AT,
+    total,
+    models,
+    hardcoded_limits: FOODNOTE_GROQ_LIMITS
+  };
+}
+
+function foodnoteRecordGroqUsage(userId, meta = {}) {
+  const usage = foodnoteNormalizeGroqUsage(meta.usage);
+  if (!usage) return foodnoteGroqUsageSummary(userId);
+  const model = String(meta.model || 'unknown').slice(0, 160);
+  const feature = String(meta.feature || 'IA').slice(0, 80);
+  const day = foodnoteGroqDayKey();
+  db.prepare(`
+    INSERT INTO groq_usage_events (user_id, day_key, feature, model, prompt_tokens, completion_tokens, total_tokens, image_bytes, rate_limit_json)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    userId,
+    day,
+    feature,
+    model,
+    Number(usage.prompt_tokens || 0),
+    Number(usage.completion_tokens || 0),
+    Number(usage.total_tokens || 0),
+    Math.max(0, Math.round(Number(meta.image_bytes || 0) || 0)),
+    meta.rate_limits ? JSON.stringify(meta.rate_limits).slice(0, 4000) : null
+  );
+  return foodnoteGroqUsageSummary(userId, { day });
+}
+
+function foodnoteResetGroqUsage(userId, options = {}) {
+  const scope = String(options.scope || 'today');
+  if (scope === 'all') {
+    db.prepare('DELETE FROM groq_usage_events WHERE user_id=?').run(userId);
+  } else {
+    db.prepare('DELETE FROM groq_usage_events WHERE user_id=? AND day_key=?').run(userId, foodnoteGroqDayKey());
+  }
+  return foodnoteGroqUsageSummary(userId);
+}
+
+app.get('/api/groq/usage', requireUser, (req, res) => {
+  try { res.json(foodnoteGroqUsageSummary(req.foodnoteUserId)); }
+  catch (e) { res.status(500).json({ ok:false, error:e.message }); }
+});
+
+app.delete('/api/groq/usage', requireUser, (req, res) => {
+  try { res.json(foodnoteResetGroqUsage(req.foodnoteUserId, { scope: req.query.scope || req.body?.scope || 'today' })); }
+  catch (e) { res.status(500).json({ ok:false, error:e.message }); }
+});
+
+function foodnoteVisionExtractPer100(item, nutrition, keys) {
+  return foodnoteJsonNumber(
+    item?.[keys[0]] ?? item?.[keys[1]] ?? item?.[keys[2]] ?? item?.[keys[3]] ??
+    nutrition?.[keys[0]] ?? nutrition?.[keys[1]] ?? nutrition?.[keys[2]] ?? nutrition?.[keys[3]],
+    0
+  );
+}
+
+function foodnoteVisionSearchTerms(name) {
+  const raw = String(name || '').trim();
+  const normalized = raw
+    .replace(/\b(grillee?|grillé|cuit[e]?|cuits|cuite|nature|maison|restaurant|portion|assiette|petit|grand|moyen)\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return Array.from(new Set([raw, normalized].filter(v => v && v.length >= 2))).slice(0, 3);
+}
+
+function foodnoteVisionNutritionFromUserFoods(userId, name) {
+  const terms = foodnoteVisionSearchTerms(name);
+  for (const term of terms) {
+    const exact = db.prepare(`
+      SELECT name AS nom, kcal100, prot100, gluc100, lip100, source
+      FROM foods
+      WHERE user_id=? AND LOWER(TRIM(name))=LOWER(TRIM(?))
+      ORDER BY favorite DESC, updated_at DESC
+      LIMIT 1
+    `).get(userId, term);
+    if (exact && Number(exact.kcal100 || 0) > 0) return { ...exact, nutrition_source: 'base_personnelle' };
+  }
+  for (const term of terms) {
+    const like = '%' + term + '%';
+    const row = db.prepare(`
+      SELECT name AS nom, kcal100, prot100, gluc100, lip100, source
+      FROM foods
+      WHERE user_id=? AND name LIKE ?
+      ORDER BY CASE WHEN LOWER(name) LIKE LOWER(?) THEN 0 ELSE 1 END, favorite DESC, LENGTH(name) ASC
+      LIMIT 1
+    `).get(userId, like, term + '%');
+    if (row && Number(row.kcal100 || 0) > 0) return { ...row, nutrition_source: 'base_personnelle' };
+  }
+  return null;
+}
+
+async function foodnoteVisionNutritionReference(userId, name) {
+  const userFood = foodnoteVisionNutritionFromUserFoods(userId, name);
+  if (userFood) return userFood;
+  for (const term of foodnoteVisionSearchTerms(name)) {
+    try {
+      const rows = await searchCiqualSqlite(term);
+      const valid = Array.isArray(rows) ? rows.find(r => Number(r.kcal100 || 0) > 0) : null;
+      if (valid) return { ...valid, nutrition_source: 'ciqual' };
+    } catch (_) {}
+  }
+  return null;
+}
+
+async function foodnoteEnrichVisionMealSuggestions(userId, suggestions) {
+  const out = [];
+  for (const item of (Array.isArray(suggestions) ? suggestions : [])) {
+    const row = { ...item };
+    const qty = Math.max(1, Number(row.qty || 100) || 100);
+    const hasNutrition = Number(row.kcal || 0) > 0 || Number(row.prot || 0) > 0 || Number(row.gluc || 0) > 0 || Number(row.lip || 0) > 0;
+    if (!hasNutrition) {
+      const ref = await foodnoteVisionNutritionReference(userId, row.nom || row.name || '');
+      if (ref) {
+        row.kcal = Math.round((Number(ref.kcal100 || 0) || 0) * qty / 100);
+        row.prot = Math.round(((Number(ref.prot100 || 0) || 0) * qty / 100) * 10) / 10;
+        row.gluc = Math.round(((Number(ref.gluc100 || 0) || 0) * qty / 100) * 10) / 10;
+        row.lip = Math.round(((Number(ref.lip100 || 0) || 0) * qty / 100) * 10) / 10;
+        row.kcal100 = Math.round(Number(ref.kcal100 || 0) || 0);
+        row.prot100 = Math.round((Number(ref.prot100 || 0) || 0) * 10) / 10;
+        row.gluc100 = Math.round((Number(ref.gluc100 || 0) || 0) * 10) / 10;
+        row.lip100 = Math.round((Number(ref.lip100 || 0) || 0) * 10) / 10;
+        row.nutrition_source = ref.nutrition_source || 'reference';
+        row.notes = [row.notes, `Nutrition complétée depuis ${row.nutrition_source === 'ciqual' ? 'CIQUAL' : 'la base personnelle'}`].filter(Boolean).join(' · ');
+      }
+    } else {
+      row.nutrition_source = row.nutrition_source || 'groq_vision';
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+function foodnoteVisionSuggestionHasNutrition(item) {
+  if (!item || typeof item !== 'object') return false;
+  return ['kcal', 'calories', 'energy_kcal', 'energie', 'énergie', 'prot', 'proteines', 'protéines', 'proteins', 'gluc', 'glucides', 'carbohydrates', 'carbs', 'lip', 'lipides', 'fat', 'graisses']
+    .some(key => item[key] !== undefined && item[key] !== null && String(item[key]).trim() !== '');
+}
+
+function foodnoteVisionSuggestionsMissingNutrition(suggestions) {
+  return (Array.isArray(suggestions) ? suggestions : []).filter(item => !foodnoteVisionHasNutritionTotals(item));
+}
+
+function foodnoteCanonicalVisionSuggestionForClient(item) {
+  const qty = Math.max(1, Math.round(Number(item?.qty ?? item?.defaut ?? 100) || 100));
+  const kcal = Math.round(Number(item?.kcal ?? 0) || 0);
+  const prot = Math.round((Number(item?.prot ?? 0) || 0) * 10) / 10;
+  const gluc = Math.round((Number(item?.gluc ?? 0) || 0) * 10) / 10;
+  const lip = Math.round((Number(item?.lip ?? 0) || 0) * 10) / 10;
+  const kcal100 = Number(item?.kcal100 || 0) > 0 ? Math.round(Number(item.kcal100)) : Math.round(kcal * 100 / qty);
+  const prot100 = Number(item?.prot100 || 0) > 0 ? Math.round(Number(item.prot100) * 10) / 10 : Math.round(prot * 1000 / qty) / 10;
+  const gluc100 = Number(item?.gluc100 || 0) > 0 ? Math.round(Number(item.gluc100) * 10) / 10 : Math.round(gluc * 1000 / qty) / 10;
+  const lip100 = Number(item?.lip100 || 0) > 0 ? Math.round(Number(item.lip100) * 10) / 10 : Math.round(lip * 1000 / qty) / 10;
+  return {
+    ...item,
+    nom: String(item?.nom || item?.name || 'Aliment IA').trim(),
+    name: String(item?.nom || item?.name || 'Aliment IA').trim(),
+    qty,
+    defaut: qty,
+    unite: 'g',
+    kcal,
+    calories: kcal,
+    energy_kcal: kcal,
+    prot,
+    proteines: prot,
+    protéines: prot,
+    protein: prot,
+    proteins: prot,
+    gluc,
+    glucides: gluc,
+    carbs: gluc,
+    carbohydrates: gluc,
+    lip,
+    lipides: lip,
+    fat: lip,
+    kcal100,
+    kcal_100g: kcal100,
+    prot100,
+    prot_100g: prot100,
+    gluc100,
+    gluc_100g: gluc100,
+    lip100,
+    lip_100g: lip100,
+    nutrition: { kcal, prot, gluc, lip, kcal100, prot100, gluc100, lip100 },
+    macros: { kcal, prot, gluc, lip }
+  };
+}
+
+function foodnoteValidateVisionImageDataUrl(value) {
+  const image = String(value || '').trim();
+  const match = image.match(/^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=\r\n]+)$/i);
+  if (!match) {
+    const err = new Error('Image invalide : attendu data:image/...;base64.');
+    err.statusCode = 400;
+    throw err;
+  }
+  const normalized = 'data:image/' + (match[1].toLowerCase() === 'jpg' ? 'jpeg' : match[1].toLowerCase()) + ';base64,' + match[2].replace(/\s+/g, '');
+  const bytes = Buffer.byteLength(match[2].replace(/\s+/g, ''), 'base64');
+  const limit = 4 * 1024 * 1024;
+  if (bytes > limit) {
+    const err = new Error('Image trop volumineuse après compression (' + Math.round(bytes / 1024) + ' Ko). Limite : 4096 Ko.');
+    err.statusCode = 413;
+    throw err;
+  }
+  return { image: normalized, bytes };
+}
+
 function foodnoteGroqPublicStatus(userId) {
   const resolved = foodnoteResolveGroqApiKey(userId);
   const storageEnabled = !!resolved.storage_enabled;
@@ -6175,6 +6724,499 @@ app.delete('/api/groq/key', requireUser, (req, res) => {
   } catch (e) { res.status(500).json({ ok:false, error:e.message }); }
 });
 
+
+function foodnoteVisionMealNutritionBatchPrompt(suggestions) {
+  const safeItems = (Array.isArray(suggestions) ? suggestions : []).map((item, idx) => ({
+    idx,
+    nom: String(item?.nom || item?.name || 'Aliment').slice(0, 90),
+    item_type: String(item?.item_type || 'aliment_simple').slice(0, 30),
+    qty: Math.max(1, Math.round(Number(item?.qty || 100) || 100)),
+    notes: String(item?.notes || '').slice(0, 160)
+  }));
+  return `Tu es un assistant nutrition pour FoodNote.
+
+On a déjà identifié ces éléments depuis une photo. Il manque des calories/macros exploitables. Ta tâche n'est PAS de reconnaître l'image : tu dois seulement estimer les valeurs nutritionnelles réalistes pour chaque ligne déjà détectée.
+
+Règles impératives :
+- retourne EXACTEMENT une suggestion par élément reçu, dans le même ordre ;
+- conserve idx, nom, item_type et qty ;
+- kcal/prot/gluc/lip sont les valeurs TOTALES pour qty grammes consommés, pas pour 100 g ;
+- ajoute aussi kcal100/prot100/gluc100/lip100 ;
+- utilise des nombres, jamais null, inconnu, N/A ou chaîne vide ;
+- si l'élément est un plat composé (taboulé, lasagnes, couscous, paella, salade composée, pizza, burger, pâtes bolognaise), estime le plat complet sans le décomposer ;
+- si tu es incertain, donne une estimation prudente et mets l'incertitude dans notes ;
+- ne renvoie aucune phrase hors JSON.
+
+Format exact :
+{"suggestions":[{"idx":0,"nom":"Riz cuit","item_type":"aliment_simple","qty":180,"kcal":234,"prot":4.9,"gluc":50.4,"lip":0.5,"kcal100":130,"prot100":2.7,"gluc100":28,"lip100":0.3,"notes":"estimation nutrition batch"}]}
+
+Éléments à estimer :
+${JSON.stringify(safeItems, null, 2)}`;
+}
+
+async function foodnoteCompleteVisionNutritionWithGroq({ apiKey, model, suggestions, force = false }) {
+  const list = Array.isArray(suggestions) ? suggestions : [];
+  if (!list.length) return { suggestions: list, usage: null, rate_limits: null, completed: false };
+  if (!force && list.every(foodnoteVisionHasNutritionTotals)) return { suggestions: list, usage: null, rate_limits: null, completed: false };
+
+  const payload = {
+    model,
+    temperature: 0.02,
+    max_tokens: 1800,
+    response_format: { type: 'json_object' },
+    messages: [{ role: 'user', content: foodnoteVisionMealNutritionBatchPrompt(list) }]
+  };
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  const rate_limits = foodnoteGroqRateLimitHeaders(response.headers);
+  const txt = await response.text();
+  let data;
+  try { data = JSON.parse(txt); } catch (_) { data = { raw: txt }; }
+  if (!response.ok) {
+    return { suggestions: list, usage: foodnoteNormalizeGroqUsage(data?.usage), rate_limits, completed: false, error: data?.error?.message || data?.error || txt || 'Batch nutrition Groq indisponible' };
+  }
+
+  const usage = foodnoteNormalizeGroqUsage(data?.usage);
+  const content = String(data?.choices?.[0]?.message?.content || '').trim();
+  let parsed;
+  try { parsed = JSON.parse(foodnoteExtractJsonBlock(content)); }
+  catch (_) { return { suggestions: list, usage, rate_limits, completed: false, raw: content.slice(0, 1200) }; }
+
+  const batch = foodnoteNormalizeVisionMealSuggestions(parsed);
+  if (!batch.length) return { suggestions: list, usage, rate_limits, completed: false, raw: content.slice(0, 1200) };
+
+  const byName = new Map(batch.map(item => [foodNameKeyForDb(item.nom || item.name || ''), item]));
+  const byIdx = new Map();
+  batch.forEach((item, order) => {
+    const rawIdx = Number(item.idx);
+    byIdx.set(Number.isFinite(rawIdx) && rawIdx >= 0 ? rawIdx : order, item);
+  });
+
+  const merged = list.map((item, idx) => {
+    const candidate = byIdx.get(idx) || batch[idx] || byName.get(foodNameKeyForDb(item.nom || item.name || ''));
+    if (!candidate || !foodnoteVisionHasNutritionTotals(candidate)) return item;
+
+    const qty = Math.max(1, Number(item.qty || item.defaut || candidate.qty || 100) || 100);
+    const candidateQty = Math.max(1, Number(candidate.qty || candidate.defaut || qty) || qty);
+    const scale = candidateQty > 0 ? qty / candidateQty : 1;
+    const out = { ...item };
+    out.qty = qty;
+    out.defaut = qty;
+    out.kcal = Math.round(Number(candidate.kcal || 0) * scale);
+    out.prot = Math.round(Number(candidate.prot || 0) * scale * 10) / 10;
+    out.gluc = Math.round(Number(candidate.gluc || 0) * scale * 10) / 10;
+    out.lip = Math.round(Number(candidate.lip || 0) * scale * 10) / 10;
+    out.kcal100 = Math.round(Number(candidate.kcal100 || (out.kcal * 100 / qty) || 0));
+    out.prot100 = Math.round(Number(candidate.prot100 || (out.prot * 100 / qty) || 0) * 10) / 10;
+    out.gluc100 = Math.round(Number(candidate.gluc100 || (out.gluc * 100 / qty) || 0) * 10) / 10;
+    out.lip100 = Math.round(Number(candidate.lip100 || (out.lip * 100 / qty) || 0) * 10) / 10;
+    out.nutrition_source = 'groq_batch_obligatoire';
+    out.notes = [out.notes, 'Nutrition recalculée par Groq en batch obligatoire'].filter(Boolean).join(' · ');
+    return out;
+  });
+  return { suggestions: merged, usage, rate_limits, completed: true };
+}
+
+
+async function foodnoteCallGroqVisionJson({ apiKey, model, prompt, image, maxTokens = 1100, temperature = 0.1 }) {
+  const content = image
+    ? [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: image } }]
+    : prompt;
+  const payload = {
+    model,
+    temperature,
+    max_tokens: maxTokens,
+    response_format: { type: 'json_object' },
+    messages: [{ role: 'user', content }]
+  };
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+  const rate_limits = foodnoteGroqRateLimitHeaders(response.headers);
+  const txt = await response.text();
+  let data;
+  try { data = JSON.parse(txt); } catch (_) { data = { raw: txt }; }
+  if (!response.ok) {
+    const err = new Error(data?.error?.message || data?.error || txt || 'Erreur Groq');
+    err.statusCode = response.status;
+    err.details = data;
+    err.rate_limits = rate_limits;
+    throw err;
+  }
+  const usage = foodnoteNormalizeGroqUsage(data?.usage);
+  const contentText = String(data?.choices?.[0]?.message?.content || '').trim();
+  let parsed;
+  try { parsed = JSON.parse(foodnoteExtractJsonBlock(contentText)); }
+  catch (e) {
+    const err = new Error('Réponse Groq non JSON exploitable.');
+    err.statusCode = 502;
+    err.raw = contentText.slice(0, 1200);
+    err.usage = usage;
+    err.rate_limits = rate_limits;
+    throw err;
+  }
+  return { parsed, usage, rate_limits, raw: contentText };
+}
+
+function foodnoteNormalizeNutritionLabelFallbackItem(parsed) {
+  const root = parsed || {};
+  const item = root.item || root.label || root.food || root.product || (Array.isArray(root.items) ? root.items[0] : null) || root;
+  const per100 = item.per_100g || item.per100 || item.nutrition_100g || item.nutrition || item.nutriments || item.macros || item;
+  const nom = String(item.nom || item.name || item.product_name || item.produit || root.product_name || root.name || 'Produit scanné').trim() || 'Produit scanné';
+  const kcal = Math.round(foodnoteJsonNumber(per100.kcal ?? per100.calories ?? per100.energy_kcal ?? per100.energie ?? per100['énergie'] ?? item.kcal ?? item.calories ?? item.energy_kcal, 0));
+  const prot = Math.round(foodnoteJsonNumber(per100.prot ?? per100.proteines ?? per100['protéines'] ?? per100.protein ?? per100.proteins ?? item.prot ?? item.proteines ?? item.protein, 0) * 10) / 10;
+  const gluc = Math.round(foodnoteJsonNumber(per100.gluc ?? per100.glucides ?? per100.carbs ?? per100.carbohydrates ?? item.gluc ?? item.glucides ?? item.carbs, 0) * 10) / 10;
+  const lip = Math.round(foodnoteJsonNumber(per100.lip ?? per100.lipides ?? per100.fat ?? per100.graisses ?? item.lip ?? item.lipides ?? item.fat, 0) * 10) / 10;
+  if (!(kcal > 0) && !(prot > 0 || gluc > 0 || lip > 0)) return null;
+  return {
+    nom,
+    name: nom,
+    qty: 100,
+    defaut: 100,
+    unite: 'g',
+    kcal,
+    calories: kcal,
+    energy_kcal: kcal,
+    prot,
+    proteines: prot,
+    protéines: prot,
+    protein: prot,
+    gluc,
+    glucides: gluc,
+    carbs: gluc,
+    lip,
+    lipides: lip,
+    fat: lip,
+    kcal100: kcal,
+    kcal_100g: kcal,
+    prot100: prot,
+    prot_100g: prot,
+    gluc100: gluc,
+    gluc_100g: gluc,
+    lip100: lip,
+    lip_100g: lip,
+    source: 'Groq fallback OCR',
+    nutrition_source: 'groq_label_fallback',
+    confidence: item.confidence || root.confidence || '',
+    notes: item.notes || root.notes || 'Lecture assistée par Groq depuis le parcours OCR existant.'
+  };
+}
+
+function foodnoteNormalizeRecipeFallbackItem(parsed, servings = 4, eaten = 1) {
+  const root = parsed || {};
+  const item = root.item || root.recipe || root.recette || (Array.isArray(root.items) ? root.items[0] : null) || root;
+  const nutrition = item.per_100g || item.nutrition_100g || item.nutrition || item.macros || item;
+  const totalWeight = Math.max(1, Math.round(foodnoteJsonNumber(item.totalWeight ?? item.total_weight ?? item.total_weight_g ?? item.poids_total_g ?? item.poidsTotal ?? item.qty ?? item.quantity_g ?? root.total_weight_g, 100)));
+  const safeServings = Math.max(1, foodnoteJsonNumber(servings, 4));
+  const safeEaten = Math.max(0.1, foodnoteJsonNumber(eaten, 1));
+  const qty = Math.max(1, Math.round(totalWeight * safeEaten / safeServings));
+  const kcal100 = Math.round(foodnoteJsonNumber(nutrition.kcal100 ?? nutrition.kcal_100g ?? nutrition.kcal ?? nutrition.calories ?? nutrition.energy_kcal ?? item.kcal100 ?? item.kcal_100g, 0));
+  const prot100 = Math.round(foodnoteJsonNumber(nutrition.prot100 ?? nutrition.prot_100g ?? nutrition.prot ?? nutrition.proteines ?? nutrition['protéines'] ?? nutrition.protein ?? item.prot100 ?? item.prot_100g, 0) * 10) / 10;
+  const gluc100 = Math.round(foodnoteJsonNumber(nutrition.gluc100 ?? nutrition.gluc_100g ?? nutrition.gluc ?? nutrition.glucides ?? nutrition.carbs ?? nutrition.carbohydrates ?? item.gluc100 ?? item.gluc_100g, 0) * 10) / 10;
+  const lip100 = Math.round(foodnoteJsonNumber(nutrition.lip100 ?? nutrition.lip_100g ?? nutrition.lip ?? nutrition.lipides ?? nutrition.fat ?? nutrition.graisses ?? item.lip100 ?? item.lip_100g, 0) * 10) / 10;
+  if (!(kcal100 > 0) && !(prot100 > 0 || gluc100 > 0 || lip100 > 0)) return null;
+  const nom = String(item.nom || item.name || item.recipe_name || item.nom_recette || root.recipe_name || 'Plat maison').trim() || 'Plat maison';
+  return {
+    nom,
+    name: nom,
+    totalWeight,
+    total_weight_g: totalWeight,
+    qty,
+    defaut: qty,
+    unite: 'g',
+    kcal100,
+    kcal_100g: kcal100,
+    prot100,
+    prot_100g: prot100,
+    gluc100,
+    gluc_100g: gluc100,
+    lip100,
+    lip_100g: lip100,
+    kcal: Math.round(kcal100 * qty / 100),
+    prot: Math.round(prot100 * qty / 10) / 10,
+    gluc: Math.round(gluc100 * qty / 10) / 10,
+    lip: Math.round(lip100 * qty / 10) / 10,
+    source: 'Recette Groq fallback',
+    nutrition_source: 'groq_recipe_photo_fallback',
+    ingredients: Array.isArray(item.ingredients) ? item.ingredients : (Array.isArray(root.ingredients) ? root.ingredients : []),
+    notes: item.notes || root.notes || 'Recette structurée par Groq depuis la photo, à valider.'
+  };
+}
+
+app.post('/api/groq/nutrition-label-fallback', requireUser, async (req, res) => {
+  try {
+    const resolvedKey = foodnoteResolveGroqApiKey(req.foodnoteUserId);
+    const apiKey = resolvedKey.key;
+    if (!apiKey) {
+      return res.status(400).json({ ok:false, error: resolvedKey.storage_enabled ? 'Clé Groq absente côté serveur. Enregistre-la dans IA > Clé API Groq, ou configure GROQ_API_KEY dans Docker.' : 'Clé Groq absente côté serveur. Configure GROQ_API_KEY dans Docker, ou active FOODNOTE_ALLOW_UI_SECRET_STORAGE=1.', storage_enabled: !!resolvedKey.storage_enabled, enable_flag: 'FOODNOTE_ALLOW_UI_SECRET_STORAGE=1' });
+    }
+    const body = req.body || {};
+    const imageInfo = body.image || body.imageDataUrl || body.photo ? foodnoteValidateVisionImageDataUrl(body.image || body.imageDataUrl || body.photo || '') : { image: '', bytes: 0 };
+    const ocrText = String(body.ocrText || body.text || '').trim().slice(0, 4000);
+    if (!imageInfo.image && !ocrText) return res.status(400).json({ ok:false, error:'Image ou texte OCR requis pour la relecture Groq.' });
+    const model = String(body.model || process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct').trim();
+    const prompt = `Tu es un lecteur d'étiquette nutritionnelle pour FoodNote.
+
+Objectif : extraire UNIQUEMENT les valeurs nutritionnelles POUR 100 g d'un produit. Si la photo contient aussi une colonne par portion, privilégie la colonne pour 100 g. Si seules des valeurs par portion existent avec un poids de portion clair, convertis en valeurs pour 100 g.
+${ocrText ? `Texte OCR local fourni par FoodNote, possiblement faux :\n${ocrText}\n` : ''}
+Réponds UNIQUEMENT en JSON valide, sans markdown, au format :
+{
+  "product_name": "Nom produit court",
+  "per_100g": { "kcal": 82, "prot": 8.7, "gluc": 10, "lip": 0.2 },
+  "confidence": "high|medium|low",
+  "notes": "point à vérifier si nécessaire"
+}
+Règles :
+- ne crée pas un repas ; il s'agit d'un aliment à enregistrer dans la base ;
+- kcal/prot/gluc/lip sont obligatoires et numériques ;
+- kcal = kilocalories, pas kJ ;
+- prot/gluc/lip en grammes pour 100 g ;
+- si une valeur est illisible, donne la meilleure lecture prudente et indique l'incertitude dans notes ;
+- aucune écriture en base, seulement extraction.`;
+    const call = await foodnoteCallGroqVisionJson({ apiKey, model, prompt, image: imageInfo.image, maxTokens: body.max_tokens || body.maxTokens || 800, temperature: body.temperature ?? 0.0 });
+    const item = foodnoteNormalizeNutritionLabelFallbackItem(call.parsed);
+    if (!item) return res.status(502).json({ ok:false, error:'Groq n’a pas renvoyé de tableau nutritionnel exploitable pour 100 g.', raw: call.raw, model, usage: call.usage, rate_limits: call.rate_limits });
+    const usage_summary = foodnoteRecordGroqUsage(req.foodnoteUserId, { feature:'Tableau nutritionnel fallback', model, usage: call.usage, image_bytes: imageInfo.bytes, rate_limits: call.rate_limits });
+    res.json({ ok:true, model, usage: call.usage, usage_summary, rate_limits: call.rate_limits, image_bytes: imageInfo.bytes, source:'groq_label_fallback', item, items:[item], raw: call.raw });
+  } catch (e) {
+    console.error('Groq fallback tableau nutritionnel erreur:', e);
+    res.status(e.statusCode || 500).json({ ok:false, error:e.message, details:e.details || undefined, rate_limits:e.rate_limits || undefined });
+  }
+});
+
+app.post('/api/groq/recipe-photo-fallback', requireUser, async (req, res) => {
+  try {
+    const resolvedKey = foodnoteResolveGroqApiKey(req.foodnoteUserId);
+    const apiKey = resolvedKey.key;
+    if (!apiKey) {
+      return res.status(400).json({ ok:false, error: resolvedKey.storage_enabled ? 'Clé Groq absente côté serveur. Enregistre-la dans IA > Clé API Groq, ou configure GROQ_API_KEY dans Docker.' : 'Clé Groq absente côté serveur. Configure GROQ_API_KEY dans Docker, ou active FOODNOTE_ALLOW_UI_SECRET_STORAGE=1.', storage_enabled: !!resolvedKey.storage_enabled, enable_flag: 'FOODNOTE_ALLOW_UI_SECRET_STORAGE=1' });
+    }
+    const body = req.body || {};
+    const { image, bytes } = foodnoteValidateVisionImageDataUrl(body.image || body.imageDataUrl || body.photo || '');
+    const ocrText = String(body.ocrText || body.text || '').trim().slice(0, 5000);
+    const servings = Math.max(1, foodnoteJsonNumber(body.servings || body.portions || 4, 4));
+    const eaten = Math.max(0.1, foodnoteJsonNumber(body.eaten || body.consumed_servings || 1, 1));
+    const model = String(body.model || process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct').trim();
+    const prompt = `Tu es un assistant recette pour FoodNote. Lis cette photo de recette, liste d'ingrédients ou préparation.
+
+Objectif : produire UN plat complet réutilisable, pas une ligne par ingrédient.
+${ocrText ? `Texte OCR local fourni par FoodNote, possiblement faux :\n${ocrText}\n` : ''}
+La recette fait environ ${servings} portion(s). L'utilisateur mangera ${eaten} portion(s), mais les valeurs demandées doivent rester POUR 100 g du plat complet.
+
+Réponds UNIQUEMENT en JSON valide, sans markdown, au format :
+{
+  "recipe_name": "Nom du plat court",
+  "total_weight_g": 920,
+  "per_100g": { "kcal": 132, "prot": 6.5, "gluc": 9.8, "lip": 7.1 },
+  "ingredients": [ { "name": "Courgettes", "quantity_g": 500 } ],
+  "confidence": "high|medium|low",
+  "notes": "quantités estimées à vérifier"
+}
+Règles :
+- analyse la recette comme un plat complet ;
+- estime les quantités manquantes de façon réaliste ;
+- total_weight_g est le poids final estimé du plat ;
+- kcal/prot/gluc/lip sont les valeurs pour 100 g du plat complet ;
+- n'écris rien en SQLite ; l'utilisateur validera dans FoodNote.`;
+    const call = await foodnoteCallGroqVisionJson({ apiKey, model, prompt, image, maxTokens: body.max_tokens || body.maxTokens || 1200, temperature: body.temperature ?? 0.1 });
+    const item = foodnoteNormalizeRecipeFallbackItem(call.parsed, servings, eaten);
+    if (!item) return res.status(502).json({ ok:false, error:'Groq n’a pas renvoyé de recette exploitable avec valeurs pour 100 g.', raw: call.raw, model, usage: call.usage, rate_limits: call.rate_limits });
+    const usage_summary = foodnoteRecordGroqUsage(req.foodnoteUserId, { feature:'Recette photo fallback', model, usage: call.usage, image_bytes: bytes, rate_limits: call.rate_limits });
+    res.json({ ok:true, model, usage: call.usage, usage_summary, rate_limits: call.rate_limits, image_bytes: bytes, source:'groq_recipe_photo_fallback', item, recipe:item, raw: call.raw });
+  } catch (e) {
+    console.error('Groq fallback recette photo erreur:', e);
+    res.status(e.statusCode || 500).json({ ok:false, error:e.message, details:e.details || undefined, rate_limits:e.rate_limits || undefined });
+  }
+});
+
+app.post('/api/groq/vision-meal', requireUser, async (req, res) => {
+  try {
+    const resolvedKey = foodnoteResolveGroqApiKey(req.foodnoteUserId);
+    const apiKey = resolvedKey.key;
+    if (!apiKey) {
+      return res.status(400).json({
+        ok:false,
+        error: resolvedKey.storage_enabled
+          ? 'Clé Groq absente côté serveur. Enregistre-la dans IA > Clé API Groq, ou configure GROQ_API_KEY dans Docker.'
+          : 'Clé Groq absente côté serveur. Configure GROQ_API_KEY dans Docker, ou active FOODNOTE_ALLOW_UI_SECRET_STORAGE=1 pour autoriser la sauvegarde SQLite depuis l’interface.',
+        storage_enabled: !!resolvedKey.storage_enabled,
+        enable_flag: 'FOODNOTE_ALLOW_UI_SECRET_STORAGE=1'
+      });
+    }
+
+    const body = req.body || {};
+    const { image, bytes } = foodnoteValidateVisionImageDataUrl(body.image || body.imageDataUrl || body.photo || '');
+    const note = String(body.note || body.description || '').trim().slice(0, 600);
+    const model = String(body.model || process.env.GROQ_VISION_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct').trim();
+    const prompt = `Tu es un assistant nutrition pour FoodNote. Analyse cette photo de repas.
+
+Objectif : proposer des éléments nutritionnels saisissables, réutilisables et validables par l'utilisateur.
+${note ? `Contexte utilisateur optionnel : ${note}
+` : ''}
+Réponds UNIQUEMENT en JSON valide, sans markdown.
+Chaque suggestion DOIT contenir obligatoirement : nom, item_type, qty, kcal, prot, gluc, lip. Tu peux aussi ajouter kcal100/prot100/gluc100/lip100 si tu connais une valeur de référence.
+Si tu reconnais un aliment ou un plat, tu DOIS estimer ses kcal/prot/gluc/lip pour la quantité consommée. N'utilise jamais null, inconnu, N/A ou une chaîne vide pour ces valeurs.
+Format exact :
+{
+  "suggestions": [
+    {
+      "nom": "Poulet grillé",
+      "item_type": "aliment_simple",
+      "qty": 140,
+      "kcal": 230,
+      "prot": 35,
+      "gluc": 0,
+      "lip": 8,
+      "kcal100": 164,
+      "prot100": 25,
+      "gluc100": 0,
+      "lip100": 5.7,
+      "confidence_food": "high",
+      "confidence_quantity": "medium",
+      "decomposition_recommended": false,
+      "save_to_base": true,
+      "notes": "quantité à vérifier"
+    },
+    {
+      "nom": "Taboulé",
+      "item_type": "plat_compose",
+      "qty": 180,
+      "kcal": 270,
+      "prot": 6,
+      "gluc": 36,
+      "lip": 10,
+      "kcal100": 150,
+      "prot100": 3.3,
+      "gluc100": 20,
+      "lip100": 5.6,
+      "confidence_food": "high",
+      "confidence_quantity": "medium",
+      "decomposition_recommended": false,
+      "save_to_base": true,
+      "notes": "Plat composé : détail des ingrédients non estimé depuis la photo."
+    }
+  ]
+}
+Règles de découpage :
+- une suggestion = un élément nutritionnel saisissable, pas forcément un ingrédient brut ;
+- sépare les éléments seulement s'ils sont clairement distincts dans l'assiette, estimables séparément et corrigeables séparément par l'utilisateur ;
+- garde les plats composés ou mélangés en une seule ligne générique : taboulé, lasagnes, couscous, paella, gratin, soupe, curry, pizza, pâtes bolognaise, salade composée mélangée ;
+- ne décompose jamais automatiquement un plat composé en semoule/tomate/huile/etc. depuis une simple photo ;
+- burger + frites = deux lignes si les frites sont séparées ; poulet + riz + haricots verts = trois lignes ; taboulé seul = une ligne ;
+- nom doit rester réutilisable : "Taboulé", "Poulet grillé", "Riz cuit". N'inclus pas date, restaurant, assiette ou contexte photo dans le nom ;
+- item_type doit être l'un de : aliment_simple, plat_compose, sauce_extra, boisson, incertain ;
+- sauce/huile : ligne séparée seulement si visible, à part ou significative. Sinon note l'incertitude dans notes ;
+- qty en grammes consommés ; kcal/prot/gluc/lip pour cette quantité, pas pour 100 g ;
+- kcal/prot/gluc/lip sont obligatoires pour chaque ligne et doivent être à la racine de chaque objet suggestion, pas dans un objet imbriqué nutrition/macros ; si l'estimation est incertaine, fournis la meilleure estimation prudente et indique l'incertitude dans notes ;
+- les macros sont les totaux de la portion : exemple 180 g de taboulé = environ 270 kcal, pas les valeurs pour 100 g ;
+- utilise confidence_food et confidence_quantity avec high, medium ou low ;
+- si tu hésites entre détailler et regrouper, regroupe en plat_compose avec notes ;
+- ne fais aucune phrase hors JSON.`;
+
+    const payload = {
+      model,
+      temperature: body.temperature ?? 0.1,
+      max_tokens: body.max_tokens || body.maxTokens || 1400,
+      response_format: { type: 'json_object' },
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: image } }
+        ]
+      }]
+    };
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const rate_limits = foodnoteGroqRateLimitHeaders(response.headers);
+    const txt = await response.text();
+    let data;
+    try { data = JSON.parse(txt); } catch (_) { data = { raw: txt }; }
+    if (!response.ok) {
+      return res.status(response.status).json({
+        ok:false,
+        error: data?.error?.message || data?.error || txt || 'Erreur Groq Vision',
+        details: data,
+        source: resolvedKey.source,
+        model,
+        rate_limits
+      });
+    }
+
+    const visionUsage = foodnoteNormalizeGroqUsage(data?.usage);
+    const content = String(data?.choices?.[0]?.message?.content || '').trim();
+    let parsed;
+    try { parsed = JSON.parse(foodnoteExtractJsonBlock(content)); }
+    catch (e) {
+      return res.status(502).json({ ok:false, error:'Réponse Groq Vision non JSON exploitable.', raw: content.slice(0, 1200), model, usage: visionUsage, rate_limits });
+    }
+    let suggestions = foodnoteNormalizeVisionMealSuggestions(parsed);
+
+    // V4 : la vision sert à reconnaître le contenu et les quantités, mais ne devient plus
+    // la source finale des kcal/macros. On force un batch nutrition texte pour TOUTES les lignes,
+    // puis on utilise la base personnelle/CIQUAL uniquement en filet de sécurité.
+    const batchCompletion = await foodnoteCompleteVisionNutritionWithGroq({ apiKey, model, suggestions, force: true });
+    suggestions = await foodnoteEnrichVisionMealSuggestions(req.foodnoteUserId, batchCompletion.suggestions);
+
+    const usage = foodnoteMergeGroqUsage(visionUsage, batchCompletion.usage);
+    const effectiveRateLimits = batchCompletion.rate_limits || rate_limits;
+    if (!suggestions.length) {
+      return res.status(502).json({ ok:false, error:'Groq Vision n’a renvoyé aucune suggestion exploitable avec calories et macros. Reprends une photo plus nette ou ajoute une précision texte.', raw: content.slice(0, 1200), model, usage, rate_limits: effectiveRateLimits });
+    }
+    const missingNutrition = foodnoteVisionSuggestionsMissingNutrition(suggestions);
+    if (missingNutrition.length) {
+      return res.status(502).json({
+        ok:false,
+        error:'Groq a identifié des aliments mais le batch nutrition n’a pas produit de calories/macros exploitables. Analyse refusée pour éviter un ajout incomplet.',
+        missing_nutrition: missingNutrition.map(x => x.nom || x.name || 'Aliment IA'),
+        nutrition_batch_error: batchCompletion.error || '',
+        raw: content.slice(0, 1200),
+        model,
+        usage,
+        rate_limits: effectiveRateLimits
+      });
+    }
+    suggestions = suggestions.map(foodnoteCanonicalVisionSuggestionForClient);
+    const usage_summary = foodnoteRecordGroqUsage(req.foodnoteUserId, { feature:'Photo plat', model, usage, image_bytes: bytes, rate_limits: effectiveRateLimits });
+    res.json({
+      ok:true,
+      model,
+      image_bytes: bytes,
+      usage,
+      usage_summary,
+      rate_limits: effectiveRateLimits,
+      nutrition_completed: !!batchCompletion.completed,
+      nutrition_mode: 'groq_batch_obligatoire_v4',
+      suggestions,
+      items: suggestions,
+      debug_nutrition: suggestions.map(x => ({ nom:x.nom, qty:x.qty, kcal:x.kcal, prot:x.prot, gluc:x.gluc, lip:x.lip, source:x.nutrition_source || '' })),
+      raw: content
+    });
+  } catch (e) {
+    console.error('Groq Vision repas erreur:', e);
+    res.status(e.statusCode || 500).json({ ok:false, error:e.message });
+  }
+});
+
 app.post(['/api/groq', '/api/groq/chat'], requireUser, async (req, res) => {
   try {
     const resolvedKey = foodnoteResolveGroqApiKey(req.foodnoteUserId);
@@ -6209,6 +7251,7 @@ app.post(['/api/groq', '/api/groq/chat'], requireUser, async (req, res) => {
       },
       body: JSON.stringify(payload)
     });
+    const rate_limits = foodnoteGroqRateLimitHeaders(response.headers);
     const txt = await response.text();
     let data;
     try { data = JSON.parse(txt); } catch (_) { data = { raw: txt }; }
@@ -6216,9 +7259,14 @@ app.post(['/api/groq', '/api/groq/chat'], requireUser, async (req, res) => {
       return res.status(response.status).json({
         error: data?.error?.message || data?.error || txt || 'Erreur Groq',
         details: data,
-        source: resolvedKey.source
+        source: resolvedKey.source,
+        rate_limits
       });
     }
+    const usage = foodnoteNormalizeGroqUsage(data?.usage);
+    if (usage) data.usage = usage;
+    if (rate_limits) data.rate_limits = rate_limits;
+    data.usage_summary = foodnoteRecordGroqUsage(req.foodnoteUserId, { feature:'IA texte', model: payload.model, usage, rate_limits });
     res.json(data);
   } catch (e) {
     console.error('Groq proxy erreur:', e);

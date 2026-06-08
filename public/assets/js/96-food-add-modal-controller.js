@@ -7,7 +7,7 @@
 (function FoodNoteFoodAddModalControllerModule(){
   'use strict';
 
-  const VERSION = 'foodnote_beta_0_22_179_integrated_search_health_20260531';
+  const VERSION = 'foodnote_beta_0_24_js_health_cleanup_20260608';
   const MODES = Object.freeze({
     SEARCH: 'search',
     ESTIMATE: 'estimate',
@@ -121,7 +121,7 @@
     wrappers: Object.create(null),
     observer: null,
     observerEnabled: false,
-    observerDisabledReason: 'hardening_checkpoint_event_driven',
+    observerDisabledReason: 'event_driven_controller',
     reconcileRequests: 0,
     lastReason: '',
     lastAction: '',
@@ -574,8 +574,13 @@
   }
 
   function runSearchResultFlow(method, args = [], options = {}){
-    // Recherche officielle actuelle : moteur intégré du Journal.
-    // Aucun pont vers l'ancien module 99-food-add-search-results-core.js n'est conservé.
+    const flow = window.FoodNoteFoodAddSearchResults;
+    if (flow && typeof flow[method] === 'function') {
+      try { return flow[method].apply(flow, Array.isArray(args) ? args : [args]); }
+      catch(e) { showError(e && e.message ? e.message : e); return undefined; }
+    }
+    // Le module 99-food-add-search-results-core.js a été retiré : la recherche active
+    // est désormais le chemin intégré handleDBSearchInput() + pickDBSuggestion().
     if (method === 'pick' && typeof window.pickDBSuggestion === 'function') {
       try { return window.pickDBSuggestion.apply(window, Array.isArray(args) ? args : [args]); }
       catch(e) { showError(e && e.message ? e.message : e); return undefined; }
@@ -586,7 +591,7 @@
       return true;
     }
     if (options.fallbackAction) return runAction(options.fallbackAction, args, options);
-    if (options.required) showError(options.error || ('Flux recherche intégrée indisponible : ' + method));
+    if (options.required) showError(options.error || ('Flux recherche indisponible : ' + method));
     return undefined;
   }
 
@@ -1214,7 +1219,7 @@
     // Le popup est maintenant piloté par actions/événements explicites ; observer
     // document.documentElement en continu est trop risqué sur une interface qui rerend souvent.
     state.observerEnabled = false;
-    state.observerDisabledReason = 'hardening_checkpoint_event_driven';
+    state.observerDisabledReason = 'event_driven_controller';
     return false;
   }
 
@@ -1385,6 +1390,7 @@
         inlineModalInputHandlers: qa('#food-add-modal [oninput], #food-add-modal [onchange]').length,
         quantityActions: qa('#db-quantity-panel [data-food-add-action]').length,
         searchResultActions: qa('#db-suggestions [data-food-add-action="search-pick"]').length,
+        searchResultsLegacy: !!window.FoodNoteFoodAddSearchResults,
         integratedSearch: integratedSearchAvailable(),
         actionDelegationInstalled: !!document.__fnFoodAddModalControllerActionDelegation,
         searchInputBridge: !!document.__fnFoodAddModalControllerSearchInputBridge,
@@ -1394,7 +1400,7 @@
         observerDisabledReason: state.observerDisabledReason,
         eventDrivenReconcile: true,
         searchAfterAddRecovery: true,
-        integratedSearchRecovery: true,
+        legacySearchRecovery: true,
         detachedCaptureActionBridge: true,
         activeActionLocks: Object.keys(state.actionLocks || {}).length,
         currentView: state.lastView,

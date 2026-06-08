@@ -18,7 +18,7 @@
    éviter de casser d’éventuels appels externes pendant la transition.
 ========================================================= */
 (function(){
-  const BUILD = 'foodnote_beta_0_22_179_food_add_clean_no_quick_suggestions_20260531';
+  const BUILD = 'foodnote_beta_0_24_add_capture_style_cleanup_20260608';
   const $ = (id) => document.getElementById(id);
   const q = (sel, root=document) => root.querySelector(sel);
   const MODAL_CONTROLLER_OWNS_POPUP = !!window.__FoodNoteFoodAddModalControllerOwnsPopup;
@@ -612,7 +612,6 @@
   }
 
   function ensureUI(){
-    injectStyles();
     const modal = $('food-add-modal');
     const panel = q('#food-add-modal .food-add-panel');
     if (!modal || !panel) return;
@@ -737,232 +736,13 @@
     });
   }
 
-  function injectCleanMealContextStyles(){
-    if ($('foodnote-add-clean-0170-style')) return;
-    const style = document.createElement('style');
-    style.id = 'foodnote-add-clean-0170-style';
-    style.textContent = `
-      .meal-group-head-right{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;margin-left:auto!important;}
-      .meal-group-add-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;border-radius:999px!important;border:1px solid color-mix(in srgb, var(--green) 58%, var(--border2))!important;background:color-mix(in srgb, var(--green) 12%, var(--bg))!important;color:var(--green)!important;font-size:22px!important;font-weight:900!important;line-height:1!important;padding:0!important;box-shadow:0 1px 4px rgba(0,0,0,.08)!important;cursor:pointer!important;touch-action:manipulation!important;}
-      .meal-group-add-btn:hover{transform:translateY(-1px)!important;}
-      .meal-group-add-btn:active{transform:translateY(0)!important;}
-      @media(max-width:760px){.meal-group-add-btn{width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;font-size:20px!important;}}
 
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-head{align-items:flex-start!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-add-title{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-context-wrap{position:static!important;display:flex!important;flex-direction:column!important;gap:7px!important;margin:0 0 2px 0!important;padding:0!important;flex:0 0 auto!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-context-bar{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;flex-wrap:nowrap!important;padding:8px 10px!important;border-radius:15px!important;border:1px solid var(--border2)!important;background:linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, transparent), color-mix(in srgb, var(--bg2) 88%, transparent))!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-current-pill{display:inline-flex!important;align-items:center!important;gap:7px!important;flex:1 1 auto!important;min-width:0!important;border:0!important;background:transparent!important;padding:0!important;margin:0!important;color:var(--text)!important;font-size:13px!important;font-weight:900!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-current-pill small{display:block!important;font-size:11px!important;font-weight:700!important;color:var(--text3)!important;line-height:1.15!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-change-btn{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:30px!important;height:30px!important;padding:0 11px!important;border-radius:999px!important;border:1px solid var(--border2)!important;background:var(--bg)!important;color:var(--text)!important;font-size:11px!important;font-weight:900!important;white-space:nowrap!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-context-picker{display:none!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-context-picker.is-open{display:grid!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-choice-btn{min-width:0!important;height:34px!important;min-height:34px!important;border-radius:13px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid var(--border2)!important;background:var(--bg)!important;color:var(--text2)!important;padding:0 6px!important;font-size:11px!important;font-weight:850!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-choice-btn.active{background:var(--green-bg)!important;border-color:var(--green)!important;color:var(--text)!important;}
+  /*
+   * Les styles de la popup Ajouter sont maintenant chargés par :
+   * public/assets/css/modules/42-food-add-modal-layout.css
+   * Ce fichier JS ne doit plus injecter de CSS runtime.
+   */
 
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn{display:none!important;align-items:center!important;justify-content:center!important;gap:5px!important;height:30px!important;min-height:30px!important;padding:0 10px!important;border-radius:999px!important;border:1px solid color-mix(in srgb, var(--green) 42%, var(--border2))!important;background:color-mix(in srgb, var(--green) 8%, var(--bg))!important;color:var(--text)!important;font-size:11px!important;font-weight:900!important;white-space:nowrap!important;flex:0 0 auto!important;touch-action:manipulation!important;cursor:pointer!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn.has-items{display:inline-flex!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn.is-open{border-color:var(--green)!important;background:var(--green-bg)!important;color:var(--green)!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover{display:none!important;position:static!important;margin-top:8px!important;padding:10px!important;border-radius:16px!important;border:1px solid var(--border2)!important;background:linear-gradient(180deg, color-mix(in srgb, var(--card) 98%, transparent), color-mix(in srgb, var(--bg2) 92%, transparent))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)!important;box-sizing:border-box!important;overflow:hidden!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover.is-open{display:block!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover::before{display:none!important;content:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #food-current-meal-card{display:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover #food-current-meal-card{display:block!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;max-height:min(245px, 32dvh)!important;overflow-y:auto!important;overscroll-behavior:contain!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover #food-current-meal-card.is-empty{display:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin:0 0 8px 0!important;padding:0 0 8px 0!important;font-size:12px!important;color:var(--text)!important;border-bottom:1px solid var(--border2)!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-head span{font-weight:950!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-head b{min-width:24px!important;height:24px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:var(--green-bg)!important;color:var(--green)!important;font-size:11px!important;font-weight:950!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-row,
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-tile{min-width:0!important;min-height:46px!important;border-radius:13px!important;border:1px solid var(--border2)!important;background:var(--bg)!important;padding:8px 9px!important;text-align:left!important;display:flex!important;flex-direction:column!important;gap:3px!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-name{font-size:11.5px!important;font-weight:900!important;color:var(--text)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-meta,
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-more{font-size:10.5px!important;color:var(--text3)!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 #food-add-search-panel{display:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-controls{display:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-search .food-add-actions{display:block!important;width:100%!important;padding:0!important;border:0!important;margin:0!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-search #food-main-action-btn{width:100%!important;max-width:none!important;min-height:40px!important;height:40px!important;border-radius:14px!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-estimate .food-add-actions,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-recipes .food-add-actions{display:none!important;}
-      @media(max-width:760px){
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-context-bar{gap:6px!important;padding:7px 9px!important;border-radius:14px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-current-pill{font-size:12px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-change-btn{height:28px!important;min-height:28px!important;padding:0 10px!important;font-size:10.5px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-choice-btn{height:32px!important;min-height:32px!important;font-size:10.5px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn{height:28px!important;min-height:28px!important;padding:0 8px!important;font-size:10.5px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover{margin-top:6px!important;padding:8px!important;border-radius:15px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover #food-current-meal-card{max-height:min(215px, 30dvh)!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-popover .food-current-meal-list{grid-template-columns:1fr!important;gap:5px!important;}
-      }
-      @media(max-width:430px){
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .fn-meal-current-pill small{display:none!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn .fn-meal-content-text{display:none!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 #fn-meal-content-btn{padding:0 9px!important;}
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
-  function injectStyles(){
-    injectCleanMealContextStyles();
-    if ($('foodnote-add-0160-style')) return;
-    const style = document.createElement('style');
-    style.id = 'foodnote-add-0160-style';
-    style.textContent = `
-      body > #food-add-modal.food-add-modal.fn-add-v0160.is-open{
-        display:flex!important;align-items:center!important;justify-content:center!important;
-        padding:max(10px, env(safe-area-inset-top,0px)) 10px max(10px, env(safe-area-inset-bottom,0px)) 10px!important;
-        box-sizing:border-box!important;overflow:hidden!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-dialog{
-        width:min(1040px, calc(100vw - 20px))!important;max-width:1040px!important;
-        max-height:min(96dvh, calc(100dvh - 16px))!important;height:auto!important;
-        margin:auto!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;
-        border-radius:24px!important;padding:10px!important;background:var(--card)!important;
-        border:1px solid color-mix(in srgb, var(--border2) 88%, transparent)!important;
-        box-shadow:0 26px 80px rgba(0,0,0,.42)!important;
-        box-sizing:border-box!important;transform:none!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-head{
-        flex:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
-        gap:10px!important;min-height:46px!important;margin:0 0 8px 0!important;padding:7px 8px 7px 14px!important;
-        border-radius:18px!important;background:linear-gradient(180deg, color-mix(in srgb, var(--bg2) 96%, transparent), color-mix(in srgb, var(--bg) 88%, transparent))!important;
-        border:1px solid color-mix(in srgb, var(--border2) 84%, transparent)!important;
-        box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;overflow:hidden!important;
-      }
-      #food-add-modal.fn-add-v0160 .fn-add-title{font-weight:950;color:var(--text);font-size:15px;line-height:1.1;padding-left:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-close{
-        position:relative!important;inset:auto!important;margin:0!important;flex:0 0 34px!important;width:34px!important;height:34px!important;
-        min-width:34px!important;min-height:34px!important;border-radius:999px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
-        font-size:24px!important;line-height:1!important;z-index:5!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-body,
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-main{min-height:0!important;flex:1 1 auto!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;width:100%!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-intro{display:none!important;}
-      body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-panel{
-        min-height:0!important;flex:1 1 auto!important;overflow:hidden!important;
-        display:flex!important;flex-direction:column!important;gap:9px!important;width:100%!important;padding:0!important;box-sizing:border-box!important;
-      }
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-estimate .food-add-panel,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-intent-recipes .food-add-panel,
-      body > #food-add-modal.food-add-modal.fn-add-v0160.food-scan-submodal-open .food-add-panel{
-        overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;
-      }
-      #food-add-modal.fn-add-v0160 #food-add-intent-chooser.food-add-intent-chooser{
-        flex:0 0 auto!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin:0!important;position:sticky!important;top:0!important;z-index:4!important;background:linear-gradient(180deg,var(--bg2),color-mix(in srgb,var(--bg2) 82%,transparent))!important;padding:1px 0 4px 0!important;
-      }
-      #food-add-modal.fn-add-v0160 .food-add-intent-btn{
-        min-width:0!important;height:38px!important;min-height:38px!important;border-radius:14px!important;padding:0 8px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;text-align:center!important;background:var(--bg)!important;border:1px solid var(--border2)!important;color:var(--text2)!important;box-shadow:none!important;
-      }
-      #food-add-modal.fn-add-v0160 .food-add-intent-btn.active{background:var(--green-bg)!important;border-color:var(--green)!important;color:var(--text)!important;}
-      #food-add-modal.fn-add-v0160 .food-add-intent-btn b{font-size:12px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-      #food-add-modal.fn-add-v0160 .food-add-intent-icon,
-      #food-add-modal.fn-add-v0160 .food-add-intent-sub{display:none!important;}
-      #food-add-modal.fn-add-v0160 .food-add-mode-panel{display:none!important;flex:0 0 auto!important;border:1px solid var(--border2)!important;background:var(--bg)!important;border-radius:16px!important;padding:9px!important;margin:0!important;box-shadow:none!important;}
-      #food-add-modal.fn-add-v0160.food-intent-search #food-add-search-panel,
-      #food-add-modal.fn-add-v0160.food-intent-estimate #food-add-estimate-panel,
-      #food-add-modal.fn-add-v0160.food-intent-recipes #food-add-recipes-panel{display:block!important;}
-      #food-add-modal.fn-add-v0160 .fn-mode-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-      #food-add-modal.fn-add-v0160 .fn-mode-title strong{font-size:13px;color:var(--text);}
-      #food-add-modal.fn-add-v0160 .fn-mode-title span{font-size:11px;color:var(--text3);}
-      #food-add-modal.fn-add-v0160 .food-add-mode-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-top:8px!important;}
-      #food-add-modal.fn-add-v0160 .food-add-mode-actions button{min-width:0!important;min-height:38px!important;border-radius:13px!important;font-size:12px!important;padding:7px 8px!important;white-space:normal!important;line-height:1.15!important;}
-      #food-add-modal.fn-add-v0160 .fn-estimate-submit-row{display:none!important;margin-top:8px!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate .fn-estimate-submit-row{display:none!important;}
-      #food-add-modal.fn-add-v0160 .fn-estimate-submit{width:100%!important;min-height:42px!important;border-radius:14px!important;font-weight:900!important;}
-      #food-add-modal.fn-add-v0160 .fn-estimate-inline-submit{display:none!important;white-space:nowrap!important;min-height:42px!important;height:42px!important;border-radius:14px!important;padding:0 14px!important;font-weight:900!important;align-items:center!important;justify-content:center!important;}
-      #food-add-modal.fn-add-v0160 .fn-estimate-short{display:none!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate .db-search-wrap{grid-template-columns:minmax(0,1fr) auto!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate #db-qty{display:none!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate .fn-estimate-inline-submit{display:inline-flex!important;}
-      #food-add-modal.fn-add-v0160 .journal-add-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(140px,180px)!important;gap:10px!important;align-items:start!important;width:100%!important;min-width:0!important;overflow:visible!important;}
-      #food-add-modal.fn-add-v0160 .db-autocomplete{width:100%!important;min-width:0!important;display:flex!important;flex-direction:column!important;gap:8px!important;overflow:visible!important;}
-      #food-add-modal.fn-add-v0160 .db-search-wrap{width:100%!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;margin:0!important;min-width:0!important;}
-      #food-add-modal.fn-add-v0160.food-intent-search:not(.fn-barcode-ready) .db-search-wrap{grid-template-columns:minmax(0,1fr)!important;}
-      #food-add-modal.fn-add-v0160.food-intent-search:not(.fn-barcode-ready) #db-qty{display:none!important;}
-      #food-add-modal.fn-add-v0160 #db-search{min-width:0!important;width:100%!important;height:42px!important;min-height:42px!important;border-radius:14px!important;font-size:14px!important;}
-      #food-add-modal.fn-add-v0160 #db-qty{width:86px!important;height:42px!important;min-height:42px!important;border-radius:14px!important;}
-      #food-add-modal.fn-add-v0160 .food-inline-filters{width:100%!important;display:flex;align-items:center;gap:6px!important;flex-wrap:wrap!important;margin:0!important;}
-      #food-add-modal.fn-add-v0160 .food-inline-filters-label{font-size:11px;color:var(--text3);font-weight:800;margin-right:2px;}
-      #food-add-modal.fn-add-v0160 .food-source-chip{height:30px!important;min-height:30px!important;border-radius:999px!important;padding:0 9px!important;font-size:11px!important;}
-      #food-add-modal.fn-add-v0160 .food-add-actions{width:100%!important;display:grid!important;grid-template-columns:minmax(130px,180px) minmax(0,1fr)!important;align-items:stretch!important;gap:8px!important;padding:0!important;border:0!important;overflow:visible!important;}
-      #food-add-modal.fn-add-v0160 .journal-add-btn{width:100%!important;min-height:40px!important;height:40px!important;border-radius:14px!important;}
-      #food-add-modal.fn-add-v0160 .food-add-controls,
-      #food-add-modal.fn-add-v0160 .food-control-section{width:100%!important;min-width:0!important;margin:0!important;padding:0!important;}
-      #food-add-modal.fn-add-v0160 .food-control-label{display:none!important;}
-      #food-add-modal.fn-add-v0160 .food-meal-inline{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;width:100%!important;min-width:0!important;}
-      #food-add-modal.fn-add-v0160 .food-meal-chip{width:100%!important;min-width:0!important;height:40px!important;min-height:40px!important;justify-content:center!important;border-radius:14px!important;padding:0 8px!important;overflow:hidden!important;}
-      #food-add-modal.fn-add-v0160 .food-meal-chip b{min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-size:12px!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate .food-add-actions,
-      #food-add-modal.fn-add-v0160.food-intent-recipes .food-add-actions{display:none!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate .food-inline-filters,
-      #food-add-modal.fn-add-v0160.food-intent-recipes .food-inline-filters,
-      #food-add-modal.fn-add-v0160.food-intent-estimate #db-suggestions,
-      #food-add-modal.fn-add-v0160.food-intent-recipes #db-suggestions,
-      #food-add-modal.fn-add-v0160.food-intent-estimate #db-selected-card,
-      #food-add-modal.fn-add-v0160.food-intent-recipes #db-selected-card{display:none!important;}
-      #food-add-modal.fn-add-v0160.food-intent-recipes .journal-add-row{display:none!important;}
-      /* 0.22.78 — Photo recette : un workflow caméra/crop/OCR ne doit jamais être
-         réinterprété comme un retour à Recherche par les rafraîchissements UI différés. */
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #food-add-search-panel,
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #food-add-estimate-panel,
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #food-add-recipes-panel,
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #food-add-intent-chooser,
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #db-suggestions,
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #db-selected-card{display:none!important;}
-      #food-add-modal.fn-add-v0160.food-add-recipe-mode #ocr-panel{display:block!important;}
-      #food-add-modal.fn-add-v0160 #groq-response,
-      #food-add-modal.fn-add-v0160 #ia-preview,
-      #food-add-modal.fn-add-v0160 #recipe-ai-result,
-      #food-add-modal.fn-add-v0160 #recipe-ocr-result,
-      #food-add-modal.fn-add-v0160 #ocr-result{max-height:none!important;overflow:visible!important;margin:0!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate #groq-response,
-      #food-add-modal.fn-add-v0160.food-intent-estimate #ia-preview{border-radius:16px!important;border:1px solid var(--border2)!important;background:var(--bg)!important;padding:9px!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate.fn-add-estimate-result #food-add-estimate-panel{display:block!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate.fn-add-estimate-result #food-add-intent-chooser{display:grid!important;}
-      #food-add-modal.fn-add-v0160.food-intent-estimate.food-estimate-result-active #food-add-intent-chooser,
-      #food-add-modal.fn-add-v0160.food-intent-estimate.food-estimate-result-active #food-add-estimate-panel,
-      #food-add-modal.fn-add-v0160.food-intent-estimate.food-estimate-result-active .journal-add-row{display:flex!important;}
-      #food-add-modal.fn-add-v0160 .db-quantity-panel.visible{display:grid!important;visibility:visible!important;opacity:1!important;}
-      #food-add-modal.fn-add-v0160 .db-suggestions.visible{max-height:42dvh!important;overflow-y:auto!important;border-radius:16px!important;}
-      @media(max-width:760px){
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-dialog{width:min(520px, calc(100vw - 14px))!important;max-height:min(94dvh, calc(100dvh - 14px))!important;border-radius:20px!important;padding:8px!important;}
-        body > #food-add-modal.food-add-modal.fn-add-v0160 .food-add-panel{gap:7px!important;padding:1px!important;}
-        #food-add-modal.fn-add-v0160 .fn-add-title{font-size:14px;}
-        #food-add-modal.fn-add-v0160 .food-add-intent-btn{height:34px!important;min-height:34px!important;border-radius:12px!important;padding:0 5px!important;}
-        #food-add-modal.fn-add-v0160 .food-add-intent-btn b{font-size:11px!important;}
-        #food-add-modal.fn-add-v0160 .food-add-mode-panel{padding:8px!important;border-radius:15px!important;}
-        #food-add-modal.fn-add-v0160 .fn-mode-title span{display:none!important;}
-        #food-add-modal.fn-add-v0160 .food-add-mode-actions{grid-template-columns:1fr!important;gap:6px!important;}
-        #food-add-modal.fn-add-v0160 .food-add-mode-actions button{min-height:36px!important;font-size:12px!important;}
-        #food-add-modal.fn-add-v0160 .fn-estimate-submit{min-height:38px!important;font-size:12px!important;}
-        #food-add-modal.fn-add-v0160 .db-search-wrap{grid-template-columns:minmax(0,1fr)!important;gap:6px!important;}
-        #food-add-modal.fn-add-v0160.food-intent-search:not(.fn-barcode-ready) #db-qty{display:none!important;}
-        #food-add-modal.fn-add-v0160.food-intent-estimate .db-search-wrap{grid-template-columns:minmax(0,1fr) 74px!important;}
-        #food-add-modal.fn-add-v0160 #db-search{height:38px!important;min-height:38px!important;font-size:13px!important;}
-        #food-add-modal.fn-add-v0160 #db-qty{width:72px!important;height:38px!important;min-height:38px!important;font-size:12px!important;}
-        #food-add-modal.fn-add-v0160 .fn-estimate-inline-submit{height:38px!important;min-height:38px!important;border-radius:13px!important;padding:0 8px!important;font-size:12px!important;}
-        #food-add-modal.fn-add-v0160 .fn-estimate-full{display:none!important;}
-        #food-add-modal.fn-add-v0160 .fn-estimate-short{display:inline!important;}
-        #food-add-modal.fn-add-v0160 .food-source-chip{height:28px!important;min-height:28px!important;font-size:10.5px!important;padding:0 7px!important;}
-        #food-add-modal.fn-add-v0160 .journal-add-row{grid-template-columns:1fr!important;gap:7px!important;}
-        #food-add-modal.fn-add-v0160 .food-add-actions{grid-template-columns:1fr!important;gap:6px!important;}
-        #food-add-modal.fn-add-v0160 .journal-add-btn{height:38px!important;min-height:38px!important;}
-        #food-add-modal.fn-add-v0160 .food-meal-chip{height:36px!important;min-height:36px!important;padding:0 5px!important;}
-        #food-add-modal.fn-add-v0160 .food-meal-chip span{font-size:13px!important;}
-        #food-add-modal.fn-add-v0160 .food-meal-chip b{font-size:11px!important;}
-      }
-      @media(max-height:760px){
-        #food-add-modal.fn-add-v0160 #food-current-meal-card{max-height:150px!important;overflow-y:auto!important;overscroll-behavior:contain!important;}
-      }
-      @media(max-width:380px){
-        #food-add-modal.fn-add-v0160 .food-add-intent-btn span{display:none!important;}
-        #food-add-modal.fn-add-v0160 .food-source-chip span{display:none!important;}
-        #food-add-modal.fn-add-v0160 .food-meal-chip span{display:none!important;}
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   function ensureConfirmBarPlacement(){
     const modal = $('food-add-modal');
@@ -1083,9 +863,8 @@
   }
 
   function init(forceHeavy, options = {}){
-    // Initialisation légère au démarrage : styles + wrappers seulement.
+    // Initialisation légère au démarrage : wrappers seulement.
     // Le rendu complet du popup ne sert que lorsque la popup Ajouter est ouverte.
-    injectStyles();
     wrapFunctions();
     if (forceHeavy || modalIsOpen()) {
       ensureUI();

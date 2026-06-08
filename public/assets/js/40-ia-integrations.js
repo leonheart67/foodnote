@@ -1,4 +1,9 @@
-/* FoodNote beta 0.21.10 — IA / estimation repas via moteur UI fn-ui */
+/*
+ * FoodNote — intégrations IA / Groq.
+ * Rôle : gérer l’estimation texte, le parsing des retours IA, le proxy Groq et le compteur serveur de tokens avec limites Groq visibles.
+ * Gère : modèle choisi, appels Groq texte, prévisualisation IA, résumé SQLite de consommation par modèle.
+ * Ne doit pas gérer : capture caméra/photo plat, écriture SQLite directe, stockage de clé brute côté navigateur si le proxy serveur est disponible.
+ */
 const FOODNOTE_GROQ_DEFAULT_MODEL = 'llama-3.3-70b-versatile';
 
 function fnIAEscape(value) {
@@ -39,6 +44,130 @@ function fnIASafeLocalGet(key, fallback = '') {
 function fnIASafeLocalSet(key, value) {
   try { if (typeof safeLocalSet === 'function') safeLocalSet(key, value); else localStorage.setItem(key, value); } catch(e) {}
 }
+
+// Compteur Groq serveur : partagé entre appareils car il est lu depuis SQLite.
+// Le navigateur ne compte plus lui-même les tokens ; il rafraîchit simplement le résumé serveur.
+const FOODNOTE_GROQ_LIMITS_UPDATED_AT = '2026-05-31';
+let fnIAGroqUsageSummaryCache = null;
+let fnIAGroqUsageLoading = false;
+
+function fnIAUsageNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function fnIANormalizeUsagePayload(usage) {
+  if (!usage || typeof usage !== 'object') return null;
+  const prompt = fnIAUsageNumber(usage.prompt_tokens ?? usage.input_tokens ?? usage.promptTokens ?? usage.inputTokens);
+  const completion = fnIAUsageNumber(usage.completion_tokens ?? usage.output_tokens ?? usage.completionTokens ?? usage.outputTokens);
+  const total = fnIAUsageNumber(usage.total_tokens ?? usage.totalTokens ?? (prompt + completion));
+  const normalized = {
+    prompt_tokens: Math.round(prompt),
+    completion_tokens: Math.round(completion),
+    total_tokens: Math.round(total || prompt + completion)
+  };
+  return normalized.total_tokens > 0 || normalized.prompt_tokens > 0 || normalized.completion_tokens > 0 ? normalized : null;
+}
+function fnIAFormatInt(value) {
+  return Math.round(Number(value) || 0).toLocaleString('fr-FR');
+}
+function fnIAFormatBytes(value) {
+  const bytes = Number(value) || 0;
+  if (!bytes) return '';
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' Ko';
+  return (bytes / 1024 / 1024).toFixed(2).replace('.', ',') + ' Mo';
+}
+function fnIAUsageRatioHtml(used, limit, unitLabel) {
+  const u = Number(used || 0);
+  const l = Number(limit || 0);
+  if (!l) return `<span class="fn-ui-mini-badge">${fnIAFormatInt(u)} / limite inconnue ${fnIAEscape(unitLabel || '')}</span>`;
+  const pct = Math.max(0, Math.min(999, Math.round(u * 1000 / l) / 10));
+  const tone = pct >= 95 ? 'bad' : pct >= 75 ? 'warn' : 'ok';
+  return `<span class="fn-ui-mini-badge fn-ui-mini-badge-${tone}">${fnIAFormatInt(u)} / ${fnIAFormatInt(l)} ${fnIAEscape(unitLabel || '')}</span>`;
+}
+async function fnIALoadGroqUsageSummary(options = {}) {
+  const el = document.getElementById('groq-token-counter');
+  if (fnIAGroqUsageLoading && !options.force) return fnIAGroqUsageSummaryCache;
+  fnIAGroqUsageLoading = true;
+  if (el && !fnIAGroqUsageSummaryCache) el.innerHTML = '<div class="fn-ui-muted">Chargement consommation Groq…</div>';
+  try {
+    const headers = (typeof apiUserHeaders === 'function') ? apiUserHeaders({'Accept':'application/json'}) : {'Accept':'application/json'};
+    const res = await fetch('/api/groq/usage', { headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error(data.error || 'Compteur Groq indisponible');
+    fnIAGroqUsageSummaryCache = data;
+  } catch (e) {
+    fnIAGroqUsageSummaryCache = { ok:false, error:e.message || String(e), total:{calls:0,total_tokens:0,prompt_tokens:0,completion_tokens:0}, models:[] };
+  } finally {
+    fnIAGroqUsageLoading = false;
+    fnIARenderTokenCounter();
+  }
+  return fnIAGroqUsageSummaryCache;
+}
+function fnIARecordGroqUsage(meta = {}) {
+  // Les appels proxy serveur enregistrent déjà usage dans SQLite.
+  // Pour un appel direct navigateur éventuel, on affiche au moins la dernière usage localement puis on retente le résumé serveur.
+  if (meta?.usage_summary && meta.usage_summary.ok) fnIAGroqUsageSummaryCache = meta.usage_summary;
+  setTimeout(() => fnIALoadGroqUsageSummary({ force:true }), 250);
+  return fnIANormalizeUsagePayload(meta.usage || meta);
+}
+function fnIAUsageMinuteLimitsHtml(model) {
+  const tpm = Number(model.limit_tokens_minute || 0);
+  const rpm = Number(model.limit_calls_minute || 0);
+  if (!tpm && !rpm) return '';
+  const bits = [];
+  if (tpm) bits.push(`${fnIAFormatInt(tpm)} TPM`);
+  if (rpm) bits.push(`${fnIAFormatInt(rpm)} RPM`);
+  return `<div class="fn-ui-limit-line fn-ui-limit-line-muted">Limites Groq actuelles : ${bits.join(' · ')}</div>`;
+}
+function fnIAUsageModelRow(model) {
+  const label = model.label || model.model || 'Modèle Groq';
+  const modelId = model.normalized_model || model.model || '';
+  return `<div class="fn-ui-row fn-ui-row--search fn-ui-groq-usage-row">
+    <div class="fn-ui-search-main">
+      <div class="fn-ui-search-title">${fnIAEscape(label)}</div>
+      <div class="fn-ui-search-meta">${fnIAEscape(modelId)}${model.plan ? ' · ' + fnIAEscape(model.plan) : ''}</div>
+      <div class="fn-ui-limit-line">Tokens jour : ${fnIAUsageRatioHtml(model.total_tokens, model.limit_tokens_day, 'tokens')}</div>
+      <div class="fn-ui-limit-line">Appels jour : ${fnIAUsageRatioHtml(model.calls, model.limit_calls_day, 'appels')}</div>
+      ${fnIAUsageMinuteLimitsHtml(model)}
+    </div>
+  </div>`;
+}
+function fnIARenderTokenCounter() {
+  const el = document.getElementById('groq-token-counter');
+  if (!el) return;
+  const data = fnIAGroqUsageSummaryCache;
+  if (!data) {
+    el.innerHTML = '<div class="fn-ui-muted">Chargement consommation Groq…</div>';
+    fnIALoadGroqUsageSummary();
+    return;
+  }
+  if (data.ok === false) {
+    el.innerHTML = `<div class="fn-ui-alert fn-ui-alert-warn"><div class="fn-ui-alert-icon">⚠️</div><div><b>Compteur Groq indisponible</b><p>${fnIAEscape(data.error || 'Erreur inconnue')}</p></div></div>`;
+    return;
+  }
+  const models = Array.isArray(data.models) ? data.models : [];
+  el.innerHTML = `
+    <div class="fn-ui-stack">
+      ${models.length ? models.map(fnIAUsageModelRow).join('') : '<div class="fn-ui-muted">Aucune consommation Groq enregistrée aujourd’hui.</div>'}
+    </div>
+    <p class="fn-ui-muted">Compteur SQLite commun à tous les appareils · limites Groq intégrées datées du ${fnIAEscape(data.limits_updated_at || FOODNOTE_GROQ_LIMITS_UPDATED_AT)}.</p>
+    <div class="fn-ui-actions fn-ui-actions-tight">
+      <button type="button" class="fn-ui-button" onclick="fnIALoadGroqUsageSummary({force:true})">Rafraîchir</button>
+      <button type="button" class="fn-ui-button" onclick="fnIAResetTokenUsage()">Réinitialiser aujourd’hui</button>
+    </div>`;
+}
+async function fnIAResetTokenUsage() {
+  if (!confirm('Réinitialiser le compteur Groq du jour dans SQLite ? Ce sera visible sur tous les appareils.')) return;
+  try {
+    const headers = (typeof apiUserHeaders === 'function') ? apiUserHeaders({'Accept':'application/json'}) : {'Accept':'application/json'};
+    const res = await fetch('/api/groq/usage?scope=today', { method:'DELETE', headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.ok === false) throw new Error(data.error || 'Réinitialisation impossible');
+    fnIAGroqUsageSummaryCache = data;
+    fnIARenderTokenCounter();
+  } catch (e) { alert(e.message || String(e)); }
+}
+
 function fnIAIsPageContext(context) {
   if (context === 'page') return true;
   if (context === 'modal') return false;
@@ -91,6 +220,7 @@ function fnIAGetModel() {
   return model.trim();
 }
 function fnIALoadModel() {
+  fnIARenderTokenCounter();
   const input = document.getElementById('groq-model-input');
   if (!input) return;
   if (!input.value) input.value = fnIASafeLocalGet('groq_model', FOODNOTE_GROQ_DEFAULT_MODEL) || FOODNOTE_GROQ_DEFAULT_MODEL;
@@ -529,7 +659,9 @@ async function callGroqChat(prompt, options = {}) {
       try {
         const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         const data = await groqReadJsonResponse(res, 'Proxy Groq');
-        return (data.response || data.content || data.choices?.[0]?.message?.content || '').trim();
+        const content = (data.response || data.content || data.choices?.[0]?.message?.content || '').trim();
+        fnIARecordGroqUsage({ feature: options.feature || 'IA texte', model: data.model || model, usage: data.usage, usage_summary: data.usage_summary });
+        return content;
       } catch(e) { lastErr = e; if (!String(e.message || e).includes('404')) break; }
     }
     console.warn('Proxy Groq indisponible, essai direct navigateur :', lastErr);
@@ -543,7 +675,9 @@ async function callGroqChat(prompt, options = {}) {
       body:JSON.stringify({ model, messages, temperature, max_tokens:maxTokens })
     });
     const data = await groqReadJsonResponse(res, 'API Groq');
-    return (data.choices?.[0]?.message?.content || '').trim();
+    const content = (data.choices?.[0]?.message?.content || '').trim();
+    fnIARecordGroqUsage({ feature: options.feature || 'IA texte', model: data.model || model, usage: data.usage, usage_summary: data.usage_summary });
+    return content;
   } catch(e) {
     if (String(e?.message || e).includes('Failed to fetch')) throw new Error('Appel Groq bloqué côté navigateur/WebView. Utilise le proxy serveur avec GROQ_API_KEY, ou active FOODNOTE_ALLOW_UI_SECRET_STORAGE=1 pour autoriser la clé serveur depuis l’interface.');
     throw e;
@@ -568,7 +702,7 @@ async function estimerGroqAliment(idx) {
   if (iaStatus) { iaStatus.textContent = '⏳ Requête Groq en cours...'; iaStatus.style.color = 'var(--text4)'; }
 
   try {
-    const reponse = await callGroqChat(prompt, { max_tokens: 80, temperature: 0.1 });
+    const reponse = await callGroqChat(prompt, { max_tokens: 80, temperature: 0.1, feature: 'IA aliment' });
     if (!reponse) throw new Error('Réponse Groq vide.');
     if (iaInput) { iaInput.value = reponse.trim(); iaInput.placeholder = '120 | 5.2 | 15.0 | 4.1'; }
     if (iaStatus) { iaStatus.textContent = '✓ Réponse reçue. Clique sur Appliquer si les valeurs sont OK.'; iaStatus.style.color = 'var(--green)'; }
@@ -808,3 +942,5 @@ let phaseSelected = null; // phase sélectionnée depuis le pool
 
 
 document.addEventListener('DOMContentLoaded', () => { try { fnIALoadModel(); } catch(e) {} });
+
+try { document.addEventListener('DOMContentLoaded', fnIARenderTokenCounter); } catch(e) {}

@@ -1,6 +1,7 @@
 /*
  * FoodNote — profil, phases nutritionnelles et réglages utilisateur.
  * Rôle : gérer les objectifs, le programme de phases, les calculs de profil et les options d’application.
+ * V2 : rend la page Objectif sur une base visuelle commune avec Récap, sans supprimer les hooks existants.
  * Gère : affichage/sauvegarde du profil, templates de phases, préférences d’interface liées au profil.
  * Ne doit pas gérer : champs du Journal, stockage direct SQLite, import CIQUAL/OpenFoodFacts ni orchestration IA de repas.
  */
@@ -1002,76 +1003,107 @@ function renderObjectifShell() {
   if (!page || !UI) return;
   if (page.querySelector('#objectif-ui-root')) return;
 
+  const esc = (v) => String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
   const actionButtons = UI.button('Modifier mes cibles', "showPage('profil', document.getElementById('nav-profil'))", {primary:true})
     + UI.button('Programme phases', "scrollTo('objectif-programme')");
 
-  const targetBadges = `<div class="fn-ui-smart-grid fn-ui-target-grid">
-    <div class="fn-ui-smart-badge fn-ui-smart-badge-mini fn-ui-macro-kcal"><span class="fn-ui-smart-dot">🔥</span><span class="fn-ui-smart-body"><span class="fn-ui-smart-label">Calories</span><strong id="objectif-ui-kcal">—</strong><small>Cible quotidienne</small></span></div>
-    <div class="fn-ui-smart-badge fn-ui-smart-badge-mini fn-ui-macro-prot"><span class="fn-ui-smart-dot">💪</span><span class="fn-ui-smart-body"><span class="fn-ui-smart-label">Protéines</span><strong id="objectif-ui-prot">—</strong><small>Minimum conseillé</small></span></div>
-    <div class="fn-ui-smart-badge fn-ui-smart-badge-mini fn-ui-macro-gluc"><span class="fn-ui-smart-dot">🍞</span><span class="fn-ui-smart-body"><span class="fn-ui-smart-label">Glucides</span><strong id="objectif-ui-gluc">—</strong><small>Énergie disponible</small></span></div>
-    <div class="fn-ui-smart-badge fn-ui-smart-badge-mini fn-ui-macro-lip"><span class="fn-ui-smart-dot">💧</span><span class="fn-ui-smart-body"><span class="fn-ui-smart-label">Lipides</span><strong id="objectif-ui-lip">—</strong><small>Équilibre hormonal</small></span></div>
-  </div>`;
-
-  const methodPanel = `<div class="objectif-method-info-wrap">
-    <details class="objectif-method-info" id="objectif-methode">
-      <summary class="objectif-method-info-button" aria-label="Afficher la méthode de calcul">
-        <span class="objectif-method-i">i</span>
-        <span>Méthode de calcul</span>
-      </summary>
-      <div class="objectif-method-popover" role="note">
-        <div class="objectif-method-popover-head">
-          <strong>Ce que FoodNote calcule</strong>
-          <span>Base scientifique + réglages par phase</span>
-        </div>
-        <div class="objectif-method-grid objectif-method-grid-compact">
-          <div class="objectif-method-box"><div class="objectif-method-title">1. Métabolisme de base</div><div class="objectif-method-text">Équation de Mifflin-St Jeor selon poids, taille, âge et sexe.</div></div>
-          <div class="objectif-method-box"><div class="objectif-method-title">2. Dépense journalière</div><div class="objectif-method-text">TDEE = métabolisme de base × facteur d’activité.</div></div>
-          <div class="objectif-method-box"><div class="objectif-method-title">3. Phase nutritionnelle</div><div class="objectif-method-text">Déficit, maintenance, reverse ou surplus selon ton programme.</div></div>
-          <div class="objectif-method-box"><div class="objectif-method-title">4. Macros</div><div class="objectif-method-text">Protéines et lipides sont basés sur le poids. Les glucides complètent les calories restantes.</div></div>
-        </div>
-        <div id="objectif-current-calc" class="fn-ui-calc-box objectif-current-calc"></div>
-        <div id="objectif-rules-list" class="objectif-rules-list" aria-label="Règles de calcul par phase"></div>
-        <p class="fn-ui-muted objectif-method-note">Ces objectifs restent des estimations : ils servent de point de départ et doivent être ajustés selon l’évolution réelle du poids, l’énergie, la faim, l’entraînement et les résultats observés sur plusieurs semaines.</p>
+  const macroCards = [
+    { macro:'kcal', icon:'🔥', label:'Calories', valueId:'objectif-ui-kcal', sub:'Cible quotidienne' },
+    { macro:'prot', icon:'🍖', label:'Protéines', valueId:'objectif-ui-prot', sub:'Minimum conseillé' },
+    { macro:'gluc', icon:'🍞', label:'Glucides', valueId:'objectif-ui-gluc', sub:'Énergie disponible' },
+    { macro:'lip',  icon:'🥑', label:'Lipides', valueId:'objectif-ui-lip',  sub:'Équilibre hormonal' }
+  ].map(card => `
+    <article class="fn-v2-indicator-card fn-v2-macro-card" data-macro="${esc(card.macro)}">
+      <div class="fn-v2-indicator-icon" aria-hidden="true">${esc(card.icon)}</div>
+      <div class="fn-v2-indicator-copy">
+        <span class="fn-v2-indicator-label">${esc(card.label)}</span>
+        <strong id="${esc(card.valueId)}">—</strong>
+        <small>${esc(card.sub)}</small>
       </div>
-    </details>
-  </div>`;
+    </article>`).join('');
 
-  const phasePanels = `<div class="fn-ui-two-col">
-    ${UI.panel({icon:'🎯', title:'Phase actuelle', subtitle:'Comprendre le rôle de la phase en cours, sans refaire le récap.', children:'<div id="stats-phase" class="fn-ui-stack"></div>'})}
-    ${UI.panel({icon:'📈', title:'Suivi des phases', subtitle:'Progression du programme nutritionnel.', children:'<div id="stats-phases-suivi" class="fn-ui-stack"></div>'})}
-  </div>`;
+  const methodPanel = `
+    <section class="fn-v2-panel fn-v2-method-panel">
+      <details class="fn-v2-details" id="objectif-methode">
+        <summary class="fn-v2-details-summary">
+          <span class="fn-v2-details-icon" aria-hidden="true">🧮</span>
+          <span><strong>Méthode de calcul</strong><small>Formule, activité et règles par phase</small></span>
+          <span class="fn-v2-details-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="fn-v2-details-body">
+          <div class="fn-v2-rule-grid">
+            <div class="fn-v2-rule-card"><b>1. Métabolisme de base</b><span>Équation de Mifflin-St Jeor selon poids, taille, âge et sexe.</span></div>
+            <div class="fn-v2-rule-card"><b>2. Dépense journalière</b><span>TDEE = métabolisme de base × facteur d’activité.</span></div>
+            <div class="fn-v2-rule-card"><b>3. Phase nutritionnelle</b><span>Déficit, maintenance, reverse ou surplus selon ton programme.</span></div>
+            <div class="fn-v2-rule-card"><b>4. Macros</b><span>Protéines et lipides sont basés sur le poids. Les glucides complètent les calories restantes.</span></div>
+          </div>
+          <div id="objectif-current-calc" class="fn-v2-calc-box objectif-current-calc"></div>
+          <div id="objectif-rules-list" class="objectif-rules-list fn-v2-rules-list" aria-label="Règles de calcul par phase"></div>
+          <p class="fn-v2-muted objectif-method-note">Ces objectifs restent des estimations : ils servent de point de départ et doivent être ajustés selon l’évolution réelle du poids, l’énergie, la faim, l’entraînement et les résultats observés sur plusieurs semaines.</p>
+        </div>
+      </details>
+    </section>`;
 
-  const programme = UI.panel({
-    icon:'🗓',
-    title:'Mon programme de phases',
-    subtitle:'Glisse les phases dans l’ordre de ton programme. Sur mobile, garde le doigt appuyé puis déplace.',
-    className:'fn-ui-program-panel',
-    children:`<div class="fn-ui-program-builder" id="objectif-programme-builder">
-      ${UI.sectionHead('Phases disponibles', 'toucher ou glisser')}
-      <div id="phases-pool" class="fn-ui-phase-zone fn-ui-phase-pool"></div>
-      ${UI.sectionHead('Mon programme', 'ordre et durée')}
-      <div id="phases-timeline" class="fn-ui-phase-zone fn-ui-phase-timeline"><div id="phases-hint" class="fn-ui-empty">Glisse tes phases ici</div></div>
-      <div id="phases-bar" class="fn-ui-phase-bar"></div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        ${UI.button('Template sèche', "applyPhaseTemplate('cut')")}
-        ${UI.button('Template recomposition', "applyPhaseTemplate('recomp')")}
-        ${UI.button('Réinitialiser', 'resetPhases()')}
-        ${UI.button('💾 Sauvegarder le programme', 'savePhases()', {primary:true})}
+  const phasePanels = `
+    <div class="fn-v2-two-col">
+      <section class="fn-v2-panel fn-v2-panel-pad">
+        <div class="fn-v2-section-head"><span aria-hidden="true">🎯</span><div><b>Phase actuelle</b><small>Rôle de la phase en cours</small></div></div>
+        <div id="stats-phase" class="fn-v2-stack"></div>
+      </section>
+      <section class="fn-v2-panel fn-v2-panel-pad">
+        <div class="fn-v2-section-head"><span aria-hidden="true">📈</span><div><b>Suivi des phases</b><small>Progression du programme</small></div></div>
+        <div id="stats-phases-suivi" class="fn-v2-stack"></div>
+      </section>
+    </div>`;
+
+  const programme = `
+    <section class="fn-v2-panel fn-v2-panel-pad fn-v2-program-panel" id="objectif-programme">
+      <div class="fn-v2-section-head fn-v2-section-head-large">
+        <span aria-hidden="true">🗓</span>
+        <div><b>Mon programme de phases</b><small>Glisse les phases dans l’ordre de ton programme. Sur mobile, garde le doigt appuyé puis déplace.</small></div>
       </div>
-      <div id="phases-save-status" class="fn-ui-save-status">✓ Programme sauvegardé</div>
-    </div>`
-  });
+      <div class="fn-ui-program-builder fn-v2-program-builder" id="objectif-programme-builder">
+        <div class="fn-v2-subhead"><b>Phases disponibles</b><small>toucher ou glisser</small></div>
+        <div id="phases-pool" class="fn-ui-phase-zone fn-ui-phase-pool"></div>
+        <div class="fn-v2-subhead"><b>Mon programme</b><small>ordre et durée</small></div>
+        <div id="phases-timeline" class="fn-ui-phase-zone fn-ui-phase-timeline"><div id="phases-hint" class="fn-ui-empty">Glisse tes phases ici</div></div>
+        <div id="phases-bar" class="fn-ui-phase-bar"></div>
+        <div class="fn-v2-actions">
+          ${UI.button('Template sèche', "applyPhaseTemplate('cut')")}
+          ${UI.button('Template recomposition', "applyPhaseTemplate('recomp')")}
+          ${UI.button('Réinitialiser', 'resetPhases()')}
+          ${UI.button('💾 Sauvegarder le programme', 'savePhases()', {primary:true})}
+        </div>
+        <div id="phases-save-status" class="fn-ui-save-status">✓ Programme sauvegardé</div>
+      </div>
+    </section>`;
 
-  page.innerHTML = UI.page(`
-    ${UI.panel({icon:'🎯', kicker:'Objectif actif', title:'Objectif & phases', subtitle:'Le plan, la phase actuelle et le suivi du programme. Les statistiques restent dédiées aux résultats.', actions:actionButtons, children:targetBadges})}
-    ${methodPanel}
-    ${phasePanels}
-    ${programme}
-  `, 'fn-ui-objectif-page');
-  const objectifRoot = page.querySelector('.fn-ui-objectif-page');
-  if (objectifRoot) objectifRoot.id = 'objectif-ui-root';
-  const programmePanel = page.querySelector('.fn-ui-program-panel');
-  if (programmePanel) programmePanel.id = 'objectif-programme';
+  page.innerHTML = `
+    <div class="fn-v2-page fn-v2-page-objectif" id="objectif-ui-root">
+      <section class="fn-v2-panel fn-v2-hero">
+        <div class="fn-v2-hero-main">
+          <span class="fn-v2-hero-icon" aria-hidden="true">🎯</span>
+          <div>
+            <span class="fn-v2-kicker">Objectif actif</span>
+            <h1>Objectif & phases</h1>
+            <p>Le plan, la phase actuelle et le suivi du programme. Les statistiques restent dédiées aux résultats.</p>
+          </div>
+        </div>
+        <div class="fn-v2-actions">${actionButtons}</div>
+      </section>
+
+      <section class="fn-v2-panel fn-v2-panel-pad">
+        <div class="fn-v2-section-head">
+          <span aria-hidden="true">🍽️</span>
+          <div><b>Cibles nutritionnelles</b><small>Calories et macros utilisent la même logique visuelle que le Récap</small></div>
+        </div>
+        <div class="fn-v2-indicator-grid">${macroCards}</div>
+      </section>
+
+      ${methodPanel}
+      ${phasePanels}
+      ${programme}
+    </div>`;
 }
 
 function renderObjectifMethod() {

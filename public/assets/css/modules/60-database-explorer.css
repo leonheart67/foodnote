@@ -1,8 +1,7 @@
 /*
- * FoodNote — explorateur des bases alimentaires.
- * Rôle : mettre en forme l'exploration visuelle des sources Starter, CIQUAL et OpenFoodFacts.
- * Gère : accordéons de bases, champs de recherche, lignes résultats et états vides.
- * Ne doit pas gérer : couleurs globales de thème, logique de recherche, sauvegarde SQLite ou import des bases.
+ * FoodNote — bases de données
+ * Rôle : Gérer l’apparence de l’explorateur SQLite, CIQUAL et OpenFoodFacts côté interface.
+ * Ne doit pas gérer : les imports, la base SQLite ou les endpoints serveur.
  */
 
 .fn-db-explorer {
@@ -279,9 +278,7 @@
 }
 
 
-/* Accordéon réutilisable des cartes Bases.
-   Cette règle est volontairement générique : elle sert à l'explorateur comme à Mes aliments,
-   sans design spécifique à une source alimentaire. */
+
 .fn-collapsible-panel {
   overflow: hidden;
 }

@@ -1,6 +1,7 @@
-/* FoodNote beta 0.22.179 — diagnostic runtime aligné
- * Chargé en dernier. Ne remplace pas les modules existants : ajoute version visible,
- * recharge forcée, diagnostic SQLite/auto-backup et checklist non destructive.
+/*
+ * FoodNote — diagnostics runtime
+ * Rôle : Gérer les diagnostics runtime, le badge version et les contrôles non destructifs.
+ * Ne doit pas gérer : l'apparence CSS, les calculs nutritionnels ou la persistance SQLite.
  */
 (function(){
   'use strict';
@@ -13,37 +14,8 @@
   window.FOODNOTE_BUILD = BUILD;
   window.FOODNOTE_APP_LABEL = LABEL;
 
-  const css = `
-    .fn-version-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2,#2a3346);background:var(--bg3,rgba(255,255,255,.06));color:var(--text3,#a9b3c7);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:700;white-space:nowrap}
-    .fn-diagnostics-card{position:relative;overflow:hidden;border:1px solid var(--border2,#263247)}
-    .fn-diagnostics-card:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#16a57a,#7dd3fc,#a78bfa);opacity:.9}
-    .fn-diagnostics-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-    .fn-diagnostics-logo-title{display:flex;align-items:center;gap:10px;min-width:0}
-    .fn-diagnostics-logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#16a57a,#0f766e);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 10px 26px rgba(0,0,0,.20)}
-    .fn-diagnostics-title{font-weight:800;color:var(--text,#f5f7fb);font-size:16px;line-height:1.2}
-    .fn-diagnostics-sub{font-size:12px;color:var(--text3,#a9b3c7);margin-top:2px;line-height:1.35}
-    .fn-diagnostics-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
-    .fn-diagnostics-actions button{font-size:13px;padding:7px 12px}
-    .fn-diagnostics-result{display:none;margin-top:12px;border:1px solid var(--border2,#263247);border-radius:12px;padding:10px;background:var(--bg2,rgba(0,0,0,.13));font-size:12px;color:var(--text3,#a9b3c7)}
-    .fn-diagnostics-result.visible{display:block}
-    .fn-checkline{display:flex;align-items:flex-start;gap:8px;padding:4px 0;line-height:1.35}
-    .fn-check-ok,.fn-check-bad,.fn-check-warn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:999px;font-size:11px;font-weight:800;flex:0 0 18px;margin-top:-1px}
-    .fn-check-ok{background:rgba(22,165,122,.16);color:#21c991}.fn-check-bad{background:rgba(239,68,68,.16);color:#f87171}.fn-check-warn{background:rgba(245,158,11,.16);color:#fbbf24}
-    .fn-check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px 12px;margin-top:6px}
-    .fn-sidebar-version{margin:0 0 8px 0;justify-content:center;width:fit-content;max-width:100%}
-    .sidebar.is-collapsed .fn-sidebar-version{display:none}
-    @media(max-width:720px){.fn-diagnostics-head{align-items:flex-start}.fn-diagnostics-actions{display:grid;grid-template-columns:1fr;gap:7px}.fn-diagnostics-actions button{width:100%}.fn-version-badge{font-size:10px;padding:3px 7px}}
-  `;
-
   function escapeHTML(v){
     return String(v ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-  }
-  function addStyle(){
-    if (document.getElementById('fn-diagnostics-style')) return;
-    const style = document.createElement('style');
-    style.id = 'fn-diagnostics-style';
-    style.textContent = css;
-    document.head.appendChild(style);
   }
   function iconSvg(){
     return '<svg width="21" height="21" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="3" y="9" width="14" height="2.4" rx="1.2" fill="white"/><rect x="3" y="14" width="10" height="2" rx="1" fill="white" opacity="0.72"/><rect x="3" y="5" width="8" height="2" rx="1" fill="white" opacity="0.52"/></svg>';
@@ -156,7 +128,6 @@
     }
   }
   function ensureUI(){
-    addStyle();
     addSidebarBadge();
     ensureCard();
     patchRenderDonnees();

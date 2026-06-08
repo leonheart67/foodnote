@@ -1,18 +1,18 @@
 /*
- * FoodNote — couche Energy Theme.
- * Rôle : renforcer les couleurs, badges, icônes nutrition et gradients visuels.
- * Gère : variables de couleurs, pastilles macro, badges objectif et effets de surface.
- * Ne doit pas gérer : logique JavaScript, données SQLite, imports CIQUAL/OpenFoodFacts ni structure HTML.
+ * FoodNote — thème et surfaces
+ * Rôle : Définir les couleurs de surface, accents visuels et variations clair/sombre conservées dans le rendu validé.
+ * Ne doit pas gérer : un laboratoire de thème runtime ou des expérimentations temporaires.
  */
+
 :root {
-  --fn-energy-green: #74c984;
+  --fn-energy-green: #d08a3e;
   --fn-energy-mint: #58d5b2;
-  --fn-energy-orange: #ffb15f;
+  --fn-energy-orange: #5b8caf;
   --fn-energy-coral: #ff7d6e;
   --fn-energy-pink: #d77ac8;
-  --fn-energy-blue: #7bbff2;
+  --fn-energy-blue: #c15f57;
   --fn-energy-violet: #9d8cff;
-  --fn-energy-yellow: #f2cf66;
+  --fn-energy-yellow: #c79a3f;
   --fn-energy-glow-strong: 0 18px 46px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent);
   --fn-energy-glow-soft: 0 14px 34px color-mix(in srgb, var(--fn-energy-green) 12%, transparent);
 }
@@ -52,10 +52,10 @@ body[data-theme="light"] {
     radial-gradient(circle at 9% -8%, rgba(255, 194, 116, .72) 0, transparent 31vw),
     radial-gradient(circle at 92% 3%, rgba(215, 122, 200, .28) 0, transparent 28vw),
     radial-gradient(circle at 55% 16%, rgba(116, 201, 132, .42) 0, transparent 34vw),
-    linear-gradient(145deg, #fff9ee 0%, #f0f8ee 46%, #f6f1ff 100%) !important;
+    linear-gradient(145deg, var(--fn-ds-surface) 0%, var(--fn-ds-accent-soft) 46%, #f6f1ff 100%) !important;
 }
 
-/* Header et identité : le logo ressort davantage. */
+
 .app-header {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--bg) 80%, var(--fn-energy-page-1) 20%), color-mix(in srgb, var(--bg) 54%, transparent)) !important;
@@ -81,7 +81,7 @@ body[data-theme="light"] {
 .sb-logo-phase,
 #header-subtitle { color: color-mix(in srgb, var(--fn-energy-orange) 32%, var(--text3)) !important; }
 
-/* Surfaces globales : plus lumineuses et plus colorées, sans changer la structure. */
+
 .card,
 .hist-card,
 .macro-ref,
@@ -129,7 +129,7 @@ body[data-theme="light"] {
   border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 24%, var(--border2)) !important;
 }
 
-/* Boutons : le vert reste nutrition, mais avec un vrai relief. */
+
 .btn-primary,
 button.btn-primary,
 .journal-add-btn,
@@ -144,7 +144,7 @@ button:hover,
   border-color: color-mix(in srgb, var(--fn-energy-orange) 22%, var(--border2)) !important;
 }
 
-/* Navigation desktop : actif plus coloré, sans transformer le menu en sapin. */
+
 .sb-item.active,
 .sb-sub-item.active {
   background:
@@ -157,7 +157,7 @@ button:hover,
   background: color-mix(in srgb, var(--fn-energy-orange) 8%, var(--bg2)) !important;
 }
 
-/* Journal : hero et macros plus vivants. */
+
 .journal-hero {
   background:
     radial-gradient(circle at 12% 2%, color-mix(in srgb, var(--fn-energy-green) 30%, transparent) 0, transparent 260px),
@@ -188,7 +188,7 @@ button:hover,
   background: linear-gradient(90deg, color-mix(in srgb, var(--fn-energy-green) 7%, transparent), color-mix(in srgb, var(--fn-energy-orange) 5%, transparent)) !important;
 }
 
-/* Objectifs : la page devient une destination visuelle, pas un formulaire gris. */
+
 #page-objectif.objectif-page {
   position: relative !important;
 }
@@ -227,7 +227,7 @@ button:hover,
   padding: 7px 12px !important;
   border-radius: 999px !important;
   font-size: 12px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   color: color-mix(in srgb, var(--text) 84%, var(--fn-energy-orange) 16%) !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-orange) 22%, var(--bg2)), color-mix(in srgb, var(--fn-energy-green) 12%, var(--bg2))) !important;
   border: 1px solid color-mix(in srgb, var(--fn-energy-orange) 32%, var(--border2)) !important;
@@ -237,7 +237,7 @@ button:hover,
   font-size: clamp(30px, 4.2vw, 52px) !important;
   line-height: .96 !important;
   letter-spacing: -.07em !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   background: linear-gradient(90deg, var(--text), color-mix(in srgb, var(--fn-energy-green) 40%, var(--text)), color-mix(in srgb, var(--fn-energy-orange) 48%, var(--text))) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
@@ -280,7 +280,7 @@ button:hover,
 }
 #page-objectif .stats-commercial-grid { gap: 14px !important; }
 
-/* Récap : on conserve la direction qui fonctionne, on renforce juste les couleurs. */
+
 .recap-badge-compact,
 .journal-dashboard-badge {
   background:
@@ -290,7 +290,7 @@ button:hover,
 }
 .recap-badge-track span { filter: saturate(1.18) !important; }
 
-/* Barre mobile : elle reste bien détachée du reste du design. */
+
 #foodnote-mobile-nav-shell {
   --fn-nav-warm: var(--fn-energy-orange) !important;
   --fn-nav-coral: var(--fn-energy-coral) !important;
@@ -327,16 +327,6 @@ button:hover,
   #page-objectif .profile-name { font-size: 34px !important; }
 }
 
-/* FoodNote beta 0.22.37 — Theme Lab
-   Objectif : garder l'énergie, mais rendre l'accueil plus lisible.
-   - fond global allégé ;
-   - badges/gradients plus expressifs ;
-   - calories mieux intégrées ;
-   - dépassement calories = alerte visuelle ;
-   - protéines atteintes = vraie victoire.
-*/
-
-/* Fond global : moins de nappes colorées massives, plus d'air. */
 body {
   background:
     radial-gradient(circle at 8% -10%, color-mix(in srgb, var(--fn-energy-orange) 14%, transparent) 0, transparent 28vw),
@@ -349,7 +339,7 @@ body[data-theme="light"] {
     radial-gradient(circle at 9% -10%, rgba(255, 194, 116, .32) 0, transparent 29vw),
     radial-gradient(circle at 94% 0%, rgba(215, 122, 200, .13) 0, transparent 26vw),
     radial-gradient(circle at 55% 16%, rgba(116, 201, 132, .20) 0, transparent 32vw),
-    linear-gradient(145deg, #fffaf1 0%, #f6faf2 48%, #f8f5ff 100%) !important;
+    linear-gradient(145deg, var(--fn-ds-surface) 0%, var(--fn-ds-surface-soft) 48%, #f8f5ff 100%) !important;
 }
 @media (max-width: 700px) {
   body {
@@ -360,7 +350,7 @@ body[data-theme="light"] {
   }
 }
 
-/* Badges : gradients plus assumés, mais dans leurs propres cartes. */
+
 .recap-badge-compact,
 .journal-dashboard-badge {
   background:
@@ -382,7 +372,7 @@ body[data-theme="light"] {
   filter: saturate(1.35) contrast(1.06) !important;
 }
 
-/* Accueil : titre non rogné, donc plus de "bjectif". */
+
 #page-journal .fn-orbit-kicker {
   display: inline-block !important;
   padding-left: 2px !important;
@@ -391,7 +381,7 @@ body[data-theme="light"] {
   letter-spacing: .105em !important;
 }
 
-/* Carte nutrition : garde le glass, mais avec plus de qualité visuelle. */
+
 #page-journal .fn-orbit-nutrition-card {
   background:
     radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--fn-energy-green) 15%, transparent), transparent 38%),
@@ -399,7 +389,7 @@ body[data-theme="light"] {
     linear-gradient(145deg, color-mix(in srgb, var(--calm-surface) 86%, var(--fn-energy-card-tint) 14%), color-mix(in srgb, var(--calm-surface) 92%, var(--fn-energy-green) 4%)) !important;
 }
 
-/* Grand bloc Calories : icône + vraie valeur verte, pas noir brutal. */
+
 #page-journal .fn-calorie-ring {
   --fn-kcal-good: color-mix(in srgb, var(--fn-energy-green) 82%, #23784b 18%) !important;
   --fn-kcal-warn: color-mix(in srgb, var(--fn-energy-orange) 80%, #b86c20 20%) !important;
@@ -413,7 +403,7 @@ body[data-theme="light"] {
   color: var(--fn-kcal-good) !important;
   text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-green) 18%, transparent) !important;
 }
-/* État WARN : 60-80% ou 108-120% — couleur ambrée, alerte douce */
+
 #page-journal .fn-calorie-ring.macro-state-warn {
   --macro-color: var(--fn-kcal-warn) !important;
 }
@@ -422,7 +412,7 @@ body[data-theme="light"] {
   color: var(--fn-kcal-warn) !important;
   text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-orange) 18%, transparent) !important;
 }
-/* État BAD : <60% — couleur corail/orange, signale un manque significatif */
+
 #page-journal .fn-calorie-ring.macro-state-bad {
   --macro-color: var(--fn-kcal-bad) !important;
 }
@@ -431,7 +421,7 @@ body[data-theme="light"] {
   color: var(--fn-kcal-bad) !important;
   text-shadow: 0 10px 28px color-mix(in srgb, var(--fn-energy-coral) 16%, transparent) !important;
 }
-/* État NEUTRAL : pas encore de saisie — gris discret */
+
 #page-journal .fn-calorie-ring.macro-state-neutral {
   --macro-color: var(--fn-kcal-neutral) !important;
 }
@@ -475,7 +465,7 @@ body[data-theme="light"] {
   #page-journal .fn-calorie-ring-visual::after { top: 18px !important; width: 30px !important; height: 30px !important; font-size: 15px !important; }
 }
 
-/* Le bloc texte à droite des calories reprend le glass, plus de pavé gris pâle. */
+
 #page-journal .fn-calorie-ring .macro-head,
 #page-journal .fn-calorie-ring .macro-target {
   background:
@@ -502,10 +492,10 @@ body[data-theme="light"] {
   font-size: 18px !important;
 }
 
-/* Dépassement calories : la pilule devient une alerte orange/rouge. */
+
 #page-journal .fn-orbit-status-over,
 #page-journal .fn-orbit-nutrition-card:has(.macro-cell-kcal.macro-state-over) .fn-orbit-status {
-  color: #fff7ed !important;
+  color: var(--fn-ds-surface) !important;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--fn-energy-coral) 86%, #b42318 14%), color-mix(in srgb, var(--fn-energy-orange) 62%, var(--fn-energy-coral) 38%)) !important;
   border-color: color-mix(in srgb, var(--fn-energy-coral) 62%, var(--fn-energy-orange) 38%) !important;
@@ -517,10 +507,10 @@ body[data-theme="light"] {
 }
 #page-journal .fn-orbit-status-ok::before { content: "✓ " !important; }
 
-/* Protéines atteintes : vraie victoire visuelle. */
+
 #page-journal .macro-cell-prot.macro-state-ok .macro-target {
   color: color-mix(in srgb, var(--fn-energy-green) 72%, var(--text) 28%) !important;
-  font-weight: 900 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
 #page-journal .macro-cell-prot.macro-state-ok .macro-target::before {
   content: "✓" !important;
@@ -538,7 +528,7 @@ body[data-theme="light"] {
   vertical-align: -2px !important;
 }
 
-/* Objectifs : logo/header plus assumés + barres colorisées plus visibles. */
+
 #page-objectif .profile-summary-main::before {
   content: "🎯" !important;
   position: absolute !important;
@@ -573,8 +563,7 @@ body[data-theme="light"] {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 26px color-mix(in srgb, var(--fn-energy-orange) 16%, transparent) !important;
 }
 
-/* FoodNote beta 0.22.37 — Theme Lab live preview
-   Les couleurs Badge kcal/prot/gluc/lip pilotent maintenant directement les vrais gradients. */
+
 :root,
 body {
   --fn-badge-gradient-spot: 38%;
@@ -600,7 +589,7 @@ body {
 .journal-dashboard-badge.macro-lip,
 .recap-badge-compact.macro-lip,
 .fn-smart-chip.macro-lip,
-.fn-ui-smart-badge.fn-ui-macro-lip { --badge-accent: var(--fn-badge-lip, #7c83d6) !important; }
+.fn-ui-smart-badge.fn-ui-macro-lip { --badge-accent: var(--fn-badge-lip, #c79a3f) !important; }
 .journal-dashboard-badge.is-ok,
 .recap-badge-compact.is-ok,
 .fn-smart-chip.is-ok,
@@ -632,11 +621,11 @@ body {
   background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent, var(--green)) var(--fn-badge-track-strength, 72%), #fff 6%), var(--badge-accent, var(--green))) !important;
 }
 
-/* FoodNote beta 0.22.56 — CORE final : Accueil macros piloté par tokens, pas par anciens aplats Energy. */
+
 :root {
   --fn-home-macro-surface: var(--card, #fffdf7);
   --fn-home-macro-surface-2: var(--bg2, #fff7ec);
-  --fn-home-macro-signature: var(--fn-energy-green, #74c984);
+  --fn-home-macro-signature: var(--fn-energy-green, #d08a3e);
   --fn-home-macro-aura-strength: 11%;
   --fn-home-macro-category-aura-strength: 7%;
   --fn-home-macro-icon-surface: rgba(255,255,255,.74);
@@ -658,8 +647,8 @@ body {
   --fn-home-gluc-sub-text: var(--fn-home-macro-sub-text);
   --fn-home-lip-sub-text: var(--fn-home-macro-sub-text);
   --fn-home-status-neutral: color-mix(in srgb, var(--text3, #667066) 70%, transparent);
-  --fn-home-status-ok: var(--fn-badge-good, #74c984);
-  --fn-home-status-warn: var(--fn-badge-warn, #ffb15f);
+  --fn-home-status-ok: var(--fn-badge-good, #d08a3e);
+  --fn-home-status-warn: var(--fn-badge-warn, #5b8caf);
   --fn-home-status-bad: var(--red, #d96060);
   --fn-home-status-over: var(--fn-kcal-over, var(--red, #d96060));
   --fn-home-status-neutral-text: var(--fn-home-macro-status-text);
@@ -681,10 +670,10 @@ body {
   padding: 0 !important;
 }
 
-#page-journal .fn-home-macro-grid .macro-cell-kcal { --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, #74c984)) !important; --macro-label-text: var(--fn-home-kcal-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-kcal-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-kcal-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-prot { --macro-color: var(--fn-macro-prot, #63b77b) !important; --macro-label-text: var(--fn-home-prot-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-prot-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-prot-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-gluc { --macro-color: var(--fn-macro-gluc, #d89442) !important; --macro-label-text: var(--fn-home-gluc-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-gluc-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-gluc-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-lip { --macro-color: var(--fn-macro-lip, #8b8ee8) !important; --macro-label-text: var(--fn-home-lip-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-lip-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-lip-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-kcal { --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, var(--fn-ds-accent))) !important; --macro-label-text: var(--fn-home-kcal-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-kcal-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-kcal-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-prot { --macro-color: var(--fn-macro-prot, var(--fn-ds-accent)) !important; --macro-label-text: var(--fn-home-prot-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-prot-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-prot-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-gluc { --macro-color: var(--fn-macro-gluc, var(--fn-ds-warning)) !important; --macro-label-text: var(--fn-home-gluc-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-gluc-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-gluc-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-lip { --macro-color: var(--fn-macro-lip, var(--fn-ds-lip)) !important; --macro-label-text: var(--fn-home-lip-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-lip-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-lip-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
 
 #page-journal .fn-home-macro-grid .fn-macro-home-card {
   --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, #667066) 70%, transparent));
@@ -704,11 +693,11 @@ body {
   border-radius: 26px !important;
   text-align: left !important;
   background:
-    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 58%),
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 58%),
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
-    linear-gradient(145deg, color-mix(in srgb, var(--fn-home-macro-surface, var(--card, #fff)) 92%, white 5%), color-mix(in srgb, var(--fn-home-macro-surface-2, var(--bg2, #fff7ec)) 94%, var(--fn-home-macro-signature, #74c984) 6%)) !important;
-  border: 1px solid color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 22%, var(--border2, rgba(0,0,0,.08))) !important;
-  box-shadow: 0 14px 34px color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 12%, transparent), inset 0 1px 0 rgba(255,255,255,.55) !important;
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-home-macro-surface, var(--card, #fff)) 92%, white 5%), color-mix(in srgb, var(--fn-home-macro-surface-2, var(--bg2, var(--fn-ds-surface))) 94%, var(--fn-home-macro-signature, var(--fn-ds-accent)) 6%)) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 22%, var(--border2, rgba(0,0,0,.08))) !important;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 12%, transparent), inset 0 1px 0 rgba(255,255,255,.55) !important;
   backdrop-filter: blur(14px) saturate(1.05) !important;
   -webkit-backdrop-filter: blur(14px) saturate(1.05) !important;
 }
@@ -716,11 +705,11 @@ body {
 #page-journal .fn-home-macro-grid .fn-macro-home-card::after,
 #page-journal .fn-home-macro-grid .macro-target::before { display: none !important; content: none !important; }
 
-#page-journal .fn-home-macro-grid .macro-state-neutral { --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, #667066) 70%, transparent)) !important; --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-ok { --macro-status-color: var(--fn-home-status-ok, #74c984) !important; --macro-status-text: var(--fn-home-status-ok-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-warn { --macro-status-color: var(--fn-home-status-warn, #ffb15f) !important; --macro-status-text: var(--fn-home-status-warn-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-bad { --macro-status-color: var(--fn-home-status-bad, #d96060) !important; --macro-status-text: var(--fn-home-status-bad-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-over { --macro-status-color: var(--fn-home-status-over, #d96060) !important; --macro-status-text: var(--fn-home-status-over-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-state-neutral { --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, var(--fn-ds-muted)) 70%, transparent)) !important; --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+#page-journal .fn-home-macro-grid .macro-state-ok { --macro-status-color: var(--fn-home-status-ok, var(--fn-ds-accent)) !important; --macro-status-text: var(--fn-home-status-ok-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+#page-journal .fn-home-macro-grid .macro-state-warn { --macro-status-color: var(--fn-home-status-warn, var(--fn-ds-warning)) !important; --macro-status-text: var(--fn-home-status-warn-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+#page-journal .fn-home-macro-grid .macro-state-bad { --macro-status-color: var(--fn-home-status-bad, var(--fn-ds-danger)) !important; --macro-status-text: var(--fn-home-status-bad-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+#page-journal .fn-home-macro-grid .macro-state-over { --macro-status-color: var(--fn-home-status-over, var(--fn-ds-danger)) !important; --macro-status-text: var(--fn-home-status-over-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
 
 #page-journal .fn-home-macro-grid .fn-macro-icon-bubble,
 #page-journal .fn-home-macro-grid .fn-mini-ring {
@@ -740,16 +729,16 @@ body {
   box-shadow: 0 10px 22px color-mix(in srgb, var(--macro-color) 18%, transparent) !important;
 }
 #page-journal .fn-home-macro-grid .fn-mini-ring::before { display: none !important; content: none !important; }
-#page-journal .fn-home-macro-grid .fn-mini-ring span { position: relative !important; z-index: 1 !important; font-size: 20px !important; line-height: 1 !important; color: var(--fn-home-icon-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important; }
+#page-journal .fn-home-macro-grid .fn-mini-ring span { position: relative !important; z-index: 1 !important; font-size: 20px !important; line-height: 1 !important; color: var(--fn-home-icon-text, var(--fn-home-macro-value-text, var(--text, var(--fn-ds-text)))) !important; }
 
 #page-journal .fn-home-macro-grid .fn-macro-copy { grid-column: 2 !important; grid-row: 1 / span 2 !important; min-width: 0 !important; padding-right: 34px !important; }
 #page-journal .fn-home-macro-grid .macro-head { margin: 0 0 7px !important; padding: 0 !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 8px !important; box-shadow: none !important; }
-#page-journal .fn-home-macro-grid .macro-lbl { font-size: 11px !important; line-height: 1.1 !important; letter-spacing: .075em !important; text-transform: uppercase !important; font-weight: 950 !important; color: var(--macro-label-text, var(--fn-home-macro-label-text, var(--text2, #3f463f))) !important; }
-#page-journal .fn-home-macro-grid .macro-val { font-size: clamp(23px, 4.2vw, 34px) !important; line-height: .98 !important; font-weight: 1000 !important; letter-spacing: -.055em !important; color: var(--macro-value-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important; text-shadow: none !important; }
-#page-journal .fn-home-macro-grid .macro-target { margin-top: 7px !important; padding: 0 !important; min-height: 0 !important; display: block !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-size: 11px !important; line-height: 1.25 !important; font-weight: 750 !important; color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3, #667066))) !important; }
+#page-journal .fn-home-macro-grid .macro-lbl { font-size: 11px !important; line-height: 1.1 !important; letter-spacing: .075em !important; text-transform: uppercase !important; font-weight: var(--fn-ds-w-heavy) !important; color: var(--macro-label-text, var(--fn-home-macro-label-text, var(--text2, var(--fn-ds-text-soft)))) !important; }
+#page-journal .fn-home-macro-grid .macro-val { font-size: clamp(23px, 4.2vw, 34px) !important; line-height: .98 !important; font-weight: var(--fn-ds-w-heavy) !important; letter-spacing: -.055em !important; color: var(--macro-value-text, var(--fn-home-macro-value-text, var(--text, var(--fn-ds-text)))) !important; text-shadow: none !important; }
+#page-journal .fn-home-macro-grid .macro-target { margin-top: 7px !important; padding: 0 !important; min-height: 0 !important; display: block !important; background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; font-size: 11px !important; line-height: 1.25 !important; font-weight: var(--fn-ds-w-semibold) !important; color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3, var(--fn-ds-muted)))) !important; }
 
-#page-journal .fn-home-macro-grid .macro-status-badge { position: absolute !important; z-index: 3 !important; top: 13px !important; right: 13px !important; width: 28px !important; height: 28px !important; border-radius: 999px !important; display: grid !important; place-items: center !important; font-size: 14px !important; line-height: 1 !important; font-weight: 1000 !important; color: var(--macro-status-text, var(--fn-home-macro-status-text, #fffdf7)) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color) 86%, white 14%), var(--macro-status-color)) !important; border: 1px solid color-mix(in srgb, var(--macro-status-color) 52%, white 42%) !important; box-shadow: 0 8px 18px color-mix(in srgb, var(--macro-status-color) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important; }
-#page-journal .fn-home-macro-grid .macro-progress { display: block !important; grid-column: 1 / -1 !important; position: absolute !important; z-index: 2 !important; left: 15px !important; right: 15px !important; bottom: 13px !important; height: 6px !important; border-radius: 999px !important; overflow: hidden !important; background: color-mix(in srgb, var(--text, #111827) 10%, transparent) !important; box-shadow: inset 0 1px 2px rgba(0,0,0,.08) !important; }
+#page-journal .fn-home-macro-grid .macro-status-badge { position: absolute !important; z-index: 3 !important; top: 13px !important; right: 13px !important; width: 28px !important; height: 28px !important; border-radius: 999px !important; display: grid !important; place-items: center !important; font-size: 14px !important; line-height: 1 !important; font-weight: var(--fn-ds-w-heavy) !important; color: var(--macro-status-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color) 86%, white 14%), var(--macro-status-color)) !important; border: 1px solid color-mix(in srgb, var(--macro-status-color) 52%, white 42%) !important; box-shadow: 0 8px 18px color-mix(in srgb, var(--macro-status-color) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important; }
+#page-journal .fn-home-macro-grid .macro-progress { display: block !important; grid-column: 1 / -1 !important; position: absolute !important; z-index: 2 !important; left: 15px !important; right: 15px !important; bottom: 13px !important; height: 6px !important; border-radius: 999px !important; overflow: hidden !important; background: color-mix(in srgb, var(--text, var(--fn-ds-text)) 10%, transparent) !important; box-shadow: inset 0 1px 2px rgba(0,0,0,.08) !important; }
 #page-journal .fn-home-macro-grid .macro-progress-fill { display: block !important; height: 100% !important; min-width: 8px !important; border-radius: inherit !important; background: linear-gradient(90deg, color-mix(in srgb, var(--macro-status-color) 76%, white 18%), var(--macro-status-color)) !important; box-shadow: 0 0 18px color-mix(in srgb, var(--macro-status-color) 28%, transparent) !important; }
 #page-journal .fn-home-macro-grid .macro-state-neutral .macro-progress-fill { min-width: 0 !important; }
 
@@ -760,10 +749,10 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   --fn-home-macro-surface-2: rgba(18,23,20,.82);
   --fn-home-macro-icon-surface: rgba(255,255,255,.075);
   background:
-    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 60%),
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 60%),
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
     linear-gradient(145deg, rgba(38,48,41,.80), rgba(19,24,21,.78)) !important;
-  border-color: color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 20%, rgba(255,255,255,.08)) !important;
+  border-color: color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 20%, rgba(255,255,255,.08)) !important;
   box-shadow: 0 16px 38px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.07) !important;
 }
 @media (max-width: 980px) {
@@ -780,8 +769,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   #page-journal .fn-home-macro-grid .macro-val { font-size: clamp(25px, 8vw, 32px) !important; }
 }
 
-/* FoodNote beta 0.22.69 — Programme de phases : la frise est générée par classes,
-   sans couleur sur le wrapper et sans barre décorative sous le titre. */
+
 #page-objectif #objectif-programme::before,
 #page-objectif #objectif-programme-builder::before {
   content: none !important;
@@ -809,8 +797,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   height: 100% !important;
 }
 
-/* FoodNote beta 0.22.70 — Programme de phases : frise lisible, sans debug visuel parasite.
-   La couleur vit uniquement dans les segments; le wrapper reste une piste neutre. */
+
 #page-objectif #objectif-programme::before,
 #page-objectif #objectif-programme-builder::before {
   content: none !important;
@@ -841,7 +828,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   border-right: 1px solid color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 48%, transparent) !important;
   color: color-mix(in srgb, var(--phase-color, var(--fn-energy-green)) 86%, var(--text)) !important;
   font-size: 10px !important;
-  font-weight: 850 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
 }
 #page-objectif .fn-ui-phase-segments i span {
   padding: 0 6px !important;

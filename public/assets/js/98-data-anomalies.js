@@ -1,5 +1,8 @@
-/* FoodNote 0.18.1 — Centre d'anomalies données
-   Signale les anciennes lignes incohérentes sans bloquer l'app. */
+/*
+ * FoodNote — anomalies données runtime
+ * Rôle : Gérer le chargement, l'affichage et les actions du centre d'anomalies.
+ * Ne doit pas gérer : l'apparence CSS, la détection serveur ou les calculs nutritionnels.
+ */
 (function(){
   'use strict';
 
@@ -20,23 +23,10 @@
     if (!resp.ok || (data && data.ok === false)) throw new Error((data && data.error) || label || ('HTTP ' + resp.status));
     return data || {};
   }
-  function injectStyles() {
-    if (document.getElementById('foodnote-anomalies-style')) return;
-    const st = document.createElement('style');
-    st.id = 'foodnote-anomalies-style';
-    st.textContent = `
-      .fn-anomaly-banner{position:fixed;right:18px;bottom:86px;z-index:12500;max-width:min(420px,calc(100vw - 28px));background:var(--card);border:1px solid rgba(245,158,11,.45);box-shadow:0 18px 50px rgba(0,0,0,.28);border-radius:16px;padding:12px 13px;color:var(--text);display:flex;gap:10px;align-items:flex-start}
-      .fn-anomaly-banner-icon{font-size:22px;line-height:1;margin-top:2px}.fn-anomaly-banner-title{font-weight:800;font-size:14px}.fn-anomaly-banner-sub{font-size:12px;color:var(--text3);margin-top:2px;line-height:1.35}.fn-anomaly-banner-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.fn-anomaly-banner-actions button{font-size:12px;padding:5px 10px;border-radius:999px}
-      .fn-anomaly-list{display:flex;flex-direction:column;gap:8px}.fn-anomaly-row{border:1px solid var(--border2);background:var(--bg);border-radius:12px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}.fn-anomaly-row.critical{border-color:rgba(226,75,74,.42)}.fn-anomaly-row.warning{border-color:rgba(245,158,11,.38)}.fn-anomaly-row.focus{outline:2px solid var(--orange);outline-offset:2px}.fn-anomaly-main{min-width:0}.fn-anomaly-title{font-weight:750;font-size:14px}.fn-anomaly-message{font-size:13px;color:var(--text3);margin-top:3px;line-height:1.35}.fn-anomaly-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px;font-size:11px;color:var(--text4)}.fn-anomaly-chip{border:1px solid var(--border2);border-radius:999px;padding:2px 7px;background:var(--card)}.fn-anomaly-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.fn-anomaly-actions button{font-size:12px;padding:5px 9px;border-radius:8px}.fn-anomaly-empty{border:1px dashed var(--border2);border-radius:12px;padding:13px;color:var(--text3);font-size:13px;background:var(--bg)}
-      @media(max-width:700px){.fn-anomaly-banner{left:12px;right:12px;bottom:76px}.fn-anomaly-row{grid-template-columns:1fr}.fn-anomaly-actions{justify-content:flex-start}}
-    `;
-    document.head.appendChild(st);
-  }
   function currentOpenCount() {
     return state.anomalies.filter(a => (a.status || 'open') === 'open').length || Number(state.counts.open || 0) || 0;
   }
   function renderBanner() {
-    injectStyles();
     const count = currentOpenCount();
     let banner = document.getElementById('fn-anomaly-banner');
     if (!count) { if (banner) banner.remove(); return; }
@@ -59,7 +49,6 @@
       </div>`;
   }
   function renderCard() {
-    injectStyles();
     const status = document.getElementById('anomalies-status-box');
     const box = document.getElementById('anomalies-list-box');
     const btn = document.getElementById('btn-anomalies-rescan');
@@ -195,7 +184,6 @@
 
   window.FoodNoteAnomalies = { load, rescan, renderCard, open, focus, mark, openJournal, dismissBanner };
   document.addEventListener('DOMContentLoaded', () => {
-    injectStyles();
     wrapShowPage();
     setTimeout(() => load(), 2600);
   });

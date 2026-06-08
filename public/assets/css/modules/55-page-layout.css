@@ -1,0 +1,151 @@
+/*
+ * FoodNote — layout de pages
+ * Rôle : Gérer les règles transverses de largeur, centrage, animations de page et comportements globaux de mise en page.
+ * Ne doit pas gérer : les composants métier, les repas, la capture alimentaire ou les calculs nutritionnels.
+ */
+
+#page-onboarding { max-width: 520px !important; }
+
+body::before { display: none !important; }
+
+button:hover,
+.sb-item:hover,
+.sb-sub-item:hover,
+.food-card-v2:hover,
+.aliment-row:hover,
+.hist-card:hover { transform: none !important; }
+
+@media (max-width: 700px) {
+  .page:not(#page-onboarding) { max-width: 100% !important; padding-left: 12px !important; padding-right: 12px !important; }
+}
+
+.app-layout,
+.main-content,
+.page,
+.page.active,
+.page-content,
+.content,
+.view,
+.screen {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+
+.sidebar,
+.app-sidebar,
+aside,
+.nav,
+.topbar,
+.app-header,
+header {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.sb-item,
+.sb-sub-item,
+.nav-tab,
+.sidebar a,
+.sidebar button {
+  color: var(--text2) !important;
+}
+
+.sb-item.active,
+.sb-sub-item.active,
+.nav-tab.active,
+.sidebar .active,
+.side-nav .active {
+  background: var(--bg3) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+thead,
+th {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+}
+
+input,
+select,
+textarea,
+.export-box,
+.macro-ref,
+.sport-box,
+.deficit-bar,
+.add-form,
+.food-action-menu,
+.dropdown,
+.modal,
+.modal-content,
+.drawer {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text4) !important;
+}
+
+label,
+small,
+.muted,
+.subtitle,
+.hint,
+.help,
+.card-title,
+.sec-label,
+.add-lbl,
+.qty-unit,
+.macro-lbl,
+.macro-target,
+.food-macro-line,
+.hist-macros,
+.empty-state {
+  color: var(--text3) !important;
+}
+
+button,
+.btn,
+.icon-btn,
+.round-btn,
+.food-action-btn {
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+button:hover,
+.btn:hover,
+.icon-btn:hover,
+.round-btn:hover,
+.food-action-btn:hover {
+  background: var(--bg3) !important;
+}
+
+.btn-primary,
+.fn-ui-button-primary,
+.capture-footer .btn-primary {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: var(--bg) !important;
+}
+
+.btn-danger,
+.food-action-delete {
+  color: var(--red) !important;
+}
+
+a { color: var(--green-dark) !important; }

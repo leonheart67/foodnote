@@ -1,0 +1,46 @@
+/*
+ * FoodNote — app.css
+ * Rôle : Charger les modules CSS dans un ordre explicite et stable.
+ * Ne doit pas gérer : les règles de style détaillées, la logique JavaScript, SQLite, CIQUAL/OpenFoodFacts ou les calculs nutritionnels.
+ */
+
+@import url("./modules/00-foundation-layout.css");
+@import url("./modules/01-nutrition-macros.css");
+@import url("./modules/10-ui-components-core.css");
+@import url("./modules/20-navigation-mobile.css");
+@import url("./modules/30-theme-surfaces.css");
+@import url("./modules/40-add-capture.css");
+@import url("./modules/42-food-add-modal-layout.css");
+@import url("./modules/43-quick-create-food.css");
+@import url("./modules/44-camera-skin.css");
+@import url("./modules/45-camera-crop.css");
+@import url("./modules/46-barcode-flow.css");
+@import url("./modules/50-theme-runtime.css");
+@import url("./modules/51-shell-header-sidebar.css");
+@import url("./modules/52-journal-meals.css");
+@import url("./modules/53-components-forms-panels.css");
+@import url("./modules/54-journal-summary-sticky.css");
+@import url("./modules/55-page-layout.css");
+@import url("./modules/56-recap-dashboard.css");
+@import url("./modules/57-add-capture-states.css");
+@import url("./modules/58-profile-objectives.css");
+@import url("./modules/59-theme-bridges.css");
+@import url("./modules/5a-journal-macro-cards.css");
+@import url("./modules/60-database-explorer.css");
+@import url("./modules/61-notifications-inline.css");
+@import url("./modules/62-diagnostics.css");
+@import url("./modules/63-mqtt-home-assistant.css");
+@import url("./modules/64-recipes.css");
+@import url("./modules/65-data-anomalies.css");
+@import url("./modules/70-design-base.css");
+@import url("./modules/71-design-tokens.css");
+@import url("./modules/72-design-variables.css");
+@import url("./modules/80-typography-page-shell.css");
+@import url("./modules/81-profile-menu.css");
+@import url("./modules/82-journal-sport-carousels.css");
+@import url("./modules/83-recap-objective-pages.css");
+@import url("./modules/84-journal-food-items.css");
+@import url("./modules/85-capture-launcher-buttons.css");
+@import url("./modules/86-mobile-swipe-motion.css");
+@import url("./modules/87-shared-page-components.css");
+@import url("./modules/88-frequent-foods.css");

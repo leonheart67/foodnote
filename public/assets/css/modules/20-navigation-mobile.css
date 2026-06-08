@@ -1,7 +1,8 @@
-/* FoodNote beta 0.22.37 — Mobile Add Dedup
-   Composant mobile dédié : barre basse + bulle d'action.
-   Retouche robuste : les libellés restent lisibles sur la barre pastel,
-   sans modifier le comportement du + ni les moteurs FoodNote. */
+/*
+ * FoodNote — navigation mobile
+ * Rôle : Gérer la barre de navigation basse mobile et ses états visuels.
+ * Ne doit pas gérer : les boutons d’ajout, les pages ou les composants nutritionnels.
+ */
 
 #foodnote-mobile-nav-shell {
   --fn-nav-warm: #ffb26f;
@@ -358,7 +359,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Hub Ajouter mobile */
+
 .fn-mobile-add-head {
   display: flex;
   align-items: flex-end;
@@ -495,14 +496,12 @@
 
 
 
-/* 0.22.144 : sur mobile, le + bas devient l'entrée globale d'ajout.
-   Le hub "Capture alimentaire" du haut reste disponible desktop/tablette, mais il est masqué sur mobile pour éviter le doublon. */
+
 body.foodnote-mobile-nav-enabled #foodnote-capture-launcher {
   display: none !important;
 }
 
-/* 0.22.37 : sur mobile, la barre basse devient l'unique entrée principale d'ajout.
-   On masque les anciens boutons Ajouter du journal uniquement quand le composant mobile est actif. */
+
 body.foodnote-mobile-nav-enabled .floating-add-food-btn,
 body.foodnote-mobile-nav-enabled .journal-bottom-actions.journal-add-only,
 body.foodnote-mobile-nav-enabled .journal-add-only,
@@ -609,11 +608,32 @@ body.foodnote-mobile-nav-enabled .journal-add-dock-btn {
   }
 }
 
-/* 0.22.144 : suppression visuelle définitive des anciens boutons Ajouter desktop.
-   Les entrées gardées sont : hub Capture desktop, + repas contextuels, + bas mobile. */
+
 .floating-add-food-btn,
 .journal-bottom-actions.journal-add-only,
 .journal-add-only,
 .journal-add-dock-btn {
   display: none !important;
+}
+
+
+#foodnote-mobile-nav-shell .fn-mobile-action-choice,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice.is-primary,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice.fn-mobile-action-sport {
+  background: var(--fn-ds-surface-soft) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+}
+#foodnote-mobile-nav-shell .fn-mobile-action-choice:hover,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice:focus-visible {
+  background: var(--fn-ds-surface-muted) !important;
+  border-color: var(--fn-ds-accent) !important;
+}
+#foodnote-mobile-nav-shell .fn-mobile-action-choice i,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice .fn-mobile-nav-emoji,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice.fn-mobile-action-sport i,
+#foodnote-mobile-nav-shell .fn-mobile-action-choice.fn-mobile-action-sport .fn-mobile-nav-emoji {
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  box-shadow: none !important;
+  color: var(--fn-ds-accent-strong) !important;
 }

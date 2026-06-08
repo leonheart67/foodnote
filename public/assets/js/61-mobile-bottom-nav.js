@@ -1,5 +1,8 @@
-/* FoodNote beta 0.22.146 — Mobile Bottom Add Hub
-   Le + mobile devient le hub d'ajout principal : recherche, code-barres, photo, tableau, recette, IA texte + sport. */
+/*
+ * FoodNote — navigation mobile bottom bar
+ * Rôle : Gérer la création DOM et les interactions du hub d'ajout mobile.
+ * Ne doit pas gérer : les règles CSS de navigation, les calculs nutritionnels ou les flux de capture.
+ */
 (function(){
   const BUILD = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
   const NAV_ID = 'foodnote-mobile-nav-shell';
@@ -105,11 +108,11 @@
         <button type="button" class="fn-mobile-nav-btn fn-mobile-nav-add" data-fn-mobile-action="add" aria-haspopup="dialog" aria-expanded="false" aria-controls="foodnote-mobile-action-bubble" aria-label="Ajouter">
           ${icon('ti-plus', '+')}<span>Ajouter</span>
         </button>
-        <button type="button" class="fn-mobile-nav-btn" data-fn-mobile-action="bilan" aria-haspopup="dialog" aria-expanded="false" aria-controls="foodnote-mobile-bilan-sheet" aria-label="Bilan">
-          ${icon('ti-chart-dots-3', '📈')}<span>Bilan</span>
+        <button type="button" class="fn-mobile-nav-btn" data-fn-mobile-page="recap" aria-label="Récap">
+          ${icon('ti-circle-check', '✅')}<span>Récap</span>
         </button>
-        <button type="button" class="fn-mobile-nav-btn" data-fn-mobile-action="menu" aria-label="Menu">
-          ${icon('ti-menu-2', '☰')}<span>Menu</span>
+        <button type="button" class="fn-mobile-nav-btn" data-fn-mobile-page="stats" aria-label="Stats">
+          ${icon('ti-chart-bar', '📊')}<span>Stats</span>
         </button>
       </div>`;
     document.body.appendChild(root);
@@ -299,12 +302,8 @@
     if (!root) return;
     const page = currentPageId();
     root.querySelectorAll('.fn-mobile-nav-btn').forEach(btn => btn.classList.remove('is-active'));
-    const direct = root.querySelector(`[data-fn-mobile-page="${page}"]`);
+    const direct = root.querySelector(`.fn-mobile-nav-bar [data-fn-mobile-page="${page}"]`);
     if (direct) direct.classList.add('is-active');
-    if (page === 'recap' || page === 'stats') {
-      const bilan = root.querySelector('[data-fn-mobile-action="bilan"]');
-      if (bilan) bilan.classList.add('is-active');
-    }
   }
 
   function refresh(){

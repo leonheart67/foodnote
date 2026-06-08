@@ -1,0 +1,139 @@
+/*
+ * FoodNote — états de la modale Ajouter
+ * Rôle : Gérer uniquement les états visuels de la modale Ajouter, OCR, recette et résultats IA.
+ * Ne doit pas gérer : la reconnaissance IA, les appels API ou la construction JavaScript des panneaux.
+ */
+
+
+/* Recherche Ajouter : la visibilité persistante des suggestions est un état CSS, pas un style inline JS. */
+#db-suggestions.visible,
+#db-suggestions[data-foodnote-keep-visible="1"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  height: min(42dvh, 360px) !important;
+  max-height: min(42dvh, 360px) !important;
+  overflow-y: auto !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+#db-suggestions[aria-hidden="true"]:not(.visible):not([data-foodnote-keep-visible="1"]) {
+  display: none;
+}
+
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #food-add-intent-chooser,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #food-add-search-panel,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #food-add-estimate-panel,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #food-add-recipes-panel,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #db-suggestions,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #db-selected-card,
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #db-qty { display:none !important; }
+
+body > #food-add-modal.food-add-modal.food-add-recipe-mode #ocr-panel { display:block !important; }
+
+body > #food-add-modal.food-add-modal.food-add-recipe-ocr-result #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-result { display:block !important; }
+
+body > #food-add-modal.food-add-modal.food-add-recipe-ocr-result #recipe-ai-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-camera #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-camera #recipe-ai-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-crop #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-crop #recipe-ai-result { display:none !important; }
+
+body > #food-add-modal.food-add-modal.food-add-recipe-result #ocr-camera-box,
+body > #food-add-modal.food-add-modal.food-add-recipe-result #recipe-crop-box,
+body > #food-add-modal.food-add-modal.food-add-recipe-ocr-result #recipe-ai-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-processing #ocr-camera-box,
+body > #food-add-modal.food-add-modal.food-add-recipe-processing #recipe-crop-box {
+  display: none !important;
+}
+
+body > #food-add-modal.food-add-modal.food-add-recipe-ocr-result #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ocr-result,
+body > #food-add-modal.food-add-modal.food-add-recipe-ai-result #recipe-ai-result {
+  display: block !important;
+}
+
+.card,
+.panel,
+.fn-ui-panel,
+.fn-ui-card,
+.fn-ui-surface,
+.fn-ui-chart-tile,
+.data-card,
+.stats-card,
+.stats-panel,
+.stats-mini-card,
+.recap-card,
+.recap-smart-card,
+.hist-card,
+.journal-section-card,
+.journal-meals-card,
+.journal-tile-card,
+.database-card,
+.table-card,
+.settings-card,
+.profile-summary-main,
+.recap-hero,
+.stats-hero,
+.journal-hero,
+.recipe-block-panel,
+.recipe-summary-panel,
+.capture-card,
+.capture-panel,
+.food-add-dialog,
+#food-add-modal .journal-add-row,
+#food-add-modal .food-add-head {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row,
+.food-card-v2,
+.food-row,
+.ingredient-row,
+.db-row,
+.table-row,
+.data-row,
+.list-row,
+.recipe-suggestion,
+.recipe-ingredient-row,
+.fn-ui-badge-edit-row,
+.fn-ui-food-row,
+.fn-ui-list-row,
+tbody tr {
+  background: var(--bg2) !important;
+  color: var(--text) !important;
+  border-color: var(--border2) !important;
+}
+
+.aliment-row:hover,
+.food-card-v2:hover,
+.food-row:hover,
+.ingredient-row:hover,
+.db-row:hover,
+.table-row:hover,
+.data-row:hover,
+.list-row:hover,
+.recipe-suggestion:hover,
+.recipe-ingredient-row:hover,
+tbody tr:hover {
+  background: var(--bg3) !important;
+}
+
+.macro-pill,
+.chip,
+.badge,
+.tag,
+.pill,
+.recipe-count-pill,
+.fn-ui-chip,
+.fn-ui-total-pill {
+  background: var(--bg3) !important;
+  color: var(--text2) !important;
+  border-color: var(--border2) !important;
+}

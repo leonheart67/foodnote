@@ -1,11 +1,9 @@
 /*
- * FoodNote — système de rappel intégré au Journal.
- * Rôle : styliser le bilan quotidien, ses rappels et ses actions dans la page.
- * Gère : panneau inline, cartes de rappel, accomplissements, formulaire de bilan rapide.
- * Ne doit pas gérer : logique de calcul des rappels, sauvegarde SQLite, imports CIQUAL/OpenFoodFacts.
+ * FoodNote — notifications inline
+ * Rôle : Gérer les messages inline, alertes non bloquantes et états de retour utilisateur.
+ * Ne doit pas gérer : les toasts système, les erreurs serveur ou la logique métier.
  */
 
-/* Sécurité de migration : les anciennes bulles/modal globales ne doivent plus recouvrir l'app. */
 #fn-notification-badge,
 #fn-notification-modal {
   display: none !important;
@@ -314,4 +312,33 @@
   .fn-daily-status-text {
     white-space: normal !important;
   }
+}
+
+
+/* Toast de sauvegarde : rendu fixe sorti de 70-history-export-storage.js. */
+.fn-save-status {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 999;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s;
+}
+
+.fn-save-status.is-visible {
+  opacity: 1;
+}
+
+.fn-save-status[data-tone="ok"] {
+  background: #e1f5ee;
+  color: #0f6e56;
+}
+
+.fn-save-status[data-tone="warn"] {
+  background: #faeeda;
+  color: #854f0b;
 }

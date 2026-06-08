@@ -1,651 +1,26 @@
 /*
- * FoodNote — couche visuelle Calm.
- * Rôle : apporter le redesign doux et les ajustements d’interface transverses.
- * Gère : cartes, espacements, surfaces Journal/Stats, états visuels et responsive de confort.
- * Ne doit pas gérer : logique JavaScript, données SQLite, imports CIQUAL/OpenFoodFacts ni Theme Lab expérimental.
+ * FoodNote — indicateurs nutritionnels
+ * Rôle : Gérer l’apparence des calories, protéines, glucides, lipides, badges macro et cartes nutritionnelles.
+ * Ne doit pas gérer : la saisie des aliments, les calculs nutritionnels ou les routes serveur.
  */
+
 :root {
-  --calm-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --calm-radius-xl: 28px;
-  --calm-radius-lg: 22px;
-  --calm-radius-md: 16px;
-  --calm-pad-page: clamp(14px, 2.2vw, 30px);
-  --calm-page-max: 1080px;
-  --calm-shadow-soft: 0 18px 50px rgba(0,0,0,.16);
-  --calm-shadow-card: 0 12px 34px rgba(0,0,0,.10);
-  --calm-line: color-mix(in srgb, var(--border) 68%, transparent);
-  --calm-green: #7fb28a;
-  --calm-green-strong: #8ccf99;
-  --calm-mint: rgba(127,178,138,.18);
-  --calm-blue: #8ecae6;
-  --calm-orange: #efb366;
-  --calm-yellow: #e5d86e;
-  --calm-red: #ee8f8f;
-}
-
-body[data-theme="light"] {
-  --bg: #f6f5f0;
-  --bg2: rgba(255,255,249,.92);
-  --bg3: #eeeee7;
-  --bg4: #e5e3da;
-  --text: #263027;
-  --text2: #4e584e;
-  --text3: #7c867b;
-  --text4: #a8afa6;
-  --border: rgba(46,56,44,.10);
-  --border2: rgba(46,56,44,.16);
-  --green: #4f7f5b;
-  --green-dark: #305d3a;
-  --green-bg: #e9f4e9;
-  --green-mid: #cfe6d2;
-  --orange: #b46d1d;
-  --orange-bg: #fff1df;
-  --blue: #4e7890;
-  --blue-bg: #e6f1f4;
-  --red: #b65c5c;
-  --red-bg: #fbebeb;
-  --pill-bg: rgba(78,88,78,.08);
-  --calm-surface: rgba(255,255,249,.82);
-  --calm-surface-strong: rgba(255,255,252,.97);
-  --calm-soft: rgba(234,241,230,.92);
-  --calm-glass: rgba(255,255,249,.72);
-  --calm-shadow-card: 0 12px 36px rgba(65,75,55,.10);
-  --calm-shadow-soft: 0 22px 60px rgba(65,75,55,.16);
-}
-
-body:not([data-theme="light"]),
-body.dark,
-body[data-theme="dark"] {
-  --bg: #151a16;
-  --bg2: rgba(31,38,33,.92);
-  --bg3: #232c25;
-  --bg4: #2d382f;
-  --text: #f2f5ef;
-  --text2: #d7ded5;
-  --text3: #a9b3aa;
-  --text4: #7f897f;
-  --border: rgba(238,245,235,.09);
-  --border2: rgba(238,245,235,.14);
-  --green: #7fb28a;
-  --green-dark: #a6d7ad;
-  --green-bg: rgba(127,178,138,.16);
-  --green-mid: rgba(127,178,138,.28);
-  --orange: #efb366;
-  --orange-bg: rgba(239,179,102,.15);
-  --blue: #8ecae6;
-  --blue-bg: rgba(142,202,230,.14);
-  --red: #ee8f8f;
-  --red-bg: rgba(238,143,143,.13);
-  --pill-bg: rgba(242,245,239,.08);
-  --calm-surface: rgba(30,38,33,.78);
-  --calm-surface-strong: rgba(33,42,36,.96);
-  --calm-soft: rgba(38,48,41,.78);
-  --calm-glass: rgba(28,36,31,.72);
-}
-
-html {
-  background: var(--bg) !important;
-}
-body {
-  font-family: var(--calm-font) !important;
-  background:
-    radial-gradient(circle at 16% -8%, color-mix(in srgb, var(--green) 18%, transparent) 0, transparent 30vw),
-    radial-gradient(circle at 95% 8%, color-mix(in srgb, var(--orange) 12%, transparent) 0, transparent 32vw),
-    linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, var(--green) 6%), var(--bg) 54%, color-mix(in srgb, var(--bg) 92%, #000 8%)) !important;
-  color: var(--text) !important;
-  letter-spacing: -.005em;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-body[data-theme="light"] {
-  background:
-    radial-gradient(circle at 12% -10%, rgba(205,230,204,.95) 0, transparent 30vw),
-    radial-gradient(circle at 92% 4%, rgba(239,215,178,.60) 0, transparent 32vw),
-    linear-gradient(180deg, #f8f7f1 0%, #f3f1eb 58%, #f6f5f0 100%) !important;
-}
-
-/* Layout général : plus premium, largeur uniforme entre les pages */
-.app-layout { min-height: 100vh !important; }
-.main-wrap {
-  background: transparent !important;
-  min-height: 100vh !important;
-}
-.page {
-  width: min(100%, var(--calm-page-max)) !important;
-  max-width: var(--calm-page-max) !important;
-  padding: var(--calm-pad-page) !important;
-}
-.page.active { animation: fnCalmFade .20s ease both; }
-@keyframes fnCalmFade { from { opacity: .01; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .page.active { animation: none !important; } }
-
-.card,
-.hist-card,
-.macro-ref,
-.profile-hero,
-.stats-panel,
-.data-card,
-.sport-box,
-.journal-meals-card,
-.journal-section-card,
-.journal-tile-card,
-.food-add-panel,
-.food-current-meal-card,
-.ocr-panel,
-.barcode-result,
-.recipe-ai-result {
-  background: var(--calm-surface) !important;
-  border: 1px solid var(--calm-line) !important;
-  border-radius: var(--calm-radius-lg) !important;
-  box-shadow: var(--calm-shadow-card) !important;
-  backdrop-filter: blur(16px) saturate(1.06) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.06) !important;
-}
-.card { padding: clamp(16px, 2.2vw, 24px) !important; }
-.card-title,
-.fn-section-title,
-.stats-mini-title {
-  color: var(--text) !important;
-  letter-spacing: -.015em !important;
-  text-transform: none !important;
-  font-weight: 780 !important;
-}
-.card-title { font-size: 14px !important; margin-bottom: 14px !important; }
-label, .add-lbl, .sec-label { color: var(--text3) !important; }
-
-button,
-.btn-primary,
-input,
-select,
-textarea {
-  font-family: var(--calm-font) !important;
-}
-button {
-  border-radius: 999px !important;
-  border: 1px solid var(--calm-line) !important;
-  background: color-mix(in srgb, var(--bg2) 76%, transparent) !important;
-  color: var(--text2) !important;
-}
-button:hover { background: color-mix(in srgb, var(--bg3) 86%, var(--green) 7%) !important; }
-.btn-primary,
-button.btn-primary,
-.journal-add-btn,
-.sport-add-btn {
-  color: #fff !important;
-  border-color: color-mix(in srgb, var(--green) 76%, transparent) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 95%, #133a26), color-mix(in srgb, var(--green) 68%, #7dd3a0)) !important;
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--green) 26%, transparent) !important;
-}
-input[type=text], input[type=number], input[type=date], input[type=password], textarea, select {
-  background: color-mix(in srgb, var(--bg2) 86%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-  border-radius: 16px !important;
-  min-height: 42px;
-  color: var(--text) !important;
-}
-input:focus, textarea:focus, select:focus {
-  border-color: color-mix(in srgb, var(--green) 58%, var(--border2)) !important;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--green) 16%, transparent) !important;
-}
-
-/* Header + sidebar : plus calme, moins panneau technique */
-.app-header {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 150 !important;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, transparent), color-mix(in srgb, var(--bg) 58%, transparent)) !important;
-  border-bottom: 0 !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-}
-.app-header-inner {
-  width: min(100%, calc(var(--calm-page-max) + (var(--calm-pad-page) * 2))) !important;
-  margin: 0 auto !important;
-  padding: 14px var(--calm-pad-page) 8px !important;
-}
-.app-title {
-  font-weight: 850 !important;
-  letter-spacing: -.04em !important;
-  color: var(--text) !important;
-}
-.fn-page-title-icon {
-  display: inline-grid !important;
-  place-items: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 14px !important;
-  background: color-mix(in srgb, var(--green) 14%, var(--bg2)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
-}
-.sidebar {
-  width: 236px !important;
-  background: color-mix(in srgb, var(--bg) 72%, var(--bg2) 28%) !important;
-  border-right: 1px solid var(--calm-line) !important;
-  box-shadow: 12px 0 42px rgba(0,0,0,.10) !important;
-}
-.main-wrap { margin-left: 236px !important; }
-body.sidebar-collapsed .sidebar { width: 74px !important; }
-body.sidebar-collapsed .main-wrap { margin-left: 74px !important; }
-.sb-header { border-bottom: 0 !important; padding: 18px 16px 10px !important; }
-.sb-logo-name {
-  letter-spacing: -.045em !important;
-  font-weight: 900 !important;
-  text-transform: none !important;
-}
-.sb-logo-phase { color: var(--text3) !important; }
-.sb-nav { padding: 10px !important; gap: 5px !important; }
-.sb-section { color: var(--text4) !important; padding: 16px 12px 6px !important; }
-.sb-item,
-.sb-sub-item {
-  border-radius: 16px !important;
-  min-height: 42px !important;
-  color: var(--text3) !important;
-  border: 1px solid transparent !important;
-}
-.sb-item:hover,
-.sb-sub-item:hover { background: color-mix(in srgb, var(--green) 8%, var(--bg2)) !important; color: var(--text) !important; }
-.sb-item.active,
-.sb-sub-item.active {
-  color: var(--text) !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 18%, var(--bg2)), color-mix(in srgb, var(--green) 9%, transparent)) !important;
-  border-color: color-mix(in srgb, var(--green) 22%, transparent) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.10) !important;
-}
-.sb-footer { border-top: 0 !important; padding: 10px 12px 16px !important; }
-.theme-toggle, .sb-user {
-  border-radius: 18px !important;
-  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-}
-
-/* Journal / Accueil : carte hero douce et lisible */
-#page-journal.journal-premium-page {
-  width: min(100%, 1040px) !important;
-  max-width: 1040px !important;
-}
-.journal-hero {
-  position: relative !important;
-  overflow: hidden !important;
-  padding: clamp(16px, 2.4vw, 26px) !important;
-  border-radius: 32px !important;
-  background:
-    radial-gradient(circle at 15% 8%, color-mix(in srgb, var(--green) 18%, transparent) 0, transparent 230px),
-    radial-gradient(circle at 94% 0%, color-mix(in srgb, var(--orange) 13%, transparent) 0, transparent 250px),
-    linear-gradient(135deg, color-mix(in srgb, var(--bg2) 88%, var(--green) 4%), color-mix(in srgb, var(--bg2) 78%, transparent)) !important;
-  border: 1px solid color-mix(in srgb, var(--green) 13%, var(--border)) !important;
-  box-shadow: var(--calm-shadow-soft) !important;
-}
-.journal-hero::before {
-  content: "Aujourd'hui" !important;
-  display: block !important;
-  position: relative !important;
-  inset: auto !important;
-  width: auto !important;
-  height: auto !important;
-  pointer-events: none !important;
-  background: none !important;
-  margin: 2px 0 12px !important;
-  color: var(--text) !important;
-  font-size: clamp(26px, 3.5vw, 42px) !important;
-  line-height: .96 !important;
-  font-weight: 920 !important;
-  letter-spacing: -.06em !important;
-}
-.journal-sticky-summary { top: 62px !important; }
-
-/* Carrousel date : simple, capsule, sans surcharge */
-.journal-day-row-carousel,
-#page-journal .journal-day-row-carousel,
-#page-sport .journal-day-row-carousel {
-  display: grid !important;
-  grid-template-columns: 38px minmax(0, 1fr) 38px 0 40px !important;
-  align-items: stretch !important;
-  gap: 8px !important;
-  margin-bottom: 14px !important;
-}
-.journal-day-carousel,
-#page-journal .journal-day-carousel,
-#page-sport .journal-day-carousel {
-  display: grid !important;
-  grid-template-columns: repeat(5, minmax(54px, 1fr)) !important;
-  gap: 8px !important;
-}
-.journal-day-nav,
-.journal-date-launch {
-  min-height: 58px !important;
-  border-radius: 18px !important;
-  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
-  box-shadow: none !important;
-  color: var(--text3) !important;
-}
-.journal-day-card,
-#page-journal .journal-day-card,
-#page-sport .journal-day-card {
-  min-height: 64px !important;
-  padding: 8px 6px !important;
-  border-radius: 19px !important;
-  display: grid !important;
-  grid-template-rows: auto auto auto !important;
-  place-items: center !important;
-  gap: 2px !important;
-  transform: none !important;
-  opacity: 1 !important;
-  color: var(--text3) !important;
-  background: color-mix(in srgb, var(--bg2) 68%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-  box-shadow: none !important;
-}
-.journal-day-card.active,
-#page-journal .journal-day-card.active,
-#page-sport .journal-day-card.active {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--green) 18%, var(--bg2)), color-mix(in srgb, var(--green) 9%, var(--bg2))) !important;
-  border-color: color-mix(in srgb, var(--green) 34%, var(--border)) !important;
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--green) 18%, transparent) !important;
-}
-.journal-day-card-top {
-  position: absolute !important;
-  top: 8px !important;
-  right: 9px !important;
-  width: auto !important;
-  min-width: 10px !important;
-}
-.journal-day-status-dot, .journal-day-status-empty {
-  width: 6px !important; height: 6px !important;
-}
-.journal-day-status-dot { box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 14%, transparent) !important; }
-.journal-day-card-weekday { font-size: 11px !important; font-weight: 800 !important; color: var(--text3) !important; text-transform: uppercase !important; }
-.journal-day-card-number { font-size: 24px !important; font-weight: 900 !important; color: var(--text) !important; letter-spacing: -.05em !important; }
-.journal-day-card-month { font-size: 10px !important; font-weight: 750 !important; color: var(--text4) !important; }
-.journal-day-card-year,
-.journal-day-card-kcal,
-.journal-day-card-foot,
-.journal-day-card-bars { display: none !important; }
-.journal-day-sport-badge,
-#page-journal .sport-day-badge {
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  padding: 0 !important;
-  font-size: 10px !important;
-  background: color-mix(in srgb, var(--orange) 16%, var(--bg2)) !important;
-}
-
-/* Macro résumé : gardé mais rendu plus léger/premium */
-.journal-floating-macro-card {
-  padding: 0 !important;
-  margin: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.journal-main-macros,
-.journal-main-macros-four {
-  display: grid !important;
-  grid-template-columns: minmax(190px, 1.15fr) repeat(3, minmax(112px, .72fr)) !important;
-  gap: 10px !important;
-  margin: 0 !important;
-}
-.journal-main-macros .macro-cell {
-  position: relative !important;
-  overflow: hidden !important;
-  min-height: 116px !important;
-  border-radius: 24px !important;
-  padding: 16px !important;
-  text-align: left !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  background: color-mix(in srgb, var(--bg2) 76%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-  box-shadow: none !important;
-}
-.journal-main-macros .macro-cell::before {
-  content: "" !important;
-  position: absolute !important;
-  left: 16px !important;
-  right: 16px !important;
-  bottom: 12px !important;
-  top: auto !important;
-  height: 5px !important;
-  border-radius: 999px !important;
-  background: color-mix(in srgb, var(--text4) 22%, transparent) !important;
-  opacity: 1 !important;
-}
-.journal-main-macros .macro-cell::after {
-  content: "";
-  position: absolute;
-  left: 16px; bottom: 12px;
-  width: 48%; height: 5px;
-  border-radius: 999px;
-  background: var(--green);
-}
-.journal-main-macros .macro-cell-kcal::after { width: 58%; background: linear-gradient(90deg, var(--green), var(--calm-green-strong)); }
-.journal-main-macros .macro-cell-prot::after { width: 68%; background: var(--blue); }
-.journal-main-macros .macro-cell-gluc::after { width: 52%; background: var(--orange); }
-.journal-main-macros .macro-cell-lip::after { width: 42%; background: var(--green); }
-.journal-main-macros .macro-head { display: flex !important; align-items: center !important; gap: 8px !important; }
-.journal-main-macros .macro-icon { font-size: 12px !important; opacity: .8; }
-.journal-main-macros .macro-lbl { font-size: 12px !important; color: var(--text3) !important; font-weight: 760 !important; letter-spacing: .01em !important; }
-.journal-main-macros .macro-val {
-  font-size: clamp(25px, 2.8vw, 40px) !important;
-  line-height: 1 !important;
-  font-weight: 920 !important;
-  letter-spacing: -.055em !important;
-  color: var(--text) !important;
-  margin-top: 8px !important;
-}
-.journal-main-macros .macro-target { font-size: 12px !important; color: var(--text3) !important; padding-bottom: 10px !important; }
-
-/* Repas et lignes d'aliments */
-.journal-main-card {
-  margin-top: 14px !important;
-  border-radius: 30px !important;
-  background: color-mix(in srgb, var(--calm-surface) 90%, transparent) !important;
-}
-.journal-meals-head { margin-bottom: 14px !important; }
-.journal-meals-icon,
-.fn-section-icon {
-  display: inline-grid !important;
-  place-items: center !important;
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 13px !important;
-  background: color-mix(in srgb, var(--green) 12%, var(--bg2)) !important;
-}
-.journal-meals-title { font-size: 18px !important; font-weight: 900 !important; }
-.journal-meals-subtitle { color: var(--text3) !important; font-size: 12px !important; }
-.meal-group {
-  border-radius: 22px !important;
-  border: 1px solid var(--calm-line) !important;
-  background: color-mix(in srgb, var(--bg2) 62%, transparent) !important;
-  margin-bottom: 12px !important;
-  box-shadow: none !important;
-}
-.meal-group-head {
-  padding: 13px 14px !important;
-  background: transparent !important;
-  border-bottom: 1px solid var(--calm-line) !important;
-}
-.meal-title, .meal-group-title { font-weight: 850 !important; color: var(--text) !important; }
-.meal-summary, .meal-group-summary { color: var(--text3) !important; }
-.journal-food-row,
-.food-log-row,
-.hist-food-row,
-.aliment-row {
-  border-radius: 16px !important;
-  background: color-mix(in srgb, var(--bg2) 58%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent) !important;
-}
-.food-action-btn, .del-btn, .edit-btn {
-  border-radius: 999px !important;
-  background: color-mix(in srgb, var(--bg3) 64%, transparent) !important;
-}
-.macro-pill, .tag-ok, .tag-warn, .tag-bad, .source-badge {
-  border-radius: 999px !important;
-}
-
-/* Bouton + flottant du journal : style premium et discret */
-.journal-add-only {
-  background: color-mix(in srgb, var(--calm-glass) 92%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--green) 22%, var(--border)) !important;
-  box-shadow: 0 22px 52px rgba(0,0,0,.22) !important;
-  backdrop-filter: blur(20px) saturate(1.12) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.12) !important;
-}
-.journal-add-only .journal-add-dock-btn {
-  min-height: 58px !important;
-  min-width: 168px !important;
-  font-weight: 900 !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--green) 90%, #0b3821), color-mix(in srgb, var(--green) 62%, #a7f3d0)) !important;
-  box-shadow: 0 18px 34px color-mix(in srgb, var(--green) 26%, transparent) !important;
-}
-
-/* Popup ajout aliment : même fonctions, habillage plus calme */
-body > #food-add-modal.food-add-modal {
-  background: rgba(0,0,0,.38) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-}
-body > #food-add-modal.food-add-modal .food-add-dialog {
-  border-radius: 32px !important;
-  border: 1px solid var(--calm-line) !important;
-  background: var(--calm-surface-strong) !important;
-  box-shadow: 0 28px 90px rgba(0,0,0,.38) !important;
-  overflow: hidden !important;
-}
-.food-add-head { background: transparent !important; border: 0 !important; }
-.food-add-close {
-  background: color-mix(in srgb, var(--bg3) 75%, transparent) !important;
-  border-radius: 999px !important;
-}
-.food-add-kicker,
-.food-current-meal-pill,
-.food-source-chip {
-  border-radius: 999px !important;
-}
-.db-search-wrap {
-  border-radius: 20px !important;
-  padding: 6px !important;
-  background: color-mix(in srgb, var(--bg2) 72%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-}
-.db-suggestions {
-  border-radius: 20px !important;
-  background: var(--calm-surface-strong) !important;
-  border: 1px solid var(--calm-line) !important;
-  box-shadow: 0 22px 54px rgba(0,0,0,.24) !important;
-}
-.db-suggestion { padding: 12px 14px !important; }
-
-/* Récap / stats / bases : cohérence visuelle sans retirer de contenu */
-.recap-card,
-.recap-badge,
-.recap-smart-card,
-.stats-card,
-.stats-mini-card,
-.profile-kpi,
-.data-summary-card,
-.unit-weight-row,
-.anomaly-row {
-  border-radius: 22px !important;
-  background: color-mix(in srgb, var(--bg2) 66%, transparent) !important;
-  border: 1px solid var(--calm-line) !important;
-  box-shadow: none !important;
-}
-.profile-kpi-value, .stats-big-number, .recap-main-value {
-  font-weight: 900 !important;
-  letter-spacing: -.045em !important;
-}
-
-/* Tableaux : moins lourds */
-table { border-collapse: separate !important; border-spacing: 0 6px !important; }
-th { border: 0 !important; color: var(--text3) !important; }
-td {
-  border-top: 1px solid var(--calm-line) !important;
-  border-bottom: 1px solid var(--calm-line) !important;
-  background: color-mix(in srgb, var(--bg2) 54%, transparent) !important;
-}
-td:first-child { border-left: 1px solid var(--calm-line) !important; border-radius: 14px 0 0 14px !important; }
-td:last-child { border-right: 1px solid var(--calm-line) !important; border-radius: 0 14px 14px 0 !important; }
-
-/* Mobile */
-@media (max-width: 900px) {
-  .sidebar { width: 236px !important; transform: translateX(-246px) !important; }
-  .sidebar.open { transform: translateX(0) !important; }
-  .main-wrap { margin-left: 0 !important; }
-  body.sidebar-collapsed .main-wrap { margin-left: 0 !important; }
-  .app-header-inner { padding-left: 60px !important; }
-  .sb-toggle {
-    width: 42px !important;
-    height: 42px !important;
-    border-radius: 16px !important;
-    top: 12px !important;
-    left: 12px !important;
-    background: var(--calm-glass) !important;
-    border: 1px solid var(--calm-line) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-  }
-}
-@media (max-width: 700px) {
-  .page { padding: 12px !important; }
-  .app-header-inner { padding-top: 10px !important; padding-bottom: 6px !important; }
-  .app-title { font-size: 19px !important; }
-  .journal-hero { border-radius: 28px !important; padding: 15px !important; }
-  .journal-hero::before { font-size: 32px !important; margin-bottom: 10px !important; }
-  .journal-day-row-carousel,
-  #page-journal .journal-day-row-carousel,
-  #page-sport .journal-day-row-carousel {
-    grid-template-columns: 0 minmax(0, 1fr) 0 0 34px !important;
-    gap: 6px !important;
-  }
-  .journal-day-nav { display: none !important; }
-  .journal-date-launch { min-height: 58px !important; font-size: 14px !important; }
-  .journal-day-carousel { gap: 6px !important; }
-  .journal-day-card,
-  #page-journal .journal-day-card,
-  #page-sport .journal-day-card {
-    min-height: 58px !important;
-    border-radius: 18px !important;
-  }
-  .journal-day-card-number { font-size: 22px !important; }
-  .journal-main-macros,
-  .journal-main-macros-four {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 8px !important;
-  }
-  .journal-main-macros .macro-cell { min-height: 94px !important; padding: 13px !important; border-radius: 21px !important; }
-  .journal-main-macros .macro-cell-kcal { grid-column: 1 / -1 !important; min-height: 108px !important; }
-  .journal-main-macros .macro-val { font-size: 28px !important; }
-  .journal-main-card { border-radius: 26px !important; padding: 14px !important; }
-  .meal-group { border-radius: 20px !important; }
-  body > #food-add-modal.food-add-modal .food-add-dialog { border-radius: 28px 28px 0 0 !important; }
-  body > #food-add-modal.food-add-modal .food-add-body { grid-template-columns: 1fr !important; }
-}
-@media (max-width: 390px) {
-  .journal-main-macros .macro-cell { min-height: 88px !important; }
-  .journal-main-macros .macro-val { font-size: 25px !important; }
-  .journal-day-card-weekday { font-size: 10px !important; }
-  .journal-day-card-number { font-size: 20px !important; }
-}
-
-/* FoodNote 0.19.2 — badges modernes + mini calories/nutriments
-   Badges plus organiques, compacts et lisibles en clair/sombre. */
-:root {
-  --fn-badge-kcal: #75a47a;
-  --fn-badge-prot: #62aee6;
-  --fn-badge-gluc: #e7a84c;
-  --fn-badge-lip: #7fbf8a;
+  --fn-badge-kcal: #d08a3e;
+  --fn-badge-prot: #c15f57;
+  --fn-badge-gluc: #5b8caf;
+  --fn-badge-lip: #c79a3f;
   --fn-badge-info: #8fa4e8;
-  --fn-badge-warn: #e7a84c;
+  --fn-badge-warn: #5b8caf;
   --fn-badge-good: #79b982;
 }
+
 body[data-theme="light"] {
   --fn-badge-surface: rgba(255,255,249,.72);
   --fn-badge-surface-strong: rgba(255,255,252,.92);
   --fn-badge-border: rgba(50,62,49,.10);
   --fn-badge-shadow: 0 10px 28px rgba(72,82,62,.08);
 }
+
 body:not([data-theme="light"]),
 body.dark,
 body[data-theme="dark"] {
@@ -665,6 +40,7 @@ body[data-theme="dark"] {
   padding: 0 !important;
   margin: 12px 0 14px !important;
 }
+
 .journal-dashboard-head,
 .recap-badge-head {
   display: flex !important;
@@ -673,6 +49,7 @@ body[data-theme="dark"] {
   gap: 12px !important;
   margin: 0 0 9px !important;
 }
+
 .journal-dashboard-title,
 .recap-badge-title {
   display: flex !important;
@@ -681,15 +58,17 @@ body[data-theme="dark"] {
   margin: 0 !important;
   font-size: 13px !important;
   line-height: 1.15 !important;
-  font-weight: 850 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
   letter-spacing: -.02em !important;
   color: var(--text) !important;
 }
+
 .recap-badge-help {
   margin-top: 2px !important;
   font-size: 11px !important;
   color: var(--text4) !important;
 }
+
 .journal-dashboard-edit-btn,
 .recap-badge-edit-btn,
 .recap-badge-editor-actions button,
@@ -699,7 +78,7 @@ body[data-theme="dark"] {
   padding: 0 12px !important;
   border-radius: 999px !important;
   font-size: 11px !important;
-  font-weight: 800 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
   color: var(--text2) !important;
   background: color-mix(in srgb, var(--fn-badge-surface-strong) 82%, transparent) !important;
   border: 1px solid var(--fn-badge-border) !important;
@@ -734,6 +113,7 @@ body[data-theme="dark"] {
   backdrop-filter: blur(12px) saturate(1.05) !important;
   -webkit-backdrop-filter: blur(12px) saturate(1.05) !important;
 }
+
 .journal-dashboard-badge::after,
 .recap-badge-compact::after {
   content: "" !important;
@@ -747,8 +127,10 @@ body[data-theme="dark"] {
   opacity: .55 !important;
   pointer-events: none !important;
 }
+
 .journal-dashboard-badge[role="button"],
 .recap-badge-compact[role="button"] { cursor: pointer !important; }
+
 .journal-dashboard-badge[role="button"]:hover,
 .recap-badge-compact[role="button"]:hover {
   transform: translateY(-1px) !important;
@@ -771,6 +153,7 @@ body[data-theme="dark"] {
   border: 1px solid color-mix(in srgb, var(--badge-accent) 20%, var(--fn-badge-border)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.18) !important;
 }
+
 .journal-dashboard-main,
 .recap-badge-text {
   min-width: 0 !important;
@@ -778,6 +161,7 @@ body[data-theme="dark"] {
   flex-direction: column !important;
   gap: 2px !important;
 }
+
 .journal-dashboard-label,
 .recap-badge-top span {
   display: block !important;
@@ -785,13 +169,14 @@ body[data-theme="dark"] {
   color: var(--text4) !important;
   font-size: 10px !important;
   line-height: 1.05 !important;
-  font-weight: 850 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
   letter-spacing: .035em !important;
   text-transform: uppercase !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 .journal-dashboard-value,
 .recap-badge-top strong {
   display: block !important;
@@ -799,12 +184,13 @@ body[data-theme="dark"] {
   color: var(--text) !important;
   font-size: 18px !important;
   line-height: 1.05 !important;
-  font-weight: 930 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.045em !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 .journal-dashboard-sub,
 .recap-badge-sub {
   display: block !important;
@@ -812,11 +198,12 @@ body[data-theme="dark"] {
   color: var(--text3) !important;
   font-size: 10.5px !important;
   line-height: 1.18 !important;
-  font-weight: 680 !important;
+  font-weight: var(--fn-ds-w-medium) !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 .recap-badge-top {
   display: block !important;
   min-width: 0 !important;
@@ -831,6 +218,7 @@ body[data-theme="dark"] {
   overflow: hidden !important;
   background: color-mix(in srgb, var(--text) 8%, transparent) !important;
 }
+
 .journal-dashboard-track span,
 .recap-badge-track span {
   display: block !important;
@@ -841,26 +229,34 @@ body[data-theme="dark"] {
 
 .journal-dashboard-badge.macro-kcal,
 .recap-badge-compact.macro-kcal { --badge-accent: var(--fn-badge-kcal) !important; }
+
 .journal-dashboard-badge.macro-prot,
 .recap-badge-compact.macro-prot { --badge-accent: var(--fn-badge-prot) !important; }
+
 .journal-dashboard-badge.macro-gluc,
 .recap-badge-compact.macro-gluc { --badge-accent: var(--fn-badge-gluc) !important; }
+
 .journal-dashboard-badge.macro-lip,
 .recap-badge-compact.macro-lip { --badge-accent: var(--fn-badge-lip) !important; }
+
 .journal-dashboard-badge.is-ok,
 .recap-badge-compact.is-ok { --badge-accent: var(--fn-badge-good) !important; }
+
 .journal-dashboard-badge.is-warn,
 .recap-badge-compact.is-warn { --badge-accent: var(--fn-badge-warn) !important; }
+
 .journal-dashboard-badge.is-phase,
 .recap-badge-compact.is-phase { --badge-accent: var(--phase-color, var(--green)) !important; }
+
 .journal-dashboard-badge.is-muted,
 .recap-badge-compact.is-muted { opacity: .86 !important; }
+
 .journal-dashboard-badge.trend-down,
 .recap-badge-compact.trend-down { --badge-accent: var(--fn-badge-good) !important; }
+
 .journal-dashboard-badge.trend-up,
 .recap-badge-compact.trend-up { --badge-accent: var(--fn-badge-warn) !important; }
 
-/* Mini calories/nutriments : plus compacts que les badges d'insight */
 .journal-dashboard-badge.macro-kcal,
 .journal-dashboard-badge.macro-prot,
 .journal-dashboard-badge.macro-gluc,
@@ -873,6 +269,7 @@ body[data-theme="dark"] {
   border-radius: 22px !important;
   padding: 9px 10px 8px !important;
 }
+
 .journal-dashboard-badge.macro-kcal .journal-dashboard-value,
 .journal-dashboard-badge.macro-prot .journal-dashboard-value,
 .journal-dashboard-badge.macro-gluc .journal-dashboard-value,
@@ -905,6 +302,7 @@ body[data-theme="dark"] {
   border: 1px solid var(--fn-badge-border) !important;
   background: color-mix(in srgb, var(--fn-badge-surface-strong) 78%, transparent) !important;
 }
+
 .recap-badge-edit-row,
 .journal-dashboard-editor-row {
   border-radius: 16px !important;
@@ -913,14 +311,16 @@ body[data-theme="dark"] {
 }
 
 @media (max-width: 700px) {
-  .journal-dashboard-grid,
+.journal-dashboard-grid,
   .recap-badge-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 7px !important;
   }
-  .journal-dashboard-head,
+
+.journal-dashboard-head,
   .recap-badge-head { margin-bottom: 7px !important; }
-  .journal-dashboard-badge,
+
+.journal-dashboard-badge,
   .recap-badge-compact {
     min-height: 60px !important;
     grid-template-columns: 27px minmax(0, 1fr) !important;
@@ -928,31 +328,36 @@ body[data-theme="dark"] {
     padding: 8px 9px !important;
     border-radius: 20px !important;
   }
-  .journal-dashboard-icon,
+
+.journal-dashboard-icon,
   .recap-badge-icon {
     width: 27px !important;
     height: 27px !important;
     border-radius: 13px !important;
     font-size: 12px !important;
   }
-  .journal-dashboard-label,
+
+.journal-dashboard-label,
   .recap-badge-top span { font-size: 9px !important; }
-  .journal-dashboard-value,
+
+.journal-dashboard-value,
   .recap-badge-top strong { font-size: 15px !important; }
-  .journal-dashboard-sub,
+
+.journal-dashboard-sub,
   .recap-badge-sub { font-size: 9.5px !important; }
-  .journal-dashboard-track,
+
+.journal-dashboard-track,
   .recap-badge-track { height: 4px !important; margin-top: 5px !important; }
 }
+
 @media (max-width: 380px) {
-  .journal-dashboard-grid,
+.journal-dashboard-grid,
   .recap-badge-grid { grid-template-columns: 1fr 1fr !important; }
-  .journal-dashboard-badge,
+
+.journal-dashboard-badge,
   .recap-badge-compact { min-height: 58px !important; }
 }
 
-/* FoodNote 0.19.2 — vrais chips modernes pour Saisie du jour + Récap
-   Les anciennes cartes rectangles restent neutralisées par ces règles chargées en dernier. */
 :root,
 body {
   --fn-chip-surface: color-mix(in srgb, var(--card, #ffffff) 86%, transparent);
@@ -960,6 +365,7 @@ body {
   --fn-chip-border: color-mix(in srgb, var(--border2, #d8ded5) 76%, transparent);
   --fn-chip-shadow: 0 10px 30px rgba(31, 48, 38, .075);
 }
+
 body.dark,
 html[data-theme="dark"] body,
 body[data-theme="dark"] {
@@ -999,11 +405,14 @@ button.fn-smart-chip,
   overflow: hidden !important;
   transform: translateZ(0) !important;
 }
+
 .fn-smart-chip[role="button"] { cursor: pointer !important; }
+
 .fn-smart-chip[role="button"]:hover {
   transform: translateY(-1px) translateZ(0) !important;
   border-color: color-mix(in srgb, var(--badge-accent) 38%, var(--fn-chip-border)) !important;
 }
+
 .fn-smart-chip::after,
 .journal-dashboard-badge.fn-smart-chip::after,
 .recap-badge-compact.fn-smart-chip::after {
@@ -1022,6 +431,7 @@ button.fn-smart-chip,
   align-items: center !important;
   gap: 7px !important;
 }
+
 .fn-smart-chip-insight,
 .journal-dashboard-badge.fn-smart-chip-insight,
 .recap-badge-compact.fn-smart-chip-insight {
@@ -1049,7 +459,9 @@ button.fn-smart-chip,
   border: 1px solid color-mix(in srgb, var(--badge-accent) 28%, var(--fn-chip-border)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.18) !important;
 }
+
 .fn-smart-chip-insight .fn-chip-dot { width: 30px !important; height: 30px !important; min-width: 30px !important; }
+
 .fn-chip-body,
 .journal-dashboard-main.fn-chip-body,
 .recap-badge-text.fn-chip-body {
@@ -1058,20 +470,22 @@ button.fn-smart-chip,
   min-width: 0 !important;
   gap: 1px !important;
 }
+
 .fn-chip-label,
 .journal-dashboard-label.fn-chip-label,
 .recap-badge-top .fn-chip-label {
   display: block !important;
-  color: var(--text4, #7e897f) !important;
+  color: var(--text4, var(--fn-ds-muted)) !important;
   font-size: 9px !important;
   line-height: 1 !important;
-  font-weight: 900 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   text-transform: uppercase !important;
   letter-spacing: .04em !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
+
 .fn-chip-value,
 .journal-dashboard-value.fn-chip-value,
 .recap-badge-top .fn-chip-value {
@@ -1079,25 +493,28 @@ button.fn-smart-chip,
   color: var(--text, #253029) !important;
   font-size: 15px !important;
   line-height: 1.05 !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.04em !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
+
 .fn-smart-chip-insight .fn-chip-value { font-size: 16px !important; }
+
 .fn-chip-sub,
 .journal-dashboard-sub.fn-chip-sub,
 .recap-badge-sub.fn-chip-sub {
   display: block !important;
-  color: var(--text3, #647066) !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
   font-size: 9.5px !important;
   line-height: 1.12 !important;
-  font-weight: 720 !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
+
 .fn-chip-ring {
   --p: 0%;
   width: 32px !important;
@@ -1109,6 +526,7 @@ button.fn-smart-chip,
   position: relative !important;
   flex-shrink: 0 !important;
 }
+
 .fn-chip-ring::before {
   content: "" !important;
   width: 24px !important;
@@ -1118,14 +536,16 @@ button.fn-smart-chip,
   position: absolute !important;
   inset: 4px !important;
 }
+
 .fn-chip-ring span {
   position: relative !important;
   z-index: 1 !important;
   font-size: 8.5px !important;
-  font-weight: 950 !important;
-  color: var(--text3, #647066) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
   line-height: 1 !important;
 }
+
 .fn-chip-progress {
   display: block !important;
   width: 100% !important;
@@ -1135,6 +555,7 @@ button.fn-smart-chip,
   overflow: hidden !important;
   background: color-mix(in srgb, var(--text) 8%, transparent) !important;
 }
+
 .fn-chip-progress i {
   display: block !important;
   height: 100% !important;
@@ -1142,20 +563,29 @@ button.fn-smart-chip,
   background: linear-gradient(90deg, color-mix(in srgb, var(--badge-accent) 65%, white 8%), var(--badge-accent)) !important;
 }
 
-.fn-smart-chip.macro-kcal { --badge-accent: var(--fn-badge-kcal, #f59e0b) !important; }
-.fn-smart-chip.macro-prot { --badge-accent: var(--fn-badge-prot, #7c9f47) !important; }
-.fn-smart-chip.macro-gluc { --badge-accent: var(--fn-badge-gluc, #d18c2f) !important; }
-.fn-smart-chip.macro-lip { --badge-accent: var(--fn-badge-lip, #7c83d6) !important; }
-.fn-smart-chip.is-ok { --badge-accent: var(--fn-badge-good, #6fa66a) !important; }
-.fn-smart-chip.is-warn { --badge-accent: var(--fn-badge-warn, #c9863a) !important; }
-.fn-smart-chip.is-phase { --badge-accent: var(--phase-color, var(--green)) !important; }
-.fn-smart-chip.trend-down { --badge-accent: var(--fn-badge-good, #6fa66a) !important; }
-.fn-smart-chip.trend-up { --badge-accent: var(--fn-badge-warn, #c9863a) !important; }
+.fn-smart-chip.macro-kcal { --badge-accent: var(--fn-badge-kcal, #d08a3e) !important; }
 
-@media(max-width:700px){
-  .journal-dashboard-grid,
+.fn-smart-chip.macro-prot { --badge-accent: var(--fn-badge-prot, #c15f57) !important; }
+
+.fn-smart-chip.macro-gluc { --badge-accent: var(--fn-badge-gluc, #5b8caf) !important; }
+
+.fn-smart-chip.macro-lip { --badge-accent: var(--fn-badge-lip, #c79a3f) !important; }
+
+.fn-smart-chip.is-ok { --badge-accent: var(--fn-badge-good, var(--fn-ds-accent)) !important; }
+
+.fn-smart-chip.is-warn { --badge-accent: var(--fn-badge-warn, var(--fn-ds-warning)) !important; }
+
+.fn-smart-chip.is-phase { --badge-accent: var(--phase-color, var(--green)) !important; }
+
+.fn-smart-chip.trend-down { --badge-accent: var(--fn-badge-good, var(--fn-ds-accent)) !important; }
+
+.fn-smart-chip.trend-up { --badge-accent: var(--fn-badge-warn, var(--fn-ds-warning)) !important; }
+
+@media (max-width:700px) {
+.journal-dashboard-grid,
   .recap-badge-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important; }
-  .fn-smart-chip-mini,
+
+.fn-smart-chip-mini,
   .journal-dashboard-badge.fn-smart-chip-mini,
   .recap-badge-compact.fn-smart-chip-mini {
     min-height: 44px !important;
@@ -1163,21 +593,27 @@ button.fn-smart-chip,
     padding: 7px 8px !important;
     gap: 6px !important;
   }
-  .fn-smart-chip-insight,
+
+.fn-smart-chip-insight,
   .journal-dashboard-badge.fn-smart-chip-insight,
   .recap-badge-compact.fn-smart-chip-insight {
     min-height: 54px !important;
     padding: 9px !important;
   }
-  .fn-chip-dot { width: 26px !important; height: 26px !important; min-width: 26px !important; font-size: 12px !important; }
-  .fn-chip-ring { width: 29px !important; height: 29px !important; }
-  .fn-chip-ring::before { inset: 4px !important; width: 21px !important; height: 21px !important; }
-  .fn-chip-label { font-size: 8.5px !important; }
-  .fn-chip-value { font-size: 14px !important; }
-  .fn-chip-sub { font-size: 9px !important; }
+
+.fn-chip-dot { width: 26px !important; height: 26px !important; min-width: 26px !important; font-size: 12px !important; }
+
+.fn-chip-ring { width: 29px !important; height: 29px !important; }
+
+.fn-chip-ring::before { inset: 4px !important; width: 21px !important; height: 21px !important; }
+
+.fn-chip-label { font-size: 8.5px !important; }
+
+.fn-chip-value { font-size: 14px !important; }
+
+.fn-chip-sub { font-size: 9px !important; }
 }
 
-/* FoodNote 0.19.3 — anneau calories central + nutriments satellites */
 #page-journal .fn-orbit-nutrition-card {
   --fn-ring-track: color-mix(in srgb, var(--text, #111827) 9%, transparent);
   --fn-card-glow: color-mix(in srgb, var(--green, #7aa86e) 17%, transparent);
@@ -1187,11 +623,12 @@ button.fn-smart-chip,
   border-radius: 30px !important;
   overflow: hidden !important;
   background:
-    radial-gradient(circle at 50% 10%, color-mix(in srgb, var(--green, #7aa86e) 14%, transparent), transparent 42%),
+    radial-gradient(circle at 50% 10%, color-mix(in srgb, var(--green, var(--fn-ds-accent)) 14%, transparent), transparent 42%),
     linear-gradient(145deg, color-mix(in srgb, var(--surface, var(--card)) 94%, white 4%), color-mix(in srgb, var(--surface2, var(--bg)) 96%, var(--green) 4%)) !important;
-  border: 1px solid color-mix(in srgb, var(--text, #111827) 10%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--text, var(--fn-ds-text)) 10%, transparent) !important;
   box-shadow: 0 20px 50px color-mix(in srgb, #000 13%, transparent) !important;
 }
+
 body.dark #page-journal .fn-orbit-nutrition-card,
 body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
   --fn-ring-track: rgba(255,255,255,.10);
@@ -1202,6 +639,7 @@ body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
   border-color: rgba(255,255,255,.09) !important;
   box-shadow: 0 24px 60px rgba(0,0,0,.38) !important;
 }
+
 #page-journal .fn-orbit-card-top {
   display:flex !important;
   align-items:flex-start !important;
@@ -1209,31 +647,35 @@ body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
   gap: 12px !important;
   margin-bottom: 8px !important;
 }
+
 #page-journal .fn-orbit-kicker {
   font-size: 11px !important;
   letter-spacing: .12em !important;
-  text-indent: .12em !important; /* compense le letter-spacing pour ne pas couper le O de "Objectif" */
+  text-indent: .12em !important; 
   text-transform: uppercase !important;
-  color: var(--text3, #647066) !important;
-  font-weight: 850 !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
+  font-weight: var(--fn-ds-w-bold) !important;
 }
+
 #page-journal .fn-orbit-title {
   margin-top: 2px !important;
   font-size: 18px !important;
   line-height: 1.1 !important;
-  font-weight: 950 !important;
-  color: var(--text, #111827) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--text, var(--fn-ds-text)) !important;
 }
+
 #page-journal .fn-orbit-status {
   padding: 7px 10px !important;
   border-radius: 999px !important;
   font-size: 11px !important;
-  font-weight: 900 !important;
-  color: color-mix(in srgb, var(--green, #7aa86e) 75%, var(--text) 25%) !important;
-  background: color-mix(in srgb, var(--green, #7aa86e) 13%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--green, #7aa86e) 20%, transparent) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: color-mix(in srgb, var(--green, var(--fn-ds-accent)) 75%, var(--text) 25%) !important;
+  background: color-mix(in srgb, var(--green, var(--fn-ds-accent)) 13%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--green, var(--fn-ds-accent)) 20%, transparent) !important;
   white-space: nowrap !important;
 }
+
 #page-journal .fn-orbit-macros,
 #page-journal .journal-main-macros.fn-orbit-macros {
   display: grid !important;
@@ -1247,16 +689,19 @@ body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
   background: transparent !important;
   padding: 0 !important;
 }
+
 #page-journal .fn-orbit-macros .macro-cell {
   min-width: 0 !important;
   border: 0 !important;
   box-shadow: none !important;
   isolation: isolate !important;
 }
+
 #page-journal .fn-orbit-macros .macro-cell::before,
 #page-journal .fn-orbit-macros .macro-cell::after {
   display:none !important;
 }
+
 #page-journal .fn-calorie-ring {
   grid-area: calorie !important;
   --macro-color: var(--fn-calorie-accent, #72a56c) !important;
@@ -1272,6 +717,7 @@ body[data-theme="dark"] #page-journal .fn-orbit-nutrition-card {
     color-mix(in srgb, var(--card, #fff) 80%, var(--macro-color) 7%) !important;
   border: 1px solid color-mix(in srgb, var(--macro-color) 20%, var(--text) 7%) !important;
 }
+
 body.dark #page-journal .fn-calorie-ring,
 body[data-theme="dark"] #page-journal .fn-calorie-ring {
   background:
@@ -1279,6 +725,7 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring {
     rgba(255,255,255,.045) !important;
   border-color: rgba(255,255,255,.08) !important;
 }
+
 #page-journal .fn-calorie-ring-visual {
   width: min(218px, 58vw) !important;
   height: min(218px, 58vw) !important;
@@ -1292,6 +739,7 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring {
     0 18px 42px color-mix(in srgb, var(--macro-color) 18%, transparent) !important;
   position: relative !important;
 }
+
 #page-journal .fn-calorie-ring-visual::before {
   content:"" !important;
   position:absolute !important;
@@ -1302,53 +750,62 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring {
     var(--card, #fff) !important;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 7%, transparent) !important;
 }
+
 body.dark #page-journal .fn-calorie-ring-visual::before,
 body[data-theme="dark"] #page-journal .fn-calorie-ring-visual::before {
   background: linear-gradient(145deg, #202822, #151a17) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.07) !important;
 }
+
 #page-journal .fn-calorie-ring-inner {
   position: relative !important;
   z-index: 2 !important;
   display: grid !important;
   place-items: center !important;
 }
+
 #page-journal .fn-calorie-ring .macro-val,
 #page-journal .fn-calorie-ring #m-kcal {
   font-size: clamp(36px, 11vw, 58px) !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.06em !important;
   line-height: .9 !important;
-  color: var(--text, #111827) !important;
+  color: var(--text, var(--fn-ds-text)) !important;
 }
+
 #page-journal .fn-ring-unit {
   margin-top: 4px !important;
   font-size: 12px !important;
-  font-weight: 900 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: .12em !important;
   text-transform: uppercase !important;
-  color: var(--text3, #6b7280) !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
 }
+
 #page-journal .fn-calorie-ring .macro-head {
   margin: 0 !important;
   justify-content: center !important;
   gap: 6px !important;
 }
+
 #page-journal .fn-calorie-ring .macro-head .macro-icon {
   color: var(--macro-color) !important;
   text-shadow: 0 0 18px color-mix(in srgb, var(--macro-color) 44%, transparent) !important;
 }
+
 #page-journal .fn-calorie-ring .macro-lbl {
   font-size: 13px !important;
-  font-weight: 950 !important;
-  color: var(--text2, #3f463f) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--text2, var(--fn-ds-text-soft)) !important;
 }
+
 #page-journal .fn-calorie-ring .macro-target {
   font-size: 12px !important;
-  color: var(--text3, #6b7280) !important;
-  font-weight: 750 !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
   margin-top: -2px !important;
 }
+
 #page-journal .fn-macro-satellite {
   --macro-color: var(--green, #7aa86e);
   min-height: 86px !important;
@@ -1359,17 +816,22 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring-visual::before {
   align-items: center !important;
   gap: 11px !important;
   background:
-    linear-gradient(145deg, color-mix(in srgb, var(--card, #fff) 78%, var(--macro-color) 8%), color-mix(in srgb, var(--bg, #f6f5f1) 82%, var(--macro-color) 5%)) !important;
+    linear-gradient(145deg, color-mix(in srgb, var(--card, #fff) 78%, var(--macro-color) 8%), color-mix(in srgb, var(--bg, var(--fn-ds-surface-soft)) 82%, var(--macro-color) 5%)) !important;
   border: 1px solid color-mix(in srgb, var(--macro-color) 20%, var(--text) 7%) !important;
 }
+
 body.dark #page-journal .fn-macro-satellite,
 body[data-theme="dark"] #page-journal .fn-macro-satellite {
   background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.03)) !important;
   border-color: rgba(255,255,255,.08) !important;
 }
-#page-journal .fn-macro-satellite.macro-cell-prot { grid-area: prot !important; --macro-color: var(--fn-macro-prot, #63b77b) !important; }
-#page-journal .fn-macro-satellite.macro-cell-gluc { grid-area: gluc !important; --macro-color: var(--fn-macro-gluc, #d89442) !important; }
-#page-journal .fn-macro-satellite.macro-cell-lip { grid-area: lip !important; --macro-color: var(--fn-macro-lip, #8b8ee8) !important; }
+
+#page-journal .fn-macro-satellite.macro-cell-prot { grid-area: prot !important; --macro-color: var(--fn-macro-prot, var(--fn-ds-accent)) !important; }
+
+#page-journal .fn-macro-satellite.macro-cell-gluc { grid-area: gluc !important; --macro-color: var(--fn-macro-gluc, var(--fn-ds-warning)) !important; }
+
+#page-journal .fn-macro-satellite.macro-cell-lip { grid-area: lip !important; --macro-color: var(--fn-macro-lip, var(--fn-ds-lip)) !important; }
+
 #page-journal .fn-mini-ring {
   width: 48px !important;
   height: 48px !important;
@@ -1380,6 +842,7 @@ body[data-theme="dark"] #page-journal .fn-macro-satellite {
   background: conic-gradient(var(--macro-color) var(--macro-pct, 0%), var(--fn-ring-track) 0) !important;
   flex: none !important;
 }
+
 #page-journal .fn-mini-ring::before {
   content:"" !important;
   position:absolute !important;
@@ -1387,73 +850,92 @@ body[data-theme="dark"] #page-journal .fn-macro-satellite {
   border-radius: inherit !important;
   background: var(--card, #fff) !important;
 }
+
 body.dark #page-journal .fn-mini-ring::before,
 body[data-theme="dark"] #page-journal .fn-mini-ring::before {
   background: #1d231f !important;
 }
+
 #page-journal .fn-mini-ring span {
   position: relative !important;
   z-index: 1 !important;
   font-size: 17px !important;
   filter: saturate(.92) !important;
 }
+
 #page-journal .fn-macro-copy { min-width:0 !important; }
+
 #page-journal .fn-macro-satellite .macro-head {
   margin: 0 0 1px !important;
   display:block !important;
 }
+
 #page-journal .fn-macro-satellite .macro-lbl {
   font-size: 11px !important;
   letter-spacing: .06em !important;
   text-transform: uppercase !important;
-  color: var(--text3, #667066) !important;
-  font-weight: 900 !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-journal .fn-macro-satellite .macro-val {
   font-size: 22px !important;
   line-height: 1 !important;
-  font-weight: 1000 !important;
-  color: var(--text, #111827) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--text, var(--fn-ds-text)) !important;
   letter-spacing: -.04em !important;
 }
+
 #page-journal .fn-macro-satellite .macro-target {
   margin-top: 4px !important;
   font-size: 11px !important;
   line-height: 1.15 !important;
-  color: var(--text3, #667066) !important;
-  font-weight: 700 !important;
+  color: var(--text3, var(--fn-ds-muted)) !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
 }
+
 #page-journal .fn-orbit-macros .macro-progress {
   display:none !important;
 }
+
 #page-journal .fn-orbit-insights {
   max-width: 760px !important;
   margin: 10px auto 0 !important;
 }
+
 #page-journal .fn-orbit-insights .journal-dashboard-grid,
 #page-journal .fn-orbit-insights.recap-badge-grid {
   gap: 8px !important;
 }
+
 #page-journal .fn-orbit-insights .fn-smart-chip,
 #page-journal .fn-orbit-insights .journal-dashboard-badge {
   border-radius: 999px !important;
   min-height: 38px !important;
 }
+
 @media (min-width: 920px) {
-  #page-journal .fn-orbit-nutrition-card { padding: 18px !important; }
-  #page-journal .fn-orbit-macros { grid-template-columns: minmax(300px, 1.05fr) minmax(240px, .95fr) !important; }
-  #page-journal .fn-calorie-ring { min-height: 304px !important; }
+#page-journal .fn-orbit-nutrition-card { padding: 18px !important; }
+
+#page-journal .fn-orbit-macros { grid-template-columns: minmax(300px, 1.05fr) minmax(240px, .95fr) !important; }
+
+#page-journal .fn-calorie-ring { min-height: 304px !important; }
 }
+
 @media (max-width: 760px) {
-  #page-journal .fn-orbit-nutrition-card {
+#page-journal .fn-orbit-nutrition-card {
     margin: 10px auto 8px !important;
     padding: 13px !important;
     border-radius: 26px !important;
   }
-  #page-journal .fn-orbit-card-top { margin-bottom: 10px !important; }
-  #page-journal .fn-orbit-title { font-size: 16px !important; }
-  #page-journal .fn-orbit-status { font-size: 10.5px !important; padding: 6px 9px !important; }
-  #page-journal .fn-orbit-macros,
+
+#page-journal .fn-orbit-card-top { margin-bottom: 10px !important; }
+
+#page-journal .fn-orbit-title { font-size: 16px !important; }
+
+#page-journal .fn-orbit-status { font-size: 10.5px !important; padding: 6px 9px !important; }
+
+#page-journal .fn-orbit-macros,
   #page-journal .journal-main-macros.fn-orbit-macros {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     grid-template-areas:
@@ -1461,18 +943,22 @@ body[data-theme="dark"] #page-journal .fn-mini-ring::before {
       "prot gluc lip" !important;
     gap: 8px !important;
   }
-  #page-journal .fn-calorie-ring {
+
+#page-journal .fn-calorie-ring {
     min-height: 244px !important;
     border-radius: 24px !important;
     padding: 12px !important;
   }
-  #page-journal .fn-calorie-ring-visual {
+
+#page-journal .fn-calorie-ring-visual {
     width: min(190px, 54vw) !important;
     height: min(190px, 54vw) !important;
   }
-  #page-journal .fn-calorie-ring .macro-val,
+
+#page-journal .fn-calorie-ring .macro-val,
   #page-journal .fn-calorie-ring #m-kcal { font-size: clamp(34px, 13vw, 48px) !important; }
-  #page-journal .fn-macro-satellite {
+
+#page-journal .fn-macro-satellite {
     min-height: 116px !important;
     grid-template-columns: 1fr !important;
     place-items: center !important;
@@ -1481,21 +967,30 @@ body[data-theme="dark"] #page-journal .fn-mini-ring::before {
     border-radius: 20px !important;
     padding: 9px 7px !important;
   }
-  #page-journal .fn-mini-ring { width: 42px !important; height: 42px !important; }
-  #page-journal .fn-mini-ring::before { inset: 5px !important; }
-  #page-journal .fn-mini-ring span { font-size: 15px !important; }
-  #page-journal .fn-macro-satellite .macro-lbl { font-size: 9.5px !important; }
-  #page-journal .fn-macro-satellite .macro-val { font-size: 17px !important; }
-  #page-journal .fn-macro-satellite .macro-target { font-size: 9.5px !important; }
-}
-@media (max-width: 390px) {
-  #page-journal .fn-calorie-ring { min-height: 224px !important; }
-  #page-journal .fn-calorie-ring-visual { width: 168px !important; height: 168px !important; }
-  #page-journal .fn-macro-satellite { min-height: 104px !important; padding: 8px 5px !important; }
-  #page-journal .fn-macro-satellite .macro-val { font-size: 15px !important; }
+
+#page-journal .fn-mini-ring { width: 42px !important; height: 42px !important; }
+
+#page-journal .fn-mini-ring::before { inset: 5px !important; }
+
+#page-journal .fn-mini-ring span { font-size: 15px !important; }
+
+#page-journal .fn-macro-satellite .macro-lbl { font-size: 9.5px !important; }
+
+#page-journal .fn-macro-satellite .macro-val { font-size: 17px !important; }
+
+#page-journal .fn-macro-satellite .macro-target { font-size: 9.5px !important; }
 }
 
-/* FoodNote 0.19.4 — orbite équilibrée : suppression du vide à droite du bloc calories */
+@media (max-width: 390px) {
+#page-journal .fn-calorie-ring { min-height: 224px !important; }
+
+#page-journal .fn-calorie-ring-visual { width: 168px !important; height: 168px !important; }
+
+#page-journal .fn-macro-satellite { min-height: 104px !important; padding: 8px 5px !important; }
+
+#page-journal .fn-macro-satellite .macro-val { font-size: 15px !important; }
+}
+
 #page-journal .fn-orbit-nutrition-card {
   max-width: 880px !important;
 }
@@ -1575,24 +1070,27 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
 }
 
 @media (min-width: 1080px) {
-  #page-journal .fn-orbit-nutrition-card {
+#page-journal .fn-orbit-nutrition-card {
     max-width: 940px !important;
   }
-  #page-journal .fn-orbit-macros,
+
+#page-journal .fn-orbit-macros,
   #page-journal .journal-main-macros.fn-orbit-macros {
     grid-template-columns: minmax(390px, 1.18fr) minmax(260px, .82fr) !important;
   }
-  #page-journal .fn-calorie-ring-visual {
+
+#page-journal .fn-calorie-ring-visual {
     width: 238px !important;
     height: 238px !important;
   }
 }
 
 @media (max-width: 760px) {
-  #page-journal .fn-orbit-nutrition-card {
+#page-journal .fn-orbit-nutrition-card {
     max-width: min(100%, 520px) !important;
   }
-  #page-journal .fn-orbit-macros,
+
+#page-journal .fn-orbit-macros,
   #page-journal .journal-main-macros.fn-orbit-macros {
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     grid-template-areas:
@@ -1600,7 +1098,8 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
       "prot gluc lip" !important;
     gap: 8px !important;
   }
-  #page-journal .fn-calorie-ring {
+
+#page-journal .fn-calorie-ring {
     min-height: 204px !important;
     padding: 12px !important;
     grid-template-columns: minmax(150px, 44%) minmax(118px, 1fr) !important;
@@ -1610,24 +1109,30 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
     column-gap: 12px !important;
     border-radius: 24px !important;
   }
-  #page-journal .fn-calorie-ring-visual {
+
+#page-journal .fn-calorie-ring-visual {
     width: clamp(146px, 42vw, 184px) !important;
     height: clamp(146px, 42vw, 184px) !important;
   }
-  #page-journal .fn-calorie-ring .macro-val,
+
+#page-journal .fn-calorie-ring .macro-val,
   #page-journal .fn-calorie-ring #m-kcal {
     font-size: clamp(31px, 9.6vw, 44px) !important;
   }
-  #page-journal .fn-ring-unit {
+
+#page-journal .fn-ring-unit {
     font-size: 10.5px !important;
   }
-  #page-journal .fn-calorie-ring .macro-head {
+
+#page-journal .fn-calorie-ring .macro-head {
     padding: 10px 10px 3px !important;
   }
-  #page-journal .fn-calorie-ring .macro-lbl {
+
+#page-journal .fn-calorie-ring .macro-lbl {
     font-size: 14px !important;
   }
-  #page-journal .fn-calorie-ring .macro-target {
+
+#page-journal .fn-calorie-ring .macro-target {
     min-height: 62px !important;
     padding: 4px 10px 10px !important;
     font-size: 11px !important;
@@ -1635,7 +1140,7 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
 }
 
 @media (max-width: 390px) {
-  #page-journal .fn-calorie-ring {
+#page-journal .fn-calorie-ring {
     grid-template-columns: 1fr !important;
     grid-template-areas:
       "ring"
@@ -1644,16 +1149,19 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
     text-align: center !important;
     min-height: 0 !important;
   }
-  #page-journal .fn-calorie-ring-visual {
+
+#page-journal .fn-calorie-ring-visual {
     width: 168px !important;
     height: 168px !important;
   }
-  #page-journal .fn-calorie-ring .macro-head {
+
+#page-journal .fn-calorie-ring .macro-head {
     justify-content: center !important;
     border-radius: 18px 18px 8px 8px !important;
     width: 100% !important;
   }
-  #page-journal .fn-calorie-ring .macro-target {
+
+#page-journal .fn-calorie-ring .macro-target {
     justify-content: center !important;
     text-align: center !important;
     min-height: auto !important;
@@ -1662,9 +1170,6 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
   }
 }
 
-/* FoodNote beta 0.22.51 — Accueil : cartes calories/macros pilotées par les vrais tokens Macro.
-   Le vieux glass RGB figé est remplacé par --macro-color : le laboratoire couleur peut
-   modifier Calories / Protéines / Glucides / Lipides sans dépendre des tokens Badge. */
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.fn-calorie-ring,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.fn-macro-satellite,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.fn-calorie-ring,
@@ -1676,7 +1181,7 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
     radial-gradient(circle at 0% 0%, rgba(255,255,255,.52) 0, transparent 42%),
     linear-gradient(135deg,
       color-mix(in srgb, var(--card, #fff) 90%, var(--macro-color, var(--fn-macro-kcal, var(--green))) 10%),
-      color-mix(in srgb, var(--bg, #f6f5f1) 88%, var(--macro-color, var(--fn-macro-kcal, var(--green))) 12%)) !important;
+      color-mix(in srgb, var(--bg, var(--fn-ds-surface-soft)) 88%, var(--macro-color, var(--fn-macro-kcal, var(--green))) 12%)) !important;
   border: 1px solid color-mix(in srgb, var(--macro-color, var(--fn-macro-kcal, var(--green))) 32%, var(--border2, transparent)) !important;
   box-shadow:
     0 16px 38px color-mix(in srgb, var(--macro-color, var(--fn-macro-kcal, var(--green))) 16%, transparent),
@@ -1689,19 +1194,22 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.fn-calorie-ring,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-kcal,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-kcal {
-  --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, #74c984)) !important;
+  --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, #d08a3e)) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-prot,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-prot {
-  --macro-color: var(--fn-macro-prot, #7bbff2) !important;
+  --macro-color: var(--fn-macro-prot, #c15f57) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-gluc,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-gluc {
-  --macro-color: var(--fn-macro-gluc, #ffb15f) !important;
+  --macro-color: var(--fn-macro-gluc, #5b8caf) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-lip,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.macro-cell-lip {
-  --macro-color: var(--fn-macro-lip, #f2cf66) !important;
+  --macro-color: var(--fn-macro-lip, #c79a3f) !important;
 }
 
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-orbit-macros .macro-cell.fn-calorie-ring::before,
@@ -1754,6 +1262,7 @@ body[data-theme="dark"] #page-journal .fn-calorie-ring .macro-target {
     inset 0 1px 0 rgba(255,255,255,.48),
     inset 0 0 0 1px rgba(255,255,255,.28) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-mini-ring,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-mini-ring {
   box-shadow:
@@ -1789,32 +1298,36 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   opacity: .9 !important;
 }
 
-/* FoodNote beta 0.22.53 — Récap intelligent : design cartes conservé, édition intégrée */
 #page-journal #journal-dashboard-badges.foodnote-smart-dashboard,
 #page-recap #recap-metrics.foodnote-smart-dashboard-metrics {
   display: grid !important;
 }
+
 #page-journal .foodnote-smart-dashboard {
   max-width: 860px !important;
   margin: 12px auto 14px !important;
 }
+
 .foodnote-smart-dashboard--metric {
   margin: 12px 0 14px !important;
 }
+
 .foodnote-smart-dashboard .fn-ui-smart-kicker {
   margin-bottom: 2px !important;
   font-size: 10px !important;
   line-height: 1.1 !important;
   text-transform: uppercase !important;
   letter-spacing: .14em !important;
-  color: var(--text4, #7e897f) !important;
-  font-weight: 900 !important;
+  color: var(--text4, var(--fn-ds-muted)) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 .foodnote-smart-dashboard-grid.foodnote-smart-dashboard-metrics,
 #page-recap #recap-metrics.foodnote-smart-dashboard-metrics {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
   gap: 10px !important;
 }
+
 .foodnote-smart-dashboard-metrics .fn-ui-metric-action {
   appearance: none !important;
   text-align: left !important;
@@ -1822,14 +1335,21 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   cursor: pointer !important;
   font-family: inherit !important;
 }
+
 .foodnote-smart-dashboard-metrics .fn-ui-metric-phase { --metric-accent: var(--phase-color, var(--green, #7aa56a)) !important; }
-.foodnote-smart-dashboard-metrics .fn-ui-metric-weight { --metric-accent: var(--fn-badge-good, #6fa66a) !important; }
-.foodnote-smart-dashboard-metrics .fn-ui-metric-foods { --metric-accent: var(--fn-badge-good, #6fa66a) !important; }
-.foodnote-smart-dashboard-metrics .fn-ui-metric-review { --metric-accent: var(--fn-badge-warn, #c9863a) !important; }
-.foodnote-smart-dashboard-metrics .fn-ui-metric-streak { --metric-accent: var(--fn-badge-kcal, var(--orange, #d49344)) !important; }
+
+.foodnote-smart-dashboard-metrics .fn-ui-metric-weight { --metric-accent: var(--fn-badge-good, var(--fn-ds-accent)) !important; }
+
+.foodnote-smart-dashboard-metrics .fn-ui-metric-foods { --metric-accent: var(--fn-badge-good, var(--fn-ds-accent)) !important; }
+
+.foodnote-smart-dashboard-metrics .fn-ui-metric-review { --metric-accent: var(--fn-badge-warn, var(--fn-ds-warning)) !important; }
+
+.foodnote-smart-dashboard-metrics .fn-ui-metric-streak { --metric-accent: var(--fn-badge-kcal, var(--orange, #d08a3e)) !important; }
+
 .foodnote-dashboard-editor-zone {
   margin-top: 12px !important;
 }
+
 .foodnote-dashboard-editor,
 .foodnote-smart-dashboard .journal-dashboard-editor,
 #page-recap .foodnote-dashboard-editor {
@@ -1839,23 +1359,23 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   border: 1px solid color-mix(in srgb, var(--border2, #d8ddce) 72%, transparent) !important;
   background: color-mix(in srgb, var(--bg2, #fff) 82%, transparent) !important;
 }
+
 .foodnote-dashboard-editor .journal-dashboard-editor-row,
 .foodnote-smart-dashboard .journal-dashboard-editor-row {
   cursor: grab !important;
 }
-@media(max-width:700px){
-  .foodnote-smart-dashboard-grid.foodnote-smart-dashboard-metrics,
+
+@media (max-width:700px) {
+.foodnote-smart-dashboard-grid.foodnote-smart-dashboard-metrics,
   #page-recap #recap-metrics.foodnote-smart-dashboard-metrics { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important; }
-  #page-journal .foodnote-smart-dashboard { margin-top: 10px !important; }
+
+#page-journal .foodnote-smart-dashboard { margin-top: 10px !important; }
 }
 
-/* FoodNote beta 0.22.56 — Accueil macros : 3 couches nettes
-   1) signature FoodNote douce en fond, 2) identité macro sur icône/texte,
-   3) status uniquement sur badge + barre. */
 :root {
   --fn-home-macro-surface: var(--card, #fffdf7);
   --fn-home-macro-surface-2: var(--bg2, #fff7ec);
-  --fn-home-macro-signature: var(--fn-energy-green, #74c984);
+  --fn-home-macro-signature: var(--fn-energy-green, #d08a3e);
   --fn-home-macro-aura-strength: 11%;
   --fn-home-macro-category-aura-strength: 7%;
   --fn-home-macro-icon-surface: rgba(255,255,255,.74);
@@ -1878,8 +1398,8 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   --fn-home-status-warn-text: var(--fn-home-macro-status-text, #fffdf7);
   --fn-home-status-bad-text: var(--fn-home-macro-status-text, #fffdf7);
   --fn-home-status-over-text: var(--fn-home-macro-status-text, #fffdf7);
-  --fn-home-status-ok: var(--fn-badge-good, #74c984);
-  --fn-home-status-warn: var(--fn-badge-warn, #ffb15f);
+  --fn-home-status-ok: var(--fn-badge-good, #d08a3e);
+  --fn-home-status-warn: var(--fn-badge-warn, #5b8caf);
   --fn-home-status-bad: var(--red, #d96060);
   --fn-home-status-over: var(--fn-kcal-over, var(--red, #d96060));
   --fn-home-kcal-value-text: var(--fn-home-macro-value-text);
@@ -1906,8 +1426,8 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
 
 #page-journal .fn-home-macro-grid .fn-macro-home-card,
 #page-journal .journal-floating-macro-card .fn-macro-home-card {
-  --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, var(--green, #74c984)));
-  --macro-status-color: color-mix(in srgb, var(--text, #111827) 22%, var(--fn-home-macro-signature, #74c984) 78%);
+  --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, var(--green, #d08a3e)));
+  --macro-status-color: color-mix(in srgb, var(--text, #111827) 22%, var(--fn-home-macro-signature, #d08a3e) 78%);
   grid-area: auto !important;
   min-height: 132px !important;
   min-width: 0 !important;
@@ -1923,11 +1443,11 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   border-radius: 26px !important;
   text-align: left !important;
   background:
-    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 58%),
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 58%),
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
-    linear-gradient(145deg, color-mix(in srgb, var(--fn-home-macro-surface, var(--card, #fff)) 92%, white 5%), color-mix(in srgb, var(--fn-home-macro-surface-2, var(--bg2, #fff7ec)) 94%, var(--fn-home-macro-signature, #74c984) 6%)) !important;
-  border: 1px solid color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 22%, var(--border2, rgba(0,0,0,.08))) !important;
-  box-shadow: 0 14px 34px color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 12%, transparent), inset 0 1px 0 rgba(255,255,255,.55) !important;
+    linear-gradient(145deg, color-mix(in srgb, var(--fn-home-macro-surface, var(--card, #fff)) 92%, white 5%), color-mix(in srgb, var(--fn-home-macro-surface-2, var(--bg2, var(--fn-ds-surface))) 94%, var(--fn-home-macro-signature, var(--fn-ds-accent)) 6%)) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 22%, var(--border2, rgba(0,0,0,.08))) !important;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 12%, transparent), inset 0 1px 0 rgba(255,255,255,.55) !important;
   backdrop-filter: blur(14px) saturate(1.05) !important;
   -webkit-backdrop-filter: blur(14px) saturate(1.05) !important;
 }
@@ -1937,16 +1457,23 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   display: none !important;
 }
 
-#page-journal .fn-home-macro-grid .macro-cell-kcal { --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, #74c984)) !important; --macro-label-text: var(--fn-home-kcal-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-kcal-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-kcal-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-prot { --macro-color: var(--fn-macro-prot, #63b77b) !important; --macro-label-text: var(--fn-home-prot-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-prot-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-prot-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-gluc { --macro-color: var(--fn-macro-gluc, #d89442) !important; --macro-label-text: var(--fn-home-gluc-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-gluc-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-gluc-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
-#page-journal .fn-home-macro-grid .macro-cell-lip { --macro-color: var(--fn-macro-lip, #8b8ee8) !important; --macro-label-text: var(--fn-home-lip-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-lip-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-lip-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-kcal { --macro-color: var(--fn-macro-kcal, var(--fn-calorie-accent, var(--fn-ds-accent))) !important; --macro-label-text: var(--fn-home-kcal-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-kcal-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-kcal-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
 
-#page-journal .fn-home-macro-grid .macro-state-neutral { --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, #667066) 70%, transparent)) !important; --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-ok { --macro-status-color: var(--fn-home-status-ok, #74c984) !important; --macro-status-text: var(--fn-home-status-ok-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-warn { --macro-status-color: var(--fn-home-status-warn, #ffb15f) !important; --macro-status-text: var(--fn-home-status-warn-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-bad { --macro-status-color: var(--fn-home-status-bad, #d96060) !important; --macro-status-text: var(--fn-home-status-bad-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
-#page-journal .fn-home-macro-grid .macro-state-over { --macro-status-color: var(--fn-home-status-over, #d96060) !important; --macro-status-text: var(--fn-home-status-over-text, var(--fn-home-macro-status-text, #fffdf7)) !important; }
+#page-journal .fn-home-macro-grid .macro-cell-prot { --macro-color: var(--fn-macro-prot, var(--fn-ds-accent)) !important; --macro-label-text: var(--fn-home-prot-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-prot-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-prot-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-cell-gluc { --macro-color: var(--fn-macro-gluc, var(--fn-ds-warning)) !important; --macro-label-text: var(--fn-home-gluc-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-gluc-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-gluc-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-cell-lip { --macro-color: var(--fn-macro-lip, var(--fn-ds-lip)) !important; --macro-label-text: var(--fn-home-lip-label-text, var(--fn-home-macro-label-text, var(--text2))) !important; --macro-value-text: var(--fn-home-lip-value-text, var(--fn-home-macro-value-text, var(--text))) !important; --macro-sub-text: var(--fn-home-lip-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-neutral { --macro-status-color: var(--fn-home-status-neutral, color-mix(in srgb, var(--text3, var(--fn-ds-muted)) 70%, transparent)) !important; --macro-status-text: var(--fn-home-status-neutral-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-ok { --macro-status-color: var(--fn-home-status-ok, var(--fn-ds-accent)) !important; --macro-status-text: var(--fn-home-status-ok-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-warn { --macro-status-color: var(--fn-home-status-warn, var(--fn-ds-warning)) !important; --macro-status-text: var(--fn-home-status-warn-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-bad { --macro-status-color: var(--fn-home-status-bad, var(--fn-ds-danger)) !important; --macro-status-text: var(--fn-home-status-bad-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
+
+#page-journal .fn-home-macro-grid .macro-state-over { --macro-status-color: var(--fn-home-status-over, var(--fn-ds-danger)) !important; --macro-status-text: var(--fn-home-status-over-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important; }
 
 #page-journal .fn-home-macro-grid .fn-macro-icon-bubble,
 #page-journal .fn-home-macro-grid .fn-mini-ring {
@@ -1965,15 +1492,18 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   border: 1px solid color-mix(in srgb, var(--macro-color) 34%, rgba(255,255,255,.36)) !important;
   box-shadow: 0 10px 22px color-mix(in srgb, var(--macro-color) 18%, transparent) !important;
 }
+
 #page-journal .fn-home-macro-grid .fn-mini-ring::before { display: none !important; }
+
 #page-journal .fn-home-macro-grid .fn-mini-ring span {
   position: relative !important;
   z-index: 1 !important;
   font-size: 20px !important;
   line-height: 1 !important;
   filter: saturate(1.05) !important;
-  color: var(--fn-home-icon-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important;
+  color: var(--fn-home-icon-text, var(--fn-home-macro-value-text, var(--text, var(--fn-ds-text)))) !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-state-neutral .macro-progress-fill { min-width: 0 !important; }
 
 #page-journal .fn-home-macro-grid .fn-macro-copy {
@@ -1982,6 +1512,7 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   min-width: 0 !important;
   padding-right: 34px !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-head {
   margin: 0 0 7px !important;
   padding: 0 !important;
@@ -1992,21 +1523,24 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   justify-content: flex-start !important;
   gap: 8px !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-lbl {
   font-size: 11px !important;
   line-height: 1.1 !important;
   letter-spacing: .075em !important;
   text-transform: uppercase !important;
-  font-weight: 950 !important;
-  color: var(--macro-label-text, var(--fn-home-macro-label-text, var(--text2, #3f463f))) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--macro-label-text, var(--fn-home-macro-label-text, var(--text2, var(--fn-ds-text-soft)))) !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-val {
   font-size: clamp(23px, 4.2vw, 34px) !important;
   line-height: .98 !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.055em !important;
-  color: var(--macro-value-text, var(--fn-home-macro-value-text, var(--text, #111827))) !important;
+  color: var(--macro-value-text, var(--fn-home-macro-value-text, var(--text, var(--fn-ds-text)))) !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-target {
   margin-top: 7px !important;
   padding: 0 !important;
@@ -2016,8 +1550,8 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   border-radius: 0 !important;
   font-size: 11px !important;
   line-height: 1.25 !important;
-  font-weight: 750 !important;
-  color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3, #667066))) !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3, var(--fn-ds-muted)))) !important;
 }
 
 #page-journal .fn-home-macro-grid .macro-status-badge {
@@ -2032,8 +1566,8 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   place-items: center !important;
   font-size: 14px !important;
   line-height: 1 !important;
-  font-weight: 1000 !important;
-  color: var(--macro-status-text, var(--fn-home-macro-status-text, #fffdf7)) !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
+  color: var(--macro-status-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important;
   background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color) 86%, white 14%), var(--macro-status-color)) !important;
   border: 1px solid color-mix(in srgb, var(--macro-status-color) 52%, white 42%) !important;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--macro-status-color) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important;
@@ -2050,9 +1584,10 @@ body:not([data-theme="light"]) .journal-floating-macro-card.fn-orbit-nutrition-c
   height: 6px !important;
   border-radius: 999px !important;
   overflow: hidden !important;
-  background: color-mix(in srgb, var(--text, #111827) 10%, transparent) !important;
+  background: color-mix(in srgb, var(--text, var(--fn-ds-text)) 10%, transparent) !important;
   box-shadow: inset 0 1px 2px rgba(0,0,0,.08) !important;
 }
+
 #page-journal .fn-home-macro-grid .macro-progress-fill {
   display: block !important;
   height: 100% !important;
@@ -2069,50 +1604,53 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   --fn-home-macro-surface-2: rgba(18,23,20,.82);
   --fn-home-macro-icon-surface: rgba(255,255,255,.075);
   background:
-    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, #74c984) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 60%),
+    radial-gradient(circle at 9% 0%, color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) var(--fn-home-macro-aura-strength, 11%), transparent) 0, transparent 60%),
     radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--macro-color) var(--fn-home-macro-category-aura-strength, 7%), transparent) 0, transparent 52%),
     linear-gradient(145deg, rgba(38,48,41,.80), rgba(19,24,21,.78)) !important;
-  border-color: color-mix(in srgb, var(--fn-home-macro-signature, #74c984) 20%, rgba(255,255,255,.08)) !important;
+  border-color: color-mix(in srgb, var(--fn-home-macro-signature, var(--fn-ds-accent)) 20%, rgba(255,255,255,.08)) !important;
   box-shadow: 0 16px 38px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.07) !important;
 }
 
 @media (max-width: 980px) {
-  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
   #page-journal .fn-orbit-macros.fn-home-macro-grid,
   #page-journal .journal-main-macros.fn-orbit-macros.fn-home-macro-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
 @media (max-width: 520px) {
-  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-home-macro-grid,
   #page-journal .fn-orbit-macros.fn-home-macro-grid,
   #page-journal .journal-main-macros.fn-orbit-macros.fn-home-macro-grid {
     grid-template-columns: 1fr !important;
   }
-  #page-journal .fn-home-macro-grid .fn-macro-home-card {
+
+#page-journal .fn-home-macro-grid .fn-macro-home-card {
     min-height: 118px !important;
     border-radius: 23px !important;
     padding: 14px 14px 15px !important;
   }
-  #page-journal .fn-home-macro-grid .fn-macro-copy { padding-right: 32px !important; }
-  #page-journal .fn-home-macro-grid .macro-val { font-size: clamp(25px, 8vw, 32px) !important; }
+
+#page-journal .fn-home-macro-grid .fn-macro-copy { padding-right: 32px !important; }
+
+#page-journal .fn-home-macro-grid .macro-val { font-size: clamp(25px, 8vw, 32px) !important; }
 }
 
-/* FoodNote beta 0.22.60 — Accueil nutrition : anneau avec valeur visible + mobile non empilé.
-   Le bloc est consolidé ici pour garder la même logique visuelle desktop/mobile :
-   calories à gauche, macros empilées à droite, avec une version compacte sur Android. */
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
   --fn-home-calorie-ring-size: clamp(126px, 13.5vw, 154px);
   --fn-home-calorie-ring-thickness: clamp(11px, 1.15vw, 14px);
   --fn-home-panel-gap: clamp(14px, 2.1vw, 22px);
 }
+
 #page-journal .fn-home-nutrition-layout {
   display: grid !important;
   grid-template-columns: minmax(310px, .74fr) minmax(340px, 1.26fr) !important;
   gap: var(--fn-home-panel-gap) !important;
   align-items: stretch !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
   display: grid !important;
   grid-template-columns: var(--fn-home-calorie-ring-size) minmax(112px, 1fr) !important;
@@ -2123,7 +1661,9 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   text-align: left !important;
   overflow: hidden !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card > .macro-status-badge { display: none !important; }
+
 #page-journal .fn-calorie-ring-wrap {
   width: var(--fn-home-calorie-ring-size) !important;
   height: var(--fn-home-calorie-ring-size) !important;
@@ -2133,6 +1673,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   place-items: center !important;
   overflow: visible !important;
 }
+
 #page-journal .fn-calorie-ring-visual,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual {
@@ -2153,12 +1694,14 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   box-shadow: 0 12px 28px color-mix(in srgb, var(--fn-calorie-accent, #5a9f30) 12%, transparent) !important;
   transform: none !important;
 }
+
 #page-journal .fn-calorie-ring-visual::before,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual::before,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual::before {
   content: none !important;
   display: none !important;
 }
+
 #page-journal .fn-calorie-ring-visual::after,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual::after,
 .journal-floating-macro-card.fn-orbit-nutrition-card .fn-calorie-ring-visual::after {
@@ -2168,10 +1711,11 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   inset: var(--fn-home-calorie-ring-thickness) !important;
   border-radius: 50% !important;
   display: block !important;
-  background: var(--fn-home-calorie-surface, #fffdf7) !important;
+  background: var(--fn-home-calorie-surface, var(--fn-ds-surface)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.72) !important;
   pointer-events: none !important;
 }
+
 #page-journal .fn-calorie-ring-core {
   position: relative !important;
   z-index: 3 !important;
@@ -2184,6 +1728,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   opacity: 1 !important;
   visibility: visible !important;
 }
+
 #page-journal .fn-calorie-flame {
   display: block !important;
   color: var(--fn-macro-kcal, var(--fn-calorie-accent, #b77822)) !important;
@@ -2193,6 +1738,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   opacity: 1 !important;
   visibility: visible !important;
 }
+
 #page-journal .fn-calorie-ring-core #m-kcal,
 #page-journal .fn-calorie-ring-core .macro-val {
   display: block !important;
@@ -2201,22 +1747,24 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   color: var(--fn-home-calorie-value-text, var(--fn-home-kcal-value-text, var(--text, #20231f))) !important;
   font-size: clamp(33px, calc(var(--fn-home-calorie-ring-size) * .32), 50px) !important;
   line-height: .9 !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.055em !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
+
 #page-journal .fn-calorie-unit {
   display: block !important;
   color: var(--fn-home-calorie-unit-text, var(--text3, #747a70)) !important;
   margin-top: clamp(5px, .7vw, 8px) !important;
   font-size: clamp(9px, calc(var(--fn-home-calorie-ring-size) * .075), 12px) !important;
   line-height: 1 !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: .18em !important;
   opacity: 1 !important;
   visibility: visible !important;
 }
+
 #page-journal .fn-calorie-copy {
   display: grid !important;
   align-content: center !important;
@@ -2224,16 +1772,19 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   min-width: 0 !important;
   text-align: left !important;
 }
+
 #page-journal .fn-calorie-copy .macro-lbl {
   margin: 0 0 10px !important;
-  color: var(--fn-home-calorie-label-text, var(--fn-home-kcal-label-text, var(--text2, #3f463f))) !important;
+  color: var(--fn-home-calorie-label-text, var(--fn-home-kcal-label-text, var(--text2, var(--fn-ds-text-soft)))) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-list {
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: clamp(10px, 1.35vw, 14px) !important;
   align-content: stretch !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row {
   display: grid !important;
   grid-template-columns: 48px minmax(0, 1fr) 30px !important;
@@ -2243,6 +1794,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   min-height: clamp(62px, 7vw, 74px) !important;
   padding: 12px 16px 15px 14px !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring,
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-icon-bubble {
   width: 42px !important;
@@ -2252,32 +1804,38 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   grid-column: 1 !important;
   grid-row: 1 / span 2 !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-copy {
   grid-column: 2 !important;
   grid-row: 1 / span 2 !important;
   padding-right: 0 !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-lbl {
   font-size: 10.5px !important;
   line-height: 1.05 !important;
   letter-spacing: .12em !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val {
   font-size: clamp(24px, 3.8vw, 31px) !important;
   line-height: .95 !important;
   letter-spacing: -.055em !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val .macro-unit {
   font-size: .72em !important;
   letter-spacing: -.025em !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val .macro-goal {
   margin-left: .18em !important;
   font-size: .68em !important;
   letter-spacing: -.03em !important;
-  font-weight: 850 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
   color: var(--macro-sub-text, var(--fn-home-macro-sub-text, var(--text3))) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target {
   margin-top: 4px !important;
   font-size: 10.5px !important;
@@ -2286,6 +1844,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge {
   position: static !important;
   grid-column: 3 !important;
@@ -2296,11 +1855,12 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   font-size: 13px !important;
   justify-self: center !important;
   align-self: center !important;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 88%, white 12%), var(--macro-status-color, var(--fn-home-status-ok, #74c984))) !important;
-  color: var(--macro-status-text, var(--fn-home-macro-status-text, #fffdf7)) !important;
-  border: 1px solid color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 72%, white 28%) !important;
-  box-shadow: 0 7px 16px color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 28%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 88%, white 12%), var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent)))) !important;
+  color: var(--macro-status-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important;
+  border: 1px solid color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 72%, white 28%) !important;
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 28%, transparent), inset 0 1px 0 rgba(255,255,255,.32) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress {
   display: block !important;
   position: absolute !important;
@@ -2311,14 +1871,16 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   border-radius: 999px !important;
   overflow: hidden !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress-fill {
   height: 100% !important;
   min-width: 0 !important;
   border-radius: inherit !important;
-  background: var(--macro-status-color, var(--fn-home-status-ok, #74c984)) !important;
+  background: var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) !important;
 }
+
 @media (max-width: 720px) {
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
     --fn-home-calorie-ring-size: clamp(84px, 23vw, 104px);
     --fn-home-calorie-ring-thickness: 9px;
@@ -2326,16 +1888,22 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     padding: 13px !important;
     border-radius: 24px !important;
   }
-  #page-journal .fn-home-panel-head { margin-bottom: 12px !important; gap: 8px !important; }
-  #page-journal .fn-orbit-kicker { font-size: 10px !important; letter-spacing: .22em !important; text-indent: .22em !important; }
-  #page-journal .fn-orbit-title { font-size: clamp(24px, 7vw, 32px) !important; line-height: 1.02 !important; }
-  #page-journal .fn-home-panel-head .fn-orbit-status { font-size: 11.5px !important; padding: 5px 9px !important; white-space: nowrap !important; }
-  #page-journal .fn-home-nutrition-layout {
+
+#page-journal .fn-home-panel-head { margin-bottom: 12px !important; gap: 8px !important; }
+
+#page-journal .fn-orbit-kicker { font-size: 10px !important; letter-spacing: .22em !important; text-indent: .22em !important; }
+
+#page-journal .fn-orbit-title { font-size: clamp(24px, 7vw, 32px) !important; line-height: 1.02 !important; }
+
+#page-journal .fn-home-panel-head .fn-orbit-status { font-size: 11.5px !important; padding: 5px 9px !important; white-space: nowrap !important; }
+
+#page-journal .fn-home-nutrition-layout {
     grid-template-columns: minmax(118px, .39fr) minmax(0, .61fr) !important;
     gap: var(--fn-home-panel-gap) !important;
     align-items: stretch !important;
   }
-  #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
     grid-template-columns: 1fr !important;
     grid-template-rows: auto minmax(0, 1fr) !important;
     gap: 8px !important;
@@ -2346,72 +1914,103 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     text-align: center !important;
     border-radius: 20px !important;
   }
-  #page-journal .fn-calorie-copy { justify-items: center !important; align-content: start !important; text-align: center !important; }
-  #page-journal .fn-calorie-copy .macro-lbl { font-size: 9px !important; letter-spacing: .13em !important; margin-bottom: 5px !important; }
-  #page-journal .fn-calorie-target-line { font-size: 12px !important; line-height: 1.15 !important; }
-  #page-journal .fn-calorie-percent { font-size: 11.5px !important; line-height: 1.15 !important; margin-top: 5px !important; }
-  #page-journal .fn-calorie-state-line { font-size: 10.5px !important; line-height: 1.15 !important; margin-top: 5px !important; white-space: normal !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-list { gap: 7px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row {
+
+#page-journal .fn-calorie-copy { justify-items: center !important; align-content: start !important; text-align: center !important; }
+
+#page-journal .fn-calorie-copy .macro-lbl { font-size: 9px !important; letter-spacing: .13em !important; margin-bottom: 5px !important; }
+
+#page-journal .fn-calorie-target-line { font-size: 12px !important; line-height: 1.15 !important; }
+
+#page-journal .fn-calorie-percent { font-size: 11.5px !important; line-height: 1.15 !important; margin-top: 5px !important; }
+
+#page-journal .fn-calorie-state-line { font-size: 10.5px !important; line-height: 1.15 !important; margin-top: 5px !important; white-space: normal !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-list { gap: 7px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row {
     grid-template-columns: 34px minmax(0, 1fr) 22px !important;
     gap: 0 8px !important;
     min-height: 58px !important;
     padding: 8px 9px 11px 8px !important;
     border-radius: 16px !important;
   }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring,
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring,
   #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-icon-bubble { width: 31px !important; height: 31px !important; min-width: 31px !important; border-radius: 11px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring span { font-size: 16px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-head { margin-bottom: 3px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-lbl { font-size: 8.5px !important; letter-spacing: .12em !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val { font-size: clamp(18px, 5.2vw, 22px) !important; letter-spacing: -.055em !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target { font-size: 8.5px !important; line-height: 1.08 !important; margin-top: 2px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge { width: 21px !important; height: 21px !important; font-size: 10.5px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress { left: 8px !important; right: 8px !important; bottom: 5px !important; height: 2px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring span { font-size: 16px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-head { margin-bottom: 3px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-lbl { font-size: 8.5px !important; letter-spacing: .12em !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val { font-size: clamp(18px, 5.2vw, 22px) !important; letter-spacing: -.055em !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target { font-size: 8.5px !important; line-height: 1.08 !important; margin-top: 2px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge { width: 21px !important; height: 21px !important; font-size: 10.5px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress { left: 8px !important; right: 8px !important; bottom: 5px !important; height: 2px !important; }
 }
+
 @media (max-width: 390px) {
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel { --fn-home-calorie-ring-size: 78px; --fn-home-calorie-ring-thickness: 8px; padding: 11px !important; }
-  #page-journal .fn-home-nutrition-layout { grid-template-columns: minmax(104px, .38fr) minmax(0, .62fr) !important; gap: 7px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card { min-height: 178px !important; padding: 9px 7px !important; }
-  #page-journal .fn-calorie-ring-core #m-kcal,
+
+#page-journal .fn-home-nutrition-layout { grid-template-columns: minmax(104px, .38fr) minmax(0, .62fr) !important; gap: 7px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card { min-height: 178px !important; padding: 9px 7px !important; }
+
+#page-journal .fn-calorie-ring-core #m-kcal,
   #page-journal .fn-calorie-ring-core .macro-val { font-size: 27px !important; }
-  #page-journal .fn-calorie-flame { font-size: 12px !important; margin-bottom: 2px !important; }
-  #page-journal .fn-calorie-unit { font-size: 8px !important; margin-top: 4px !important; }
-  #page-journal .fn-calorie-target-line { font-size: 11px !important; }
-  #page-journal .fn-calorie-percent { font-size: 10.5px !important; }
-  #page-journal .fn-calorie-state-line { font-size: 9.5px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row { grid-template-columns: 29px minmax(0, 1fr) 19px !important; gap: 0 6px !important; min-height: 54px !important; padding: 7px 8px 10px 7px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring,
+
+#page-journal .fn-calorie-flame { font-size: 12px !important; margin-bottom: 2px !important; }
+
+#page-journal .fn-calorie-unit { font-size: 8px !important; margin-top: 4px !important; }
+
+#page-journal .fn-calorie-target-line { font-size: 11px !important; }
+
+#page-journal .fn-calorie-percent { font-size: 10.5px !important; }
+
+#page-journal .fn-calorie-state-line { font-size: 9.5px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row { grid-template-columns: 29px minmax(0, 1fr) 19px !important; gap: 0 6px !important; min-height: 54px !important; padding: 7px 8px 10px 7px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-mini-ring,
   #page-journal .fn-home-nutrition-layout .fn-home-macro-row .fn-macro-icon-bubble { width: 27px !important; height: 27px !important; min-width: 27px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-lbl { font-size: 7.8px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val { font-size: 17px !important; }
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target { font-size: 7.8px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-lbl { font-size: 7.8px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-val { font-size: 17px !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-target { font-size: 7.8px !important; }
 }
+
 @media (max-width: 340px) {
-  #page-journal .fn-home-nutrition-layout { grid-template-columns: 1fr !important; }
-  #page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
+#page-journal .fn-home-nutrition-layout { grid-template-columns: 1fr !important; }
+
+#page-journal .fn-home-nutrition-layout .fn-calorie-summary-card {
     grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0,1fr) !important;
     min-height: 116px !important;
     text-align: left !important;
     justify-items: stretch !important;
   }
-  #page-journal .fn-calorie-copy { justify-items: start !important; text-align: left !important; }
+
+#page-journal .fn-calorie-copy { justify-items: start !important; text-align: left !important; }
 }
 
-/* FoodNote beta 0.22.63 — Accueil mobile compact : deux colonnes, hauteur réduite.
-   Correction de fond : le layout mobile n'empile plus, et la carte Calories redevient horizontale
-   pour gagner environ 35% de hauteur visuelle sans sacrifier la lisibilité. */
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
   container-type: inline-size;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
   width: 100% !important;
   min-width: 0 !important;
   max-width: 100% !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
@@ -2423,24 +2022,24 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
 }
 
 @media (max-width: 860px) {
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
     display: grid !important;
     grid-template-columns: minmax(132px, 42%) minmax(0, 58%) !important;
     grid-template-areas: "calorie macros" !important;
     gap: 8px !important;
     align-items: stretch !important;
   }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card { grid-area: calorie !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list { grid-area: macros !important; }
 }
 
 @media (max-width: 720px) {
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
     --fn-home-calorie-ring-size: clamp(66px, 18vw, 82px) !important;
     --fn-home-calorie-ring-thickness: clamp(6px, 1.55vw, 8px) !important;
@@ -2448,7 +2047,8 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     padding: 8px !important;
     border-radius: 20px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-panel-head,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-panel-head,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-panel-head {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -2456,33 +2056,36 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     align-items: start !important;
     margin-bottom: 6px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-kicker,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-kicker,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-kicker {
     font-size: 8px !important;
     letter-spacing: .18em !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-title,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-title,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-title {
     font-size: clamp(20px, 5.5vw, 26px) !important;
     line-height: 1 !important;
     letter-spacing: -.045em !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-status,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-status,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-status {
     font-size: 9.5px !important;
     padding: 4px 7px !important;
     white-space: nowrap !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
     grid-template-columns: minmax(142px, 45%) minmax(0, 55%) !important;
     grid-template-areas: "calorie macros" !important;
     gap: var(--fn-home-panel-gap) !important;
     align-items: stretch !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
     display: grid !important;
     grid-template-columns: var(--fn-home-calorie-ring-size) minmax(0, 1fr) !important;
@@ -2496,34 +2099,42 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     padding: 7px 7px !important;
     border-radius: 17px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy {
     justify-items: start !important;
     align-content: center !important;
     text-align: left !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl {
     font-size: 7.5px !important;
     letter-spacing: .13em !important;
     margin-bottom: 3px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line {
     font-size: 10px !important;
     line-height: 1.08 !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-percent,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-percent,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-state-line {
     font-size: 8.8px !important;
     line-height: 1.08 !important;
     margin-top: 2px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core .macro-val {
     font-size: clamp(21px, 6vw, 27px) !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame { font-size: 10px !important; margin-bottom: 1px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit { font-size: 7px !important; margin-top: 3px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame { font-size: 10px !important; margin-bottom: 1px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit { font-size: 7px !important; margin-top: 3px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list {
     display: grid !important;
     grid-template-columns: 1fr !important;
@@ -2531,7 +2142,8 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     gap: 5px !important;
     align-content: stretch !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
     grid-template-columns: 31px minmax(0, 1fr) 17px !important;
     gap: 0 5px !important;
@@ -2539,7 +2151,8 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     padding: 5px 6px 7px 5px !important;
     border-radius: 14px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble {
@@ -2548,75 +2161,89 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
     min-width: 29px !important;
     border-radius: 10px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span { font-size: 13px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-head { margin-bottom: 1px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl { font-size: 6.9px !important; letter-spacing: .10em !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: clamp(13.5px, 3.7vw, 17px) !important; line-height: .92 !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6.8px !important; line-height: 1.02 !important; margin-top: 0 !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge { width: 17px !important; height: 17px !important; font-size: 8.5px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress { left: 5px !important; right: 5px !important; bottom: 3px !important; height: 2px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-head { margin-bottom: 1px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl { font-size: 6.9px !important; letter-spacing: .10em !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: clamp(13.5px, 3.7vw, 17px) !important; line-height: .92 !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6.8px !important; line-height: 1.02 !important; margin-top: 0 !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge { width: 17px !important; height: 17px !important; font-size: 8.5px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress { left: 5px !important; right: 5px !important; bottom: 3px !important; height: 2px !important; }
 }
 
 @media (max-width: 390px) {
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
     --fn-home-calorie-ring-size: clamp(58px, 17vw, 68px) !important;
     --fn-home-calorie-ring-thickness: 6px !important;
     padding: 7px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
     grid-template-columns: minmax(136px, 46%) minmax(0, 54%) !important;
     grid-template-areas: "calorie macros" !important;
     gap: 5px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card {
     min-height: 104px !important;
     padding: 6px 6px !important;
     gap: 6px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core .macro-val { font-size: 21px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame { font-size: 9px !important; margin-bottom: 1px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit { font-size: 6.5px !important; margin-top: 2px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line { font-size: 8.8px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-percent,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame { font-size: 9px !important; margin-bottom: 1px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit { font-size: 6.5px !important; margin-top: 2px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line { font-size: 8.8px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-percent,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-state-line { font-size: 7.8px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list { grid-auto-rows: minmax(32px, 1fr) !important; gap: 4px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row {
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list { grid-auto-rows: minmax(32px, 1fr) !important; gap: 4px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row {
     grid-template-columns: 27px minmax(0, 1fr) 15px !important;
     min-height: 32px !important;
     padding: 4px 5px 6px 4px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble {
     width: 26px !important;
     height: 22px !important;
     min-width: 26px !important;
     border-radius: 9px !important;
   }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl { font-size: 6.2px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: 13px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6.1px !important; }
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge { width: 15px !important; height: 15px !important; font-size: 7.5px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl { font-size: 6.2px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: 13px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6.1px !important; }
+
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge { width: 15px !important; height: 15px !important; font-size: 7.5px !important; }
 }
 
 @media (max-width: 340px) {
-  html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+html body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+html body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
     grid-template-columns: minmax(126px, 46%) minmax(0, 54%) !important;
     grid-template-areas: "calorie macros" !important;
   }
 }
 
-/* FoodNote beta 0.22.63 — Accueil nutrition : layout référence compact.
-   Source de vérité visuelle : carte Calories étroite à gauche, macros longues à droite.
-   Le mobile conserve le même dessin en deux colonnes au lieu de basculer en pile. */
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
   --fn-home-calorie-ring-size: clamp(92px, 11.5vw, 116px) !important;
@@ -2625,6 +2252,7 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   padding: clamp(15px, 2.1vw, 22px) clamp(16px, 2.4vw, 28px) !important;
   border-radius: clamp(22px, 3vw, 30px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-panel-head,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-panel-head {
   display: grid !important;
@@ -2633,20 +2261,23 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   align-items: start !important;
   margin-bottom: clamp(14px, 2vw, 18px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-kicker,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-kicker {
   font-size: clamp(9px, 1.15vw, 12px) !important;
   line-height: 1.05 !important;
   letter-spacing: .23em !important;
-  text-indent: .23em !important; /* compense le letter-spacing pour ne pas couper le O */
-  font-weight: 900 !important;
+  text-indent: .23em !important; 
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-title,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-title {
   font-size: clamp(22px, 3.65vw, 34px) !important;
   line-height: 1.02 !important;
   letter-spacing: -.045em !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-status,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-status {
   font-size: clamp(10px, 1.25vw, 13px) !important;
@@ -2655,24 +2286,18 @@ body:not([data-theme="light"]) #page-journal .fn-home-macro-grid .fn-macro-home-
   border-radius: 999px !important;
   white-space: nowrap !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
   display: grid !important;
   grid-template-columns: minmax(158px, 23.5%) minmax(0, 1fr) !important;
   grid-template-areas: "calorie macros" !important;
   gap: var(--fn-home-panel-gap) !important;
   align-items: stretch !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
   grid-area: calorie !important;
   display: grid !important;
   grid-template-columns: 1fr !important;
@@ -2686,6 +2311,7 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nut
   text-align: center !important;
   border-radius: clamp(16px, 2.3vw, 20px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-wrap,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-wrap {
   width: var(--fn-home-calorie-ring-size) !important;
@@ -2694,6 +2320,7 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nut
   min-height: var(--fn-home-calorie-ring-size) !important;
   justify-self: center !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual {
   width: var(--fn-home-calorie-ring-size) !important;
@@ -2705,12 +2332,16 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nut
   aspect-ratio: 1 / 1 !important;
   border-radius: 50% !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before { content: none !important; display: none !important; }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after { inset: var(--fn-home-calorie-ring-thickness) !important; }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core { max-width: calc(var(--fn-home-calorie-ring-size) - (var(--fn-home-calorie-ring-thickness) * 2.35)) !important; }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core .macro-val,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
@@ -2718,46 +2349,51 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nut
   font-size: clamp(30px, calc(var(--fn-home-calorie-ring-size) * .36), 42px) !important;
   line-height: .9 !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-flame {
   font-size: clamp(12px, calc(var(--fn-home-calorie-ring-size) * .12), 15px) !important;
   margin-bottom: 3px !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-unit {
   font-size: clamp(8px, calc(var(--fn-home-calorie-ring-size) * .078), 10px) !important;
   margin-top: 5px !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy {
   justify-items: center !important;
   align-content: start !important;
   text-align: center !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl {
   margin: 0 0 5px !important;
   font-size: clamp(8px, 1.05vw, 10px) !important;
   line-height: 1.05 !important;
   letter-spacing: .14em !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-target-line {
   font-size: clamp(11px, 1.25vw, 13px) !important;
   line-height: 1.15 !important;
-  font-weight: 700 !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-percent,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-state-line,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-percent,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-state-line {
   display: none !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list {
   grid-area: macros !important;
   display: grid !important;
   grid-template-columns: 1fr !important;
@@ -2767,10 +2403,9 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
   padding: 0 !important;
   background: transparent !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
   display: grid !important;
   grid-template-columns: clamp(34px, 4.8vw, 42px) minmax(0, 1fr) clamp(20px, 3vw, 26px) !important;
   grid-template-rows: auto auto !important;
@@ -2780,6 +2415,7 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
   padding: clamp(9px, 1.35vw, 12px) clamp(12px, 1.9vw, 16px) clamp(11px, 1.8vw, 15px) clamp(10px, 1.55vw, 14px) !important;
   border-radius: clamp(15px, 2.1vw, 18px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
@@ -2789,31 +2425,37 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
   min-width: clamp(32px, 4.6vw, 40px) !important;
   border-radius: clamp(10px, 1.7vw, 14px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span { font-size: clamp(13px, 2vw, 17px) !important; }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl {
   font-size: clamp(8px, 1.05vw, 10px) !important;
   line-height: 1.05 !important;
   letter-spacing: .13em !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val {
   font-size: clamp(18px, 3.1vw, 26px) !important;
   line-height: .95 !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target {
   margin-top: 3px !important;
   font-size: clamp(8px, 1.15vw, 10px) !important;
   line-height: 1.1 !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge {
   width: clamp(18px, 3vw, 24px) !important;
   height: clamp(18px, 3vw, 24px) !important;
   font-size: clamp(9px, 1.6vw, 12px) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
   left: clamp(8px, 1.45vw, 14px) !important;
@@ -2821,8 +2463,9 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
   bottom: 5px !important;
   height: 2px !important;
 }
+
 @media (max-width: 720px) {
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel {
     --fn-home-calorie-ring-size: clamp(72px, 19vw, 88px) !important;
     --fn-home-calorie-ring-thickness: 7px !important;
@@ -2830,81 +2473,100 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
     padding: 11px 12px !important;
     border-radius: 22px !important;
   }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-panel-head,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-panel-head,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-panel-head { margin-bottom: 8px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-title,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-title,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-title { font-size: clamp(16px, 4.6vw, 22px) !important; letter-spacing: -.035em !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-kicker,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-kicker,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-kicker { font-size: 8px !important; letter-spacing: .18em !important; text-indent: .18em !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-status,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-orbit-status,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-orbit-status { font-size: 9px !important; padding: 5px 8px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout {
     grid-template-columns: minmax(124px, 31%) minmax(0, 1fr) !important;
     grid-template-areas: "calorie macros" !important;
   }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card { min-height: 166px !important; padding: 11px 6px !important; gap: 7px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list { grid-template-rows: repeat(3, minmax(49px, 1fr)) !important; gap: 6px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row { grid-template-columns: 30px minmax(0,1fr) 17px !important; min-height: 49px !important; gap: 0 7px !important; padding: 7px 8px 9px 7px !important; border-radius: 14px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble { width: 28px !important; height: 28px !important; min-width: 28px !important; border-radius: 10px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring span { font-size: 13px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-lbl { font-size: 7px !important; letter-spacing: .10em !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: clamp(14px, 4.2vw, 17px) !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6.8px !important; margin-top: 1px !important; }
 }
+
 @media (max-width: 390px) {
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel { --fn-home-calorie-ring-size: clamp(62px, 18vw, 72px) !important; padding: 9px 10px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout { grid-template-columns: minmax(112px, 32%) minmax(0,1fr) !important; gap: 6px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout { grid-template-columns: minmax(112px, 32%) minmax(0,1fr) !important; gap: 6px !important; }
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card { min-height: 150px !important; padding: 9px 5px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core #m-kcal { font-size: 22px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-flame,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-flame { font-size: 9px !important; margin-bottom: 1px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-unit,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-unit { font-size: 6.5px !important; margin-top: 2px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-copy .macro-lbl { font-size: 7px !important; margin-bottom: 3px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-target-line,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-target-line { font-size: 9px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-list,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-list { grid-template-rows: repeat(3, minmax(45px, 1fr)) !important; gap: 5px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row { grid-template-columns: 26px minmax(0,1fr) 15px !important; min-height: 45px !important; padding: 6px 7px 8px 6px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-mini-ring,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .fn-macro-icon-bubble { width: 24px !important; height: 24px !important; min-width: 24px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-val { font-size: 13px !important; }
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
+
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-target { font-size: 6px !important; }
 }
+
 @media (max-width: 340px) {
-  #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
-  body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout { grid-template-columns: minmax(104px, 34%) minmax(0,1fr) !important; }
+#page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-nutrition-layout,
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-nutrition-layout { grid-template-columns: minmax(104px, 34%) minmax(0,1fr) !important; }
 }
 
-/* FoodNote beta 0.22.66 — Accueil calories : fond glass conservé ; masque intérieur ajouté plus bas.
-   L'opacité ne remixe plus la couleur avec l'aura signature. La couleur choisie reste la source ; seul l'alpha change. */
 :root {
   --fn-home-calorie-card-surface: var(--fn-home-calorie-surface, #fff3ea);
   --fn-home-calorie-card-opacity: 70%;
@@ -2913,69 +2575,52 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutr
   --fn-home-calorie-ring-inner-surface: var(--fn-home-calorie-surface, #fffdf7);
   --fn-home-calorie-ring-inner-opacity: 92%;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
-  background: rgb(from var(--fn-home-calorie-card-surface, var(--fn-home-calorie-surface, #fff3ea)) r g b / var(--fn-home-calorie-card-opacity, 70%)) !important;
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-summary-card {
+  background: rgb(from var(--fn-home-calorie-card-surface, var(--fn-home-calorie-surface, var(--fn-ds-surface))) r g b / var(--fn-home-calorie-card-opacity, 70%)) !important;
   border: 1px solid rgb(from var(--fn-home-calorie-border, #d8ddce) r g b / var(--fn-home-calorie-card-border-opacity, 48%)) !important;
   -webkit-backdrop-filter: blur(var(--fn-home-calorie-card-blur, 10px)) saturate(1.06) !important;
   backdrop-filter: blur(var(--fn-home-calorie-card-blur, 10px)) saturate(1.06) !important;
   box-shadow:
-    0 10px 28px color-mix(in srgb, var(--fn-home-calorie-card-surface, var(--fn-home-calorie-surface, #fff3ea)) 16%, transparent),
+    0 10px 28px color-mix(in srgb, var(--fn-home-calorie-card-surface, var(--fn-home-calorie-surface, var(--fn-ds-surface))) 16%, transparent),
     inset 0 1px 0 rgba(255,255,255,.46) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after {
-  background: rgb(from var(--fn-home-calorie-ring-inner-surface, var(--fn-home-calorie-card-surface, #fffdf7)) r g b / var(--fn-home-calorie-ring-inner-opacity, 92%)) !important;
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after {
+  background: rgb(from var(--fn-home-calorie-ring-inner-surface, var(--fn-home-calorie-card-surface, var(--fn-ds-surface))) r g b / var(--fn-home-calorie-ring-inner-opacity, 92%)) !important;
 }
 
-/* FoodNote beta 0.22.66 — Calories : opacité intérieur cercle sans dérive vers l'anneau.
-   Le centre du cercle a maintenant deux couches :
-   1) un masque neutre opaque qui coupe l'anneau calories ;
-   2) la couleur choisie dans le labo, avec opacité réglable.
-   Résultat : baisser "Opacité intérieur cercle" n'expose plus le vert de l'anneau. */
 :root {
   --fn-home-calorie-ring-inner-backdrop: var(--fn-home-panel-surface, #fffdf7);
   --fn-home-calorie-ring-inner-surface: var(--fn-home-calorie-ring-inner-surface, var(--fn-home-calorie-surface, #fffdf7));
   --fn-home-calorie-ring-inner-opacity: var(--fn-home-calorie-ring-inner-opacity, 92%);
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::before {
   content: "" !important;
   position: absolute !important;
   inset: var(--fn-home-calorie-ring-thickness, clamp(11px, 1.25vw, 14px)) !important;
   border-radius: inherit !important;
   display: block !important;
-  background: var(--fn-home-calorie-ring-inner-backdrop, var(--fn-home-panel-surface, #fffdf7)) !important;
+  background: var(--fn-home-calorie-ring-inner-backdrop, var(--fn-home-panel-surface, var(--fn-ds-surface))) !important;
   opacity: 1 !important;
   z-index: 0 !important;
   pointer-events: none !important;
   transform: none !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.68) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-visual::after {
   content: "" !important;
   position: absolute !important;
   inset: var(--fn-home-calorie-ring-thickness, clamp(11px, 1.25vw, 14px)) !important;
   border-radius: inherit !important;
   display: block !important;
-  background: var(--fn-home-calorie-ring-inner-surface, #fffdf7) !important;
+  background: var(--fn-home-calorie-ring-inner-surface, var(--fn-ds-surface)) !important;
   opacity: var(--fn-home-calorie-ring-inner-alpha, var(--fn-home-calorie-ring-inner-opacity, 92%)) !important;
   z-index: 1 !important;
   pointer-events: none !important;
@@ -2983,57 +2628,53 @@ body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-orbit-nut
   border: 0 !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.52) !important;
 }
+
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core,
-html.fn-theme-lab-active body #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core,
-body.fn-theme-lab-active #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-calorie-ring-core {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-calorie-ring-core {
   position: relative !important;
   z-index: 3 !important;
 }
 
-/* FoodNote beta 0.22.68 — Accueil macros : barres utiles + badges status contrastés.
-   Source de vérité : 30-nutrition-foods.js écrit --macro-progress-width et --macro-over-width
-   à partir des valeurs réelles. Le CSS ne force plus une barre pleine identique. */
 :root {
   --fn-home-progress-track: #dfe6d8;
   --fn-home-progress-height: 6px;
   --fn-home-progress-over-opacity: 70%;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row {
   --macro-progress-width: var(--macro-pct, 0%);
   --macro-over-width: 0%;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge,
-html.fn-theme-lab-active body #page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge,
-body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-row > .macro-status-badge {
-  color: var(--macro-status-text, var(--fn-home-macro-status-text, #fffdf7)) !important;
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row > .macro-status-badge {
+  color: var(--macro-status-text, var(--fn-home-macro-status-text, var(--fn-ds-surface))) !important;
   background: linear-gradient(135deg,
-    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 88%, white 12%),
-    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 96%, black 4%)) !important;
-  border: 1px solid color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 72%, white 28%) !important;
+    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 88%, white 12%),
+    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 96%, black 4%)) !important;
+  border: 1px solid color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 72%, white 28%) !important;
   box-shadow:
-    0 7px 16px color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 28%, transparent),
+    0 7px 16px color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 28%, transparent),
     inset 0 1px 0 rgba(255,255,255,.32) !important;
   text-shadow: 0 1px 1px rgba(0,0,0,.22) !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row.macro-state-neutral > .macro-status-badge,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-neutral > .macro-status-badge,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-neutral > .macro-status-badge {
   background: linear-gradient(135deg,
-    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-neutral, #7b8278)) 56%, var(--fn-home-panel-surface, #fffdf7) 44%),
-    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-neutral, #7b8278)) 70%, black 3%)) !important;
+    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-neutral, var(--fn-ds-muted))) 56%, var(--fn-home-panel-surface, var(--fn-ds-surface)) 44%),
+    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-neutral, var(--fn-ds-muted))) 70%, black 3%)) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.26) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
-html.fn-theme-lab-active body #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
-body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
   display: block !important;
   position: absolute !important;
   z-index: 2 !important;
@@ -3043,9 +2684,10 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   height: var(--fn-home-progress-height, 6px) !important;
   border-radius: 999px !important;
   overflow: hidden !important;
-  background: color-mix(in srgb, var(--fn-home-progress-track, #dfe6d8) 74%, var(--macro-status-color, #74c984) 10%) !important;
+  background: color-mix(in srgb, var(--fn-home-progress-track, #dfe6d8) 74%, var(--macro-status-color, var(--fn-ds-accent)) 10%) !important;
   box-shadow: inset 0 1px 1px rgba(0,0,0,.08) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress::after,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress::after,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress::after {
@@ -3058,20 +2700,20 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   max-width: 42% !important;
   opacity: 0 !important;
   background: repeating-linear-gradient(135deg,
-    color-mix(in srgb, var(--macro-status-color, #d96060) 88%, white 12%) 0 4px,
-    color-mix(in srgb, var(--macro-status-color, #d96060) 58%, transparent) 4px 8px) !important;
+    color-mix(in srgb, var(--macro-status-color, var(--fn-ds-danger)) 88%, white 12%) 0 4px,
+    color-mix(in srgb, var(--macro-status-color, var(--fn-ds-danger)) 58%, transparent) 4px 8px) !important;
   pointer-events: none !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row.macro-state-over .macro-progress::after,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-over .macro-progress::after,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-over .macro-progress::after {
   opacity: var(--fn-home-progress-over-opacity, 70%) !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress-fill,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress-fill,
-#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress-fill,
-html.fn-theme-lab-active body #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress-fill,
-body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress-fill {
+#page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress-fill {
   display: block !important;
   height: 100% !important;
   width: var(--macro-progress-width, var(--macro-pct, 0%)) !important;
@@ -3079,19 +2721,21 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   min-width: 0 !important;
   border-radius: inherit !important;
   background: linear-gradient(90deg,
-    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, #74c984)) 72%, white 20%),
-    var(--macro-status-color, var(--fn-home-status-ok, #74c984))) !important;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--macro-status-color, #74c984) 22%, transparent) !important;
+    color-mix(in srgb, var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent))) 72%, white 20%),
+    var(--macro-status-color, var(--fn-home-status-ok, var(--fn-ds-accent)))) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--macro-status-color, var(--fn-ds-accent)) 22%, transparent) !important;
   transition: width .22s ease, background .18s ease, box-shadow .18s ease !important;
 }
+
 #page-journal .fn-home-nutrition-layout .fn-home-macro-row.macro-state-neutral .macro-progress-fill,
 #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-neutral .macro-progress-fill,
 #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row.macro-state-neutral .macro-progress-fill {
   width: 0% !important;
   box-shadow: none !important;
 }
+
 @media (max-width: 720px) {
-  #page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
+#page-journal .fn-home-nutrition-layout .fn-home-macro-row .macro-progress,
   #page-journal .journal-floating-macro-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress,
   #page-journal .journal-floating-macro-card.fn-orbit-nutrition-card.fn-home-nutrition-panel .fn-home-macro-row .macro-progress {
     left: 8px !important;
@@ -3100,22 +2744,24 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   }
 }
 
-/* FoodNote beta 0.22.89 — Récap : tendances séparées + conseils structurés */
 #page-recap .recap-trends {
   display: flex !important;
   flex-direction: column !important;
   gap: 12px !important;
   min-width: 0 !important;
 }
+
 #page-recap .recap-trend-tabs {
   display: none !important;
 }
+
 #page-recap .recap-trend-panels {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 12px !important;
   align-items: stretch !important;
 }
+
 #page-recap .recap-trend-column {
   min-width: 0 !important;
   display: flex !important;
@@ -3126,27 +2772,32 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--bg) 88%, var(--green-bg) 12%) !important;
   padding: 12px !important;
 }
+
 #page-recap .recap-trend-column-head {
   display: flex !important;
   align-items: baseline !important;
   justify-content: space-between !important;
   gap: 10px !important;
 }
+
 #page-recap .recap-trend-column-head b {
   color: var(--text) !important;
   font-size: 14px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-recap .recap-trend-column-head span {
   color: var(--text4) !important;
   font-size: 11px !important;
-  font-weight: 800 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
 }
+
 #page-recap .recap-trend-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 9px !important;
 }
+
 #page-recap .recap-trend-card {
   --recap-trend-accent: var(--green) !important;
   min-width: 0 !important;
@@ -3158,18 +2809,25 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   padding: 11px !important;
   box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
+
 #page-recap .recap-trend-card.is-ok { --recap-trend-accent: var(--fn-home-status-ok, var(--green)) !important; }
+
 #page-recap .recap-trend-card.is-warn,
 #page-recap .recap-trend-card.is-up { --recap-trend-accent: var(--fn-home-status-warn, var(--orange)) !important; }
+
 #page-recap .recap-trend-card.is-down { --recap-trend-accent: var(--calm-blue, var(--green)) !important; }
+
 #page-recap .recap-trend-card.is-stable { --recap-trend-accent: var(--green-mid, var(--green)) !important; }
+
 #page-recap .recap-trend-card.is-neutral { --recap-trend-accent: var(--text4) !important; }
+
 #page-recap .recap-trend-head {
   display: grid !important;
   grid-template-columns: auto minmax(0, 1fr) auto !important;
   gap: 8px !important;
   align-items: center !important;
 }
+
 #page-recap .recap-trend-icon {
   width: 32px !important;
   height: 32px !important;
@@ -3181,22 +2839,25 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   color: var(--recap-trend-accent) !important;
   font-size: 16px !important;
 }
+
 #page-recap .recap-trend-head b {
   display: block !important;
   color: var(--text) !important;
   font-size: 12px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   line-height: 1.1 !important;
 }
+
 #page-recap .recap-trend-head small {
   display: block !important;
   color: var(--text4) !important;
   font-size: 10px !important;
-  font-weight: 750 !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
+
 #page-recap .recap-trend-head em {
   border-radius: 999px !important;
   padding: 3px 7px !important;
@@ -3204,9 +2865,10 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   color: color-mix(in srgb, var(--recap-trend-accent) 72%, var(--text)) !important;
   font-size: 9px !important;
   font-style: normal !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   white-space: nowrap !important;
 }
+
 #page-recap .recap-trend-values {
   display: flex !important;
   align-items: baseline !important;
@@ -3214,18 +2876,21 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   gap: 8px !important;
   margin-top: 10px !important;
 }
+
 #page-recap .recap-trend-values strong {
   color: var(--text) !important;
   font-size: 21px !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   letter-spacing: -.03em !important;
 }
+
 #page-recap .recap-trend-values span {
   color: var(--text3) !important;
   font-size: 10px !important;
-  font-weight: 800 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
   text-align: right !important;
 }
+
 #page-recap .recap-trend-track {
   height: 7px !important;
   border-radius: 999px !important;
@@ -3233,12 +2898,14 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   margin-top: 9px !important;
   background: color-mix(in srgb, var(--recap-trend-accent) 12%, var(--bg2)) !important;
 }
+
 #page-recap .recap-trend-track i {
   display: block !important;
   height: 100% !important;
   border-radius: inherit !important;
   background: var(--recap-trend-accent) !important;
 }
+
 #page-recap .recap-trend-card p,
 #page-recap .recap-empty-note {
   margin: 8px 0 0 !important;
@@ -3246,31 +2913,38 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   font-size: 11px !important;
   line-height: 1.35 !important;
 }
+
 #page-recap .recap-empty-note {
   border-radius: 16px !important;
   background: color-mix(in srgb, var(--bg2) 88%, var(--green-bg) 12%) !important;
   border: 1px dashed color-mix(in srgb, var(--border2) 72%, transparent) !important;
   padding: 12px !important;
 }
+
 #page-recap .recap-advice-list .fn-ui-alert {
   min-height: 0 !important;
 }
 
-/* FoodNote beta 0.22.89 — Conseils & alertes : moteur lisible et non culpabilisant */
 #page-recap .recap-advice-list {
   display: block !important;
 }
+
 #page-recap .recap-advice-board {
   --recap-advice-accent: var(--green) !important;
   display: grid !important;
   gap: 12px !important;
   min-width: 0 !important;
 }
-#page-recap .recap-advice-board.is-bad { --recap-advice-accent: var(--fn-home-status-bad, #A32D2D) !important; }
+
+#page-recap .recap-advice-board.is-bad { --recap-advice-accent: var(--fn-home-status-bad, var(--fn-ds-danger)) !important; }
+
 #page-recap .recap-advice-board.is-warn { --recap-advice-accent: var(--fn-home-status-warn, var(--orange)) !important; }
+
 #page-recap .recap-advice-board.is-ok { --recap-advice-accent: var(--fn-home-status-ok, var(--green)) !important; }
+
 #page-recap .recap-advice-board.is-info,
 #page-recap .recap-advice-board.is-neutral { --recap-advice-accent: var(--calm-blue, var(--green)) !important; }
+
 #page-recap .recap-advice-summary {
   display: grid !important;
   grid-template-columns: auto minmax(0, 1fr) auto !important;
@@ -3283,6 +2957,7 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
     color-mix(in srgb, var(--bg) 88%, var(--green-bg) 12%) !important;
   padding: 13px !important;
 }
+
 #page-recap .recap-advice-summary-icon {
   width: 42px !important;
   height: 42px !important;
@@ -3293,33 +2968,38 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--recap-advice-accent) 18%, var(--bg)) !important;
   color: var(--recap-advice-accent) !important;
   font-size: 19px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-recap .recap-advice-summary-body {
   min-width: 0 !important;
 }
+
 #page-recap .recap-advice-summary-body span {
   display: block !important;
   color: var(--text4) !important;
   font-size: 10px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   text-transform: uppercase !important;
   letter-spacing: .06em !important;
 }
+
 #page-recap .recap-advice-summary-body strong {
   display: block !important;
   color: var(--text) !important;
   font-size: 17px !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   line-height: 1.12 !important;
   margin-top: 2px !important;
 }
+
 #page-recap .recap-advice-summary-body p {
   margin: 4px 0 0 !important;
   color: var(--text3) !important;
   font-size: 12px !important;
   line-height: 1.35 !important;
 }
+
 #page-recap .recap-advice-summary-meta {
   align-self: start !important;
   border-radius: 999px !important;
@@ -3327,15 +3007,17 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   color: color-mix(in srgb, var(--recap-advice-accent) 72%, var(--text)) !important;
   padding: 5px 8px !important;
   font-size: 10px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   white-space: nowrap !important;
 }
+
 #page-recap .recap-advice-groups {
   display: grid !important;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, .9fr) minmax(0, .95fr) !important;
   gap: 12px !important;
   align-items: start !important;
 }
+
 #page-recap .recap-advice-group {
   min-width: 0 !important;
   border-radius: 20px !important;
@@ -3343,9 +3025,13 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--bg) 90%, var(--green-bg) 10%) !important;
   padding: 11px !important;
 }
+
 #page-recap .recap-advice-group.priority { background: color-mix(in srgb, var(--bg) 86%, var(--orange-bg, var(--green-bg)) 14%) !important; }
+
 #page-recap .recap-advice-group.positive { background: color-mix(in srgb, var(--bg) 86%, var(--green-bg) 14%) !important; }
+
 #page-recap .recap-advice-group.context { background: color-mix(in srgb, var(--bg) 90%, var(--bg2) 10%) !important; }
+
 #page-recap .recap-advice-group-head {
   display: flex !important;
   align-items: baseline !important;
@@ -3353,20 +3039,24 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   gap: 8px !important;
   margin-bottom: 9px !important;
 }
+
 #page-recap .recap-advice-group-head b {
   color: var(--text) !important;
   font-size: 13px !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-recap .recap-advice-group-head span {
   color: var(--text4) !important;
   font-size: 10px !important;
-  font-weight: 850 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
 }
+
 #page-recap .recap-advice-group-list {
   display: grid !important;
   gap: 8px !important;
 }
+
 #page-recap .recap-advice-card {
   --advice-card-accent: var(--calm-blue, var(--green)) !important;
   display: grid !important;
@@ -3378,11 +3068,16 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--bg) 92%, var(--advice-card-accent) 8%) !important;
   padding: 10px !important;
 }
-#page-recap .recap-advice-card.is-bad { --advice-card-accent: var(--fn-home-status-bad, #A32D2D) !important; }
+
+#page-recap .recap-advice-card.is-bad { --advice-card-accent: var(--fn-home-status-bad, var(--fn-ds-danger)) !important; }
+
 #page-recap .recap-advice-card.is-warn { --advice-card-accent: var(--fn-home-status-warn, var(--orange)) !important; }
+
 #page-recap .recap-advice-card.is-ok { --advice-card-accent: var(--fn-home-status-ok, var(--green)) !important; }
+
 #page-recap .recap-advice-card.is-info,
 #page-recap .recap-advice-card.is-neutral { --advice-card-accent: var(--calm-blue, var(--green)) !important; }
+
 #page-recap .recap-advice-icon {
   width: 31px !important;
   height: 31px !important;
@@ -3393,21 +3088,25 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--advice-card-accent) 18%, var(--bg)) !important;
   color: var(--advice-card-accent) !important;
   font-size: 15px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
 }
+
 #page-recap .recap-advice-body { min-width: 0 !important; }
+
 #page-recap .recap-advice-title {
   display: flex !important;
   align-items: baseline !important;
   justify-content: space-between !important;
   gap: 8px !important;
 }
+
 #page-recap .recap-advice-title b {
   color: var(--text) !important;
   font-size: 12px !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   line-height: 1.15 !important;
 }
+
 #page-recap .recap-advice-title span {
   flex: 0 0 auto !important;
   color: color-mix(in srgb, var(--advice-card-accent) 70%, var(--text)) !important;
@@ -3415,15 +3114,17 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   border-radius: 999px !important;
   padding: 2px 6px !important;
   font-size: 9px !important;
-  font-weight: 950 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   white-space: nowrap !important;
 }
+
 #page-recap .recap-advice-card p {
   margin: 4px 0 0 !important;
   color: var(--text3) !important;
   font-size: 11px !important;
   line-height: 1.35 !important;
 }
+
 #page-recap .recap-advice-action {
   margin-top: 7px !important;
   display: grid !important;
@@ -3432,19 +3133,22 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   background: color-mix(in srgb, var(--advice-card-accent) 9%, var(--bg)) !important;
   padding: 7px !important;
 }
+
 #page-recap .recap-advice-action strong {
   color: color-mix(in srgb, var(--advice-card-accent) 74%, var(--text)) !important;
   font-size: 9px !important;
-  font-weight: 1000 !important;
+  font-weight: var(--fn-ds-w-heavy) !important;
   text-transform: uppercase !important;
   letter-spacing: .05em !important;
 }
+
 #page-recap .recap-advice-action em {
   color: var(--text2) !important;
   font-style: normal !important;
   font-size: 11px !important;
   line-height: 1.3 !important;
 }
+
 #page-recap .recap-advice-empty {
   border-radius: 15px !important;
   border: 1px dashed color-mix(in srgb, var(--border2) 70%, transparent) !important;
@@ -3454,30 +3158,35 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
   font-size: 11px !important;
   line-height: 1.35 !important;
 }
+
 @media (max-width: 980px) {
-  #page-recap .recap-advice-groups {
+#page-recap .recap-advice-groups {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
 @media (max-width: 680px) {
-  #page-recap .recap-advice-summary {
+#page-recap .recap-advice-summary {
     grid-template-columns: auto minmax(0, 1fr) !important;
     gap: 10px !important;
     padding: 11px !important;
   }
-  #page-recap .recap-advice-summary-meta {
+
+#page-recap .recap-advice-summary-meta {
     grid-column: 1 / -1 !important;
     justify-self: start !important;
     white-space: normal !important;
   }
-  #page-recap .recap-advice-title {
+
+#page-recap .recap-advice-title {
     align-items: flex-start !important;
     flex-direction: column !important;
     gap: 4px !important;
   }
 }
+
 @media (max-width: 860px) {
-  #page-recap .recap-trend-tabs {
+#page-recap .recap-trend-tabs {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 6px !important;
@@ -3486,7 +3195,8 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
     background: color-mix(in srgb, var(--bg2) 86%, var(--green-bg) 14%) !important;
     border: 1px solid color-mix(in srgb, var(--border2) 72%, transparent) !important;
   }
-  #page-recap .recap-trend-tab {
+
+#page-recap .recap-trend-tab {
     border: 0 !important;
     border-radius: 999px !important;
     background: transparent !important;
@@ -3494,21 +3204,28 @@ body.fn-theme-lab-active #page-journal .fn-home-nutrition-layout .fn-home-macro-
     min-height: 34px !important;
     padding: 0 12px !important;
     font-size: 12px !important;
-    font-weight: 950 !important;
+    font-weight: var(--fn-ds-w-heavy) !important;
     cursor: pointer !important;
     touch-action: manipulation !important;
   }
-  #page-recap .recap-trend-tab.active {
+
+#page-recap .recap-trend-tab.active {
     background: var(--card) !important;
     color: var(--text) !important;
     box-shadow: 0 4px 12px color-mix(in srgb, var(--text) 9%, transparent) !important;
   }
-  #page-recap .recap-trend-panels { grid-template-columns: 1fr !important; }
-  #page-recap .recap-trend-panel { display: none !important; }
-  #page-recap .recap-trend-panel.active { display: flex !important; }
+
+#page-recap .recap-trend-panels { grid-template-columns: 1fr !important; }
+
+#page-recap .recap-trend-panel { display: none !important; }
+
+#page-recap .recap-trend-panel.active { display: flex !important; }
 }
+
 @media (max-width: 560px) {
-  #page-recap .recap-trend-grid { grid-template-columns: 1fr !important; }
-  #page-recap .recap-trend-card { padding: 10px !important; }
-  #page-recap .recap-trend-values strong { font-size: 19px !important; }
+#page-recap .recap-trend-grid { grid-template-columns: 1fr !important; }
+
+#page-recap .recap-trend-card { padding: 10px !important; }
+
+#page-recap .recap-trend-values strong { font-size: 19px !important; }
 }

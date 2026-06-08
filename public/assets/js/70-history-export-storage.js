@@ -1987,15 +1987,16 @@ function saveLocalOnly() {
 function showSaveStatus(msg, warn) {
   let el = document.getElementById('save-status');
   if (!el) {
-    el = document.createElement('div'); el.id = 'save-status';
-    el.style.cssText = 'position:fixed;bottom:16px;right:16px;font-size:12px;padding:6px 12px;border-radius:8px;z-index:999;transition:opacity 0.5s';
+    el = document.createElement('div');
+    el.id = 'save-status';
+    el.className = 'fn-save-status';
     document.body.appendChild(el);
   }
   el.textContent = msg;
-  el.style.background = warn ? '#faeeda' : '#e1f5ee';
-  el.style.color = warn ? '#854f0b' : '#0f6e56';
-  el.style.opacity = '1';
-  setTimeout(() => el.style.opacity = '0', 2500);
+  el.dataset.tone = warn ? 'warn' : 'ok';
+  el.classList.add('is-visible');
+  clearTimeout(el._foodnoteHideTimer);
+  el._foodnoteHideTimer = setTimeout(() => el.classList.remove('is-visible'), 2500);
 }
 
 function getEntries() { return _db.journal_entries || []; }

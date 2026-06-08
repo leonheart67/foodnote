@@ -1,6 +1,10 @@
-/* FoodNote beta 0.22.154 — RECAP_AFTER_DELETE_REFRESH_FIX
- * Objectif : un seul contrôleur pour recherche / code-barres / photo / OCR / recette / tableau nutritionnel / IA.
- * Ce fichier est volontairement autonome et non destructif : il s'ajoute à la base existante et neutralise les anciens chemins concurrents les plus fréquents.
+/*
+ * FoodNote — moteur central de capture alimentaire.
+ * Rôle : piloter les parcours Ajouter/Rechercher/Code-barres/Photo plat/OCR/Recette/IA texte.
+ * Gère : état du workflow, caméra navigateur, prévisualisation, appels IA via serveur,
+ *   suggestions modifiables, validation utilisateur et balisage sémantique des macros affichées.
+ * Ne doit pas gérer : écriture SQLite directe, clé Groq côté navigateur, stockage permanent d'images
+ *   ou rendu CSS global.
  */
 (function FoodNoteCaptureWorkflowCore(){
   'use strict';
@@ -10,7 +14,7 @@
     return;
   }
 
-  const VERSION = 'foodnote_beta_0_22_179_capture_search_select_qty_fix_20260530';
+  const VERSION = 'foodnote_beta_0_24_add_capture_style_cleanup_20260608';
   const STATES = Object.freeze({
     MEAL_SELECT: 'meal_select',
     IDLE: 'idle',
@@ -40,7 +44,7 @@
   const TITLES = {
     [MODES.SEARCH]: 'Rechercher un aliment',
     [MODES.BARCODE]: 'Scan code-barres',
-    [MODES.PHOTO_FOOD]: 'Photo aliment libre',
+    [MODES.PHOTO_FOOD]: 'Photo du plat',
     [MODES.NUTRITION_TABLE]: 'Photo tableau nutritionnel',
     [MODES.RECIPE]: 'Photo recette',
     [MODES.IA_TEXT]: 'Texte / IA Groq'
@@ -74,7 +78,8 @@
     crop: { x: 8, y: 10, w: 84, h: 68 },
     cropDrag: null,
     skipMealSelect: false,
-    openedFromMealButton: false
+    openedFromMealButton: false,
+    ocrPassSummary: null
   };
 
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -95,6 +100,20 @@
     return Number.isFinite(n) ? n : fallback;
   }
 
+  function captureMacroSummaryHTML(macros, options = {}) {
+    const m = macros || {};
+    const compact = options.compact !== false;
+    const suffix = options.suffix ? `<small>${escapeHtml(options.suffix)}</small>` : '';
+    const unitGap = compact ? '' : ' ';
+    return `
+      <span class="capture-macro" data-macro="kcal">🔥 ${Math.round(clampNumber(m.kcal, 0))} kcal</span>
+      <span class="capture-macro" data-macro="prot">🍖 ${round1(clampNumber(m.prot, 0))}${unitGap}g</span>
+      <span class="capture-macro" data-macro="gluc">🍞 ${round1(clampNumber(m.gluc, 0))}${unitGap}g</span>
+      <span class="capture-macro" data-macro="lip">🥑 ${round1(clampNumber(m.lip, 0))}${unitGap}g</span>
+      ${suffix}
+    `;
+  }
+
   function looseNumber(value, fallback = 0) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
     const raw = String(value ?? '')
@@ -111,6 +130,18 @@
   function numberFromAny(value, fallback = 0) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
     if (value === null || value === undefined) return fallback;
+    if (typeof value === 'object') {
+      const keys = ['value', 'amount', 'total', 'estimated', 'estimate', 'estime', 'estimé', 'qty', 'quantity', 'grams', 'grammes', 'g', 'kcal'];
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          const n = numberFromAny(value[key], NaN);
+          if (Number.isFinite(n)) return n;
+        }
+      }
+      const firstPrimitive = Object.values(value).find(v => typeof v === 'number' || typeof v === 'string');
+      if (firstPrimitive !== undefined) return numberFromAny(firstPrimitive, fallback);
+      return fallback;
+    }
     const txt = String(value)
       .replace(/\u00a0/g, ' ')
       .replace(/,/g, '.')
@@ -192,6 +223,30 @@
 
   function emit(name, detail) {
     window.dispatchEvent(new CustomEvent('foodnote:capture:' + name, { detail: detail || {} }));
+  }
+
+  function isIaSuggestionMode() {
+    return state.mode === MODES.IA_TEXT || state.mode === MODES.PHOTO_FOOD;
+  }
+
+  function confidenceLabel(value) {
+    const v = normalizeText(value);
+    if (!v) return '';
+    if (v.includes('high') || v.includes('elevee') || v.includes('forte')) return 'élevée';
+    if (v.includes('medium') || v.includes('moyenne')) return 'moyenne';
+    if (v.includes('low') || v.includes('faible')) return 'faible';
+    return String(value || '').trim();
+  }
+
+  function visionItemTypeLabel(value) {
+    const v = normalizeText(value).replace(/[\s-]+/g, '_');
+    if (!v) return '';
+    if (v.includes('plat_compose') || v.includes('composed_dish')) return 'plat composé';
+    if (v.includes('sauce') || v.includes('extra') || v.includes('condiment')) return 'sauce / extra';
+    if (v.includes('boisson') || v.includes('drink')) return 'boisson';
+    if (v.includes('incertain') || v.includes('uncertain')) return 'incertain';
+    if (v.includes('aliment_simple') || v.includes('ingredient_simple') || v === 'simple') return 'aliment simple';
+    return String(value || '').trim();
   }
 
   function transition(nextState, payload = {}) {
@@ -348,7 +403,7 @@
     if (state.current === STATES.SAVED) return 'Ajout effectué. Tu peux continuer ou fermer.';
     if (state.current === STATES.SEARCH_FOOD) return 'Recherche locale + bases disponibles. Rien ne change l’écran sans validation.';
     if (state.current === STATES.BARCODE_SCAN) return 'Place le code-barres dans le cadre, ou saisis le code manuellement.';
-    if (state.current === STATES.PHOTO_CAPTURE) return 'Prends une photo avec la caméra. L’étape suivante dépend du mode choisi.';
+    if (state.current === STATES.PHOTO_CAPTURE) return state.mode === MODES.PHOTO_FOOD ? 'Prends ou choisis une photo du plat. Groq Vision proposera des aliments à valider.' : 'Prends une photo avec la caméra. L’étape suivante dépend du mode choisi.';
     if (state.current === STATES.CROP) return state.mode === MODES.NUTRITION_TABLE ? 'Recadre uniquement le tableau nutritionnel, puis lance la lecture.' : 'Recadre uniquement la liste d’ingrédients, puis lance la lecture.';
     if (state.current === STATES.NUTRITION_TABLE_OCR) return 'OCR du tableau nutritionnel : vérifie le texte avant l’analyse.';
     if (state.current === STATES.RECIPE_OCR) return 'OCR recette : vérifie les ingrédients avant l’analyse.';
@@ -390,10 +445,10 @@
         ? renderNutritionConfirm()
         : state.mode === MODES.RECIPE
           ? renderRecipeDishConfirm()
-          : state.mode === MODES.IA_TEXT
+          : isIaSuggestionMode()
             ? renderIaTextResults()
             : renderResults();
-      if (state.mode === MODES.IA_TEXT) {
+      if (isIaSuggestionMode()) {
         footer.innerHTML = `<button class="btn-primary" data-action="confirm-selected">Ajouter la sélection</button><button data-action="select-all-ia">Tout sélectionner</button><button data-action="clear-ia-selection">Tout désélectionner</button><button data-action="back-mode">Retour</button><button data-action="close">Fermer</button>`;
         requestAnimationFrame(updateIaTextSelectionSummary);
       } else {
@@ -411,8 +466,8 @@
     } else if (state.current === STATES.NUTRITION_TABLE_OCR || state.current === STATES.RECIPE_OCR) {
       body.innerHTML = renderOcrReview();
       footer.innerHTML = state.mode === MODES.NUTRITION_TABLE
-        ? `<button class="btn-primary" data-action="analyse-ocr">📊 Extraire les valeurs</button><button data-action="back-photo">Retour photo</button><button data-action="close">Annuler</button>`
-        : `<button class="btn-primary" data-action="analyse-ocr">✨ Analyser avec IA</button><button data-action="back-photo">Retour photo</button><button data-action="close">Annuler</button>`;
+        ? `<button class="btn-primary" data-action="analyse-ocr">📊 Extraire les valeurs</button><button data-action="groq-nutrition-label-fallback">✨ Relire avec Groq</button><button data-action="back-photo">Retour photo</button><button data-action="close">Annuler</button>`
+        : `<button class="btn-primary" data-action="analyse-ocr">✨ Analyser avec IA</button><button data-action="groq-recipe-photo-fallback">📷 OCR mauvais ? Envoyer la photo à Groq</button><button data-action="back-photo">Retour photo</button><button data-action="close">Annuler</button>`;
     } else if (state.current === STATES.AI_ANALYSIS) {
       body.innerHTML = renderAiInput();
       footer.innerHTML = `<button class="btn-primary" data-action="run-ai">Analyser avec Groq</button><button data-action="close">Annuler</button>`;
@@ -430,7 +485,7 @@
       <div class="capture-mode-grid">
         ${modeButton(MODES.SEARCH, '🔎', 'Recherche base aliments', 'Aliment connu, CIQUAL ou OpenFoodFacts.')}
         ${modeButton(MODES.BARCODE, '🏷️', 'Scan code-barres', 'Produit emballé avec code EAN.')}
-        ${modeButton(MODES.PHOTO_FOOD, '📷', 'Photo aliment libre', 'Photo + description, puis estimation IA.')}
+        ${modeButton(MODES.PHOTO_FOOD, '📷', 'Photo plat', 'Photo analysée par Groq Vision, puis validation.')}
         ${modeButton(MODES.NUTRITION_TABLE, '📊', 'Tableau nutritionnel', 'Photo/OCR des valeurs pour 100 g.')}
         ${modeButton(MODES.RECIPE, '🍲', 'Recette', 'Ingrédients ou préparation à convertir en portions.')}
         ${modeButton(MODES.IA_TEXT, '⚡', 'Coller / IA', 'Texte libre, repas restaurant, liste d’aliments.')}
@@ -469,7 +524,7 @@
     const m = item ? macrosForQty(item, qty) : null;
     const preview = m ? `<div class="capture-meal-preview">
       <strong>${escapeHtml(item.nom || 'Aliment')}</strong>
-      <div class="capture-macros">🔥 ${Math.round(m.kcal)} kcal · 🍖 ${round1(m.prot)}g · 🍞 ${round1(m.gluc)}g · 🥑 ${round1(m.lip)}g</div>
+      <div class="capture-macros">${captureMacroSummaryHTML(m)}</div>
       <div class="capture-meal-qty">${qty} g</div>
     </div>` : '';
     return `
@@ -504,9 +559,14 @@
       ? 'Cadre le tableau nutritionnel, puis prends la photo. Tu pourras corriger l’OCR avant IA.'
       : isRecipe
         ? 'Cadre la recette ou la liste d’ingrédients, puis prends la photo. Tu pourras corriger l’OCR avant IA.'
-        : 'Cadre ton plat si tu veux garder une photo. L’estimation reste basée sur ta description texte.';
+        : 'Cadre ton plat ou choisis une photo existante. Groq Vision proposera les aliments et quantités, puis tu valideras avant ajout.';
     return `
       <div class="capture-help">${escapeHtml(modeHint)}</div>
+      <input id="capture-photo-file" type="file" accept="image/*" capture="environment" hidden>
+      <div class="capture-photo-camera-actions capture-photo-source-actions">
+        <button type="button" class="btn-primary" data-action="choose-photo-file">📷 Prendre / choisir une photo</button>
+        <button type="button" data-action="start-photo-camera">Ouvrir la caméra intégrée</button>
+      </div>
       <div class="capture-camera-box capture-photo-camera-box" id="capture-photo-camera-box" hidden>
         <video id="capture-photo-video" playsinline muted autoplay></video>
         <div class="capture-scan-frame"></div>
@@ -519,12 +579,11 @@
       <div class="capture-preview" id="capture-image-preview" ${state.imageDataUrl ? '' : 'hidden aria-hidden="true"'}>${state.imageDataUrl ? `<img src="${state.imageDataUrl}" alt="Photo capturée">` : ''}</div>
       ${isPhotoFood ? `
         <div class="capture-field-row">
-          <label>Description du plat</label>
-          <textarea id="capture-photo-desc" placeholder="Ex : assiette restaurant : boeuf grillé, pommes sautées, choux de Bruxelles…">${escapeHtml(state.aiText || '')}</textarea>
+          <label>Précisions optionnelles</label>
+          <textarea id="capture-photo-desc" placeholder="Ex : restaurant entreprise, sauce à part, riz plutôt petit volume…">${escapeHtml(state.aiText || '')}</textarea>
         </div>
-        <div class="capture-help">Pour l’instant Groq texte n’analyse pas réellement l’image. La photo sert de support visuel, l’estimation se fait sur ta description.</div>` : ''}`;
+        <div class="capture-help">La photo est envoyée temporairement au serveur pour Groq Vision. Aucune image n’est stockée et rien n’est ajouté au journal tant que tu ne valides pas les cartes.</div>` : ''}`;
   }
-
 
   function renderInlineCrop() {
     if (!state.imageDataUrl) {
@@ -551,13 +610,22 @@
 
   function renderOcrReview() {
     const label = state.current === STATES.NUTRITION_TABLE_OCR ? 'Texte détecté sur le tableau nutritionnel' : 'Texte détecté sur la recette';
+    const summary = state.ocrPassSummary ? renderOcrPassSummary(state.ocrPassSummary) : '';
     return `
       ${state.imageDataUrl ? `<img class="capture-image-small" src="${state.imageDataUrl}" alt="Image OCR">` : ''}
+      ${summary}
       <div class="capture-field-row">
         <label>${label}</label>
         <textarea id="capture-ocr-text" class="capture-large-textarea" placeholder="Le résultat OCR apparait ici. Tu peux corriger avant IA.">${escapeHtml(state.ocrText || '')}</textarea>
       </div>
-      <div class="capture-help">Une OCR vide ou illisible doit rester visible : FoodNote ne revient plus silencieusement en arrière.</div>`;
+      <div class="capture-help">FoodNote lance maintenant plusieurs passes OCR automatiquement. Si le texte reste mauvais, corrige-le ou utilise le bouton Groq en secours, sans créer de doublon de parcours.</div>`;
+  }
+
+  function renderOcrPassSummary(summary) {
+    const quality = summary.quality || 'à vérifier';
+    const label = summary.bestLabel || 'meilleure passe automatique';
+    const attempts = Array.isArray(summary.attempts) ? summary.attempts.length : 0;
+    return `<div class="capture-help"><strong>OCR automatique :</strong> ${escapeHtml(quality)} · ${escapeHtml(label)}${attempts ? ` · ${attempts} passe${attempts > 1 ? 's' : ''}` : ''}</div>`;
   }
 
   function renderAiInput() {
@@ -672,8 +740,8 @@
           <input id="rc-qty-slider" type="range" min="5" max="${maxQty}" step="5" value="${qty}" class="capture-qty-slider">
           <input id="rc-qty-input" class="nutr-confirm-input" type="number" min="1" step="1" value="${qty}">
         </div>
-        <div class="nutr-confirm-macros" id="rc-consumed-macros">
-          <span>🔥 ${kcalQ} kcal</span><span>🥩 ${protQ} g</span><span>🍞 ${glucQ} g</span><span>🥑 ${lipQ} g</span>
+        <div class="nutr-confirm-macros capture-macros" id="rc-consumed-macros">
+          ${captureMacroSummaryHTML({ kcal: kcalQ, prot: protQ, gluc: glucQ, lip: lipQ }, { compact: false })}
         </div>
         <div class="capture-help">Le nom, le poids total et les valeurs pour 100 g restent éditables avant ajout.</div>
       </div>`;
@@ -689,9 +757,15 @@
     if (disp) disp.textContent = Math.round(qty);
     const box = $('#rc-consumed-macros');
     if (box) {
-      box.innerHTML = `<span>🔥 ${Math.round(kcal100 * qty / 100)} kcal</span><span>🥩 ${round1(prot100 * qty / 100)} g</span><span>🍞 ${round1(gluc100 * qty / 100)} g</span><span>🥑 ${round1(lip100 * qty / 100)} g</span>`;
+      box.innerHTML = captureMacroSummaryHTML({
+        kcal: Math.round(kcal100 * qty / 100),
+        prot: round1(prot100 * qty / 100),
+        gluc: round1(gluc100 * qty / 100),
+        lip: round1(lip100 * qty / 100)
+      }, { compact: false });
     }
   }
+
 
   function renderIaTextResults() {
     if (!state.results.length) return '<div class="capture-empty">Aucun aliment IA à valider.</div>';
@@ -735,18 +809,65 @@
     };
   }
 
+  function iaTextNutritionSummaryContent(item, qty) {
+    const m = iaTextMacrosForQty(item, qty);
+    return captureMacroSummaryHTML(m, { compact: false, suffix: `pour ${round1(qty)} g` });
+  }
+
   function iaTextMacroEditHtml(item, idx, qty) {
     const m = iaTextMacrosForQty(item, qty);
+    // V6 : bloc nutrition autonome et visible.
+    // Rôle : afficher et modifier kcal/prot/gluc/lip reçus du serveur pour la quantité validée.
+    // Ne doit pas gérer : calcul serveur, appel Groq ou écriture SQLite directe.
     return `
-      <div class="capture-ia-macro-edit-grid" id="ia-row-macros-${idx}">
-        <div class="capture-ia-macro-box"><span>🔥 Kcal</span><input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="kcal" type="number" min="0" step="1" value="${Math.round(m.kcal)}"></div>
-        <div class="capture-ia-macro-box"><span>🍖 Prot.</span><input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="prot" type="number" min="0" step="0.1" value="${round1(m.prot)}"></div>
-        <div class="capture-ia-macro-box"><span>🍞 Gluc.</span><input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="gluc" type="number" min="0" step="0.1" value="${round1(m.gluc)}"></div>
-        <div class="capture-ia-macro-box"><span>🥑 Lip.</span><input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="lip" type="number" min="0" step="0.1" value="${round1(m.lip)}"></div>
-      </div>`;
+      <section class="capture-ia-nutrition-visible" id="capture-ia-macros-${idx}" aria-label="Calories et nutriments estimés">
+        <div class="capture-ia-nutrition-visible-head">
+          <strong>Calories / nutriments</strong>
+          <small>pour ${round1(qty)} g</small>
+        </div>
+        <div class="capture-ia-nutrition-visible-grid">
+          <label class="capture-ia-nutrition-visible-cell">
+            <span>🔥 kcal</span>
+            <input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="kcal" type="number" min="0" step="1" value="${Math.round(m.kcal)}">
+          </label>
+          <label class="capture-ia-nutrition-visible-cell">
+            <span>🍖 prot.</span>
+            <input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="prot" type="number" min="0" step="0.1" value="${round1(m.prot)}">
+          </label>
+          <label class="capture-ia-nutrition-visible-cell">
+            <span>🍞 gluc.</span>
+            <input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="gluc" type="number" min="0" step="0.1" value="${round1(m.gluc)}">
+          </label>
+          <label class="capture-ia-nutrition-visible-cell">
+            <span>🥑 lip.</span>
+            <input class="capture-ia-macro-input" data-ia-idx="${idx}" data-macro="lip" type="number" min="0" step="0.1" value="${round1(m.lip)}">
+          </label>
+        </div>
+      </section>`;
+  }
+
+  function visionConfidenceHtml(item) {
+    const type = visionItemTypeLabel(item?.item_type || item?.food_type || item?.type || '');
+    const food = confidenceLabel(item?.confidence_food || item?.confiance_aliment || '');
+    const qty = confidenceLabel(item?.confidence_quantity || item?.confiance_quantite || item?.confiance_quantité || '');
+    const notes = String(item?.notes || item?.note || '').trim();
+    if (!type && !food && !qty && !notes) return '';
+    const bits = [];
+    if (type) bits.push('type : ' + type);
+    if (food) bits.push('aliment : ' + food);
+    if (qty) bits.push('quantité : ' + qty);
+    const source = String(item?.nutrition_source || '').trim();
+    if (source === 'groq_batch_obligatoire' || source === 'groq_batch_obligatoire_v4') bits.push('nutrition : Groq batch');
+    else if (source === 'groq_batch') bits.push('nutrition : Groq batch');
+    else if (source === 'ciqual') bits.push('nutrition : CIQUAL');
+    else if (source === 'base_personnelle') bits.push('nutrition : base personnelle');
+    if (notes) bits.push(notes);
+    return `<div class="capture-help capture-vision-confidence">${escapeHtml(bits.join(' · '))}</div>`;
   }
 
   function iaTextResultCard(item, idx) {
+    // Photo plat / IA : le nom proposé par Groq est une prédiction, donc il reste éditable
+    // avant validation au même titre que le poids et les nutriments.
     if (item._selectedForAdd === undefined) item._selectedForAdd = !item._addedToJournal;
     ensureIaTextPer100(item);
     const qty = Math.max(1, clampNumber(item.qty || item.defaut, 100));
@@ -759,15 +880,20 @@
         <div class="capture-ia-card-top">
           <label class="capture-ia-title-check">
             <input class="capture-ia-select" data-ia-idx="${idx}" type="checkbox" ${selected ? 'checked' : ''} ${added ? 'disabled' : ''} aria-label="Sélectionner ${escapeHtml(item.nom || item.name || 'Aliment IA')}">
-            <strong>${escapeHtml(item.nom || item.name || 'Aliment IA')}</strong>
+            <span class="capture-ia-name-wrap">
+              <small>Aliment détecté, corrigible</small>
+              <input class="capture-ia-name-input" data-ia-idx="${idx}" type="text" value="${escapeHtml(item.nom || item.name || 'Aliment IA')}" ${added ? 'disabled' : ''} aria-label="Nom de l’aliment détecté">
+            </span>
           </label>
           ${added ? '<span class="capture-source-tag ok">✓ Ajouté</span>' : sourceBadge(item)}
         </div>
+        ${visionConfidenceHtml(item)}
+        <div class="capture-macros capture-ia-macro-summary" id="capture-ia-summary-${idx}">${iaTextNutritionSummaryContent(item, qty)}</div>
 
         <div class="capture-ia-qty-compact">
           <div class="capture-ia-qty-head">
             <span>Poids consommé</span>
-            <strong id="ia-row-qty-display-${idx}">${round1(qty)} g</strong>
+            <strong id="capture-ia-qty-display-${idx}">${round1(qty)} g</strong>
           </div>
           <div class="capture-ia-qty-line">
             <input id="ia-qty-slider-${idx}" class="capture-ia-qty-slider" data-ia-idx="${idx}" type="range" min="1" max="${maxQty}" step="1" value="${round1(qty)}" ${added ? 'disabled' : ''}>
@@ -811,7 +937,7 @@
     const el = document.getElementById('capture-ia-selected-count');
     if (el) el.textContent = String(selected);
     const primary = document.querySelector('#capture-footer [data-action="confirm-selected"]');
-    if (primary && state.mode === MODES.IA_TEXT) {
+    if (primary && isIaSuggestionMode()) {
       primary.textContent = selected > 1 ? `Ajouter la sélection (${selected})` : selected === 1 ? 'Ajouter la sélection' : 'Sélection vide';
       primary.disabled = selected < 1;
     }
@@ -825,8 +951,15 @@
     const qtySlider = document.querySelector(`.capture-ia-qty-slider[data-ia-idx="${idx}"]`);
     const saveInput = document.querySelector(`.capture-ia-save-base[data-ia-idx="${idx}"]`);
     const selectInput = document.querySelector(`.capture-ia-select[data-ia-idx="${idx}"]`);
+    const nameInput = document.querySelector(`.capture-ia-name-input[data-ia-idx="${idx}"]`);
     const rawQty = qtyInput && qtyInput.value !== '' ? qtyInput.value : qtySlider && qtySlider.value !== '' ? qtySlider.value : item.qty || 100;
     const qty = Math.max(1, clampNumber(rawQty, item.qty || 100));
+    const editedName = nameInput ? String(nameInput.value || '').trim().replace(/\s{2,}/g, ' ') : '';
+    if (editedName) {
+      item.nom = editedName;
+      item.name = editedName;
+      item._nameEdited = true;
+    }
     item.qty = qty;
     item.defaut = qty;
     item.saveToBase = saveInput ? !!saveInput.checked : item.saveToBase !== false;
@@ -851,14 +984,16 @@
       item.prot = m.prot;
       item.gluc = m.gluc;
       item.lip  = m.lip;
-      const macroBox = document.getElementById('ia-row-macros-' + idx);
+      const macroBox = document.getElementById('capture-ia-macros-' + idx);
       if (macroBox) macroBox.outerHTML = iaTextMacroEditHtml(item, idx, qty);
     }
 
     if (qtyInput && Number(qtyInput.value) !== qty) qtyInput.value = round1(qty);
     if (qtySlider && Number(qtySlider.value) !== qty) qtySlider.value = round1(qty);
-    const qtyDisplay = document.getElementById('ia-row-qty-display-' + idx);
+    const qtyDisplay = document.getElementById('capture-ia-qty-display-' + idx);
     if (qtyDisplay) qtyDisplay.textContent = round1(qty) + ' g';
+    const summary = document.getElementById('capture-ia-summary-' + idx);
+    if (summary) summary.innerHTML = iaTextNutritionSummaryContent(item, qty);
     const card = document.querySelector(`.capture-ia-result-card[data-ia-row="${idx}"]`);
     if (card) card.classList.toggle('selected', item._selectedForAdd !== false);
     updateIaTextSelectionSummary();
@@ -916,7 +1051,8 @@
     if (src.includes('ciqual') || src === 'ciq') return '<span class="capture-source-tag ciq">🌿 CIQUAL</span>';
     if (src.includes('recipe') || src.includes('recette')) return '<span class="capture-source-tag recipe">🍲 Recette</span>';
     if (src.includes('openfoodfacts') || src === 'off') return '<span class="capture-source-tag off">🛒 OFF</span>';
-    if (src === 'ia' || src === 'groq') return '<span class="capture-source-tag ia">✨ IA</span>';
+    if (src.includes('vision')) return '<span class="capture-source-tag ia">📷 IA photo</span>';
+    if (src === 'ia' || src === 'groq' || src.includes('groq')) return '<span class="capture-source-tag ia">✨ IA</span>';
     return '<span class="capture-source-tag base">💾 Base</span>';
   }
 
@@ -934,7 +1070,7 @@
             ${sourceBadge(item)}
           </div>
           ${brand}
-          <div class="capture-macros">🔥 ${Math.round(m.kcal)} kcal · 🍖 ${round1(m.prot)}g · 🍞 ${round1(m.gluc)}g · 🥑 ${round1(m.lip)}g</div>
+          <div class="capture-macros">${captureMacroSummaryHTML(m)}</div>
         </div>
         <div class="capture-result-qty"><span>${round1(qty)}</span><small>${escapeHtml(item.unite || item.unit || 'g')}</small></div>
       </label>`;
@@ -1083,7 +1219,7 @@
         }
         updateRecipeConfirmPreview();
       }
-      if (ev.target && ev.target.matches && (ev.target.matches('.capture-ia-qty-input') || ev.target.matches('.capture-ia-qty-slider') || ev.target.matches('.capture-ia-save-base') || ev.target.matches('.capture-ia-select') || ev.target.matches('.capture-ia-macro-input'))) {
+      if (ev.target && ev.target.matches && (ev.target.matches('.capture-ia-name-input') || ev.target.matches('.capture-ia-qty-input') || ev.target.matches('.capture-ia-qty-slider') || ev.target.matches('.capture-ia-save-base') || ev.target.matches('.capture-ia-select') || ev.target.matches('.capture-ia-macro-input'))) {
         const idx = clampNumber(ev.target.getAttribute('data-ia-idx'), -1);
         if (idx >= 0) {
           let source = 'auto';
@@ -1097,6 +1233,8 @@
             if (s) s.value = ev.target.value;
           } else if (ev.target.matches('.capture-ia-macro-input')) {
             source = 'macro';
+          } else if (ev.target.matches('.capture-ia-name-input')) {
+            source = 'name';
           }
           syncIaTextRowFromInputs(idx, source);
         }
@@ -1122,13 +1260,17 @@
     document.addEventListener('change', async (ev) => {
       const target = ev.target;
       if (!target || !target.closest || !target.closest('#capture-workflow-modal')) return;
+      if (target.id === 'capture-photo-file') {
+        await loadSelectedImage(target.files && target.files[0]);
+        return;
+      }
       if (target.name === 'capture-result') {
         if (state.current === STATES.SEARCH_FOOD && state.mode === MODES.SEARCH) {
           applyCaptureSearchSelection(target.value, { source:'capture-result-change' });
           return;
         }
         state.selectedIndex = clampNumber(target.value, 0);
-        if (state.mode === MODES.IA_TEXT) syncAllIaTextRowsFromInputs();
+        if (isIaSuggestionMode()) syncAllIaTextRowsFromInputs();
         render();
       }
       if (target.matches && (target.matches('.capture-ia-save-base') || target.matches('.capture-ia-select'))) {
@@ -1161,6 +1303,7 @@
         schedulePhotoCameraStart();
         return;
       }
+      if (action === 'choose-photo-file') { document.getElementById('capture-photo-file')?.click(); return; }
       if (action === 'start-photo-camera') return startPhotoCamera();
       if (action === 'stop-photo-camera') return stopPhotoCameraOnly();
       if (action === 'capture-photo-frame') return capturePhotoFrame();
@@ -1168,6 +1311,8 @@
       if (action === 'use-photo') return continueAfterPhoto();
       if (action === 'read-crop') return continueAfterInlineCrop();
       if (action === 'analyse-ocr') return analyseOcrText();
+      if (action === 'groq-nutrition-label-fallback') return runNutritionLabelGroqFallback();
+      if (action === 'groq-recipe-photo-fallback') return runRecipePhotoGroqFallback();
       if (action === 'run-ai') return runAiFromInput();
       if (action === 'confirm-selected') return confirmSelected();
       if (action === 'select-all-ia') { setAllIaTextSelection(true); return; }
@@ -1251,7 +1396,7 @@
     } else if (state.mode === MODES.PHOTO_FOOD || state.mode === MODES.NUTRITION_TABLE || state.mode === MODES.RECIPE) {
       transition(STATES.PHOTO_CAPTURE, { mode: state.mode });
       schedulePhotoCameraStart();
-    } else if (state.mode === MODES.IA_TEXT) {
+    } else if (isIaSuggestionMode()) {
       transition(STATES.AI_ANALYSIS, { mode: state.mode });
     } else {
       fail('Mode de capture inconnu : ' + state.mode);
@@ -1680,17 +1825,25 @@
 
   function normalizeNutritionOcrLine(line) {
     return cleanOcrLine(line)
+      .replace(/\u00a0/g, ' ')
       .replace(/[’`´]/g, "'")
       .replace(/[|¦]/g, ' ')
+      .replace(/[•·]/g, ' ')
       .replace(/([0-9])\s*[oO]\s*([0-9])/g, '$1 0 $2')
+      .replace(/([0-9])\s*[lI]\s*([0-9])/g, '$1 1 $2')
+      .replace(/\b[oO](?=\s*(?:g|kcal|kj|,|\.))/g, '0')
       .replace(/k\s*[cç]?[a4][l1iI]/gi, 'kcal')
+      .replace(/kcai|kcaI|kca1/gi, 'kcal')
       .replace(/k\s*j/gi, 'kJ')
-      .replace(/protei?nes?/gi, 'protéines')
-      .replace(/proteines?/gi, 'protéines')
-      .replace(/gluc[li]des?/gi, 'glucides')
+      .replace(/[ée]ner[gjq]ie/gi, 'énergie')
+      .replace(/protei?nes?|prot[eé]lnes?|prot[eé]ines?/gi, 'protéines')
+      .replace(/proteins?/gi, 'protein')
+      .replace(/gluc[li1]des?|gIucides?/gi, 'glucides')
+      .replace(/carbohydrat(?:es)?/gi, 'carbohydrates')
       .replace(/mati[eèé]res?\s+grasses?/gi, 'matières grasses')
       .replace(/matieres?\s+grasses?/gi, 'matières grasses')
-      .replace(/lip[li]des?/gi, 'lipides')
+      .replace(/lip[li1]des?/gi, 'lipides')
+      .replace(/\bfa[tl]\b/gi, 'fat')
       .replace(/\s{2,}/g, ' ')
       .trim();
   }
@@ -1700,6 +1853,17 @@
       .split(/\r?\n/)
       .map(normalizeNutritionOcrLine)
       .filter(l => l.length > 1);
+  }
+
+  function repairOcrNumberText(text) {
+    return String(text || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/([0-9])\s*,\s*([0-9])/g, '$1,$2')
+      .replace(/([0-9])\s*\.\s*([0-9])/g, '$1.$2')
+      .replace(/\b([0-9])\s+[oO]\s*([0-9])\b/g, (_, a, b) => a + '0' + b)
+      .replace(/\b([0-9])\s+[lI]\s*([0-9])\b/g, (_, a, b) => a + '1' + b)
+      .replace(/\b([oO])(?=\d)/g, '0')
+      .replace(/(?<=\d)[oO]\b/g, '0');
   }
 
   function ocrLineKey(line) {
@@ -1826,6 +1990,86 @@
   }
 
 
+
+  function isUsableNutritionTableResult(item) {
+    if (!item) return false;
+    const kcal = Number(item.kcal || 0);
+    const macros = [item.prot, item.gluc, item.lip].filter(v => Number(v) > 0).length;
+    return kcal > 0 && macros >= 2;
+  }
+
+  function scoreNutritionTableOcrText(text) {
+    const repaired = repairOcrNumberText(text);
+    const lines = normalizeNutritionOcrText(repaired);
+    const parsed = parseNutritionTableOcr(repaired)[0] || null;
+    let score = 0;
+    const flags = [];
+    const joined = ocrLineKey(lines.join(' '));
+    if (lines.length >= 4) { score += 10; flags.push('lignes'); }
+    if (/pour\s*100\s*g|par\s*100\s*g|per\s*100\s*g|100\s*g/.test(joined)) { score += 8; flags.push('100g'); }
+    if (lines.some(l => /kcal|energie|energy|calorie/i.test(l))) { score += 18; flags.push('énergie'); }
+    if (lines.some(l => /prot[eé]?ine|protein/i.test(l))) { score += 14; flags.push('protéines'); }
+    if (lines.some(l => /glucide|carbo|hydrate/i.test(l))) { score += 14; flags.push('glucides'); }
+    if (lines.some(l => /lipide|mati[eèé]re grasse|graisse|fat/i.test(l))) { score += 14; flags.push('lipides'); }
+    if (parsed) {
+      if (Number(parsed.kcal) > 0) score += 14;
+      const macroValues = [parsed.prot, parsed.gluc, parsed.lip].map(v => Number(v || 0));
+      const macroCount = macroValues.filter(v => v > 0).length;
+      score += macroCount * 6;
+      if (macroValues.some(v => v > 100)) score -= 18;
+      if (Number(parsed.kcal) > 900) score -= 12;
+      const macroKcal = Number(parsed.prot || 0) * 4 + Number(parsed.gluc || 0) * 4 + Number(parsed.lip || 0) * 9;
+      if (Number(parsed.kcal) > 0 && macroKcal > 0) {
+        const delta = Math.abs(Number(parsed.kcal) - macroKcal) / Math.max(Number(parsed.kcal), macroKcal, 1);
+        if (delta < 0.35) { score += 12; flags.push('cohérence'); }
+        else if (delta < 0.6) score += 4;
+        else { score -= 10; flags.push('incohérence'); }
+      }
+    }
+    const digitCount = (repaired.match(/\d/g) || []).length;
+    if (digitCount >= 8) score += 4;
+    if (!String(repaired || '').trim()) score = 0;
+    return { score: Math.max(0, Math.min(100, Math.round(score))), details: flags.join(', ') };
+  }
+
+  function scoreRecipeOcrText(text) {
+    const grid = reconstructRecipeGridOcr(text);
+    const cleaned = cleanRecipeOcr(repairOcrNumberText(text));
+    const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    let score = Math.min(28, lines.length * 7);
+    const joined = cleaned.toLowerCase();
+    const numberCount = (joined.match(/\d+(?:[.,]\d+)?/g) || []).length;
+    const unitCount = (joined.match(/\b(?:g|kg|ml|cl|l|cuill[eè]res?|c[àa]s|c[àa]c|sachets?|oeufs?|œufs?|poign[ée]es?|pinc[ée]es?|tranches?|bo[iî]tes?)\b/g) || []).length;
+    const foodWords = (joined.match(/farine|sucre|huile|beurre|oeuf|œuf|riz|p[aâ]tes?|semoule|tomate|poulet|viande|lait|cr[eè]me|fromage|l[eé]gume|pomme|banane|thon|saumon|chocolat|avoine|yaourt|skyr|lentilles?|haricots?|courgettes?|carottes?|oignons?|ail|citron|sel|p[ée]pites?/g) || []).length;
+    const pairedLines = countRecipePairedLines(cleaned);
+    score += Math.min(22, numberCount * 5);
+    score += Math.min(22, unitCount * 7);
+    score += Math.min(18, foodWords * 3);
+    score += Math.min(28, pairedLines * 9);
+    if (grid) score += 18;
+    if (cleaned.length > 40) score += 6;
+    if (cleaned.length > 120) score += 4;
+    if (/pr[ée]paration|ingr[ée]dients?|recette/i.test(text)) score += 4;
+    if (pairedLines < 2 && numberCount >= 3) score -= 18;
+    if (/["#~_|]{2,}|[A-Z]{1}\s+["']\s+[a-z]/.test(text)) score -= 8;
+    return {
+      score: Math.max(0, Math.min(100, Math.round(score))),
+      details: grid ? `${pairedLines} paires, grille reconstruite` : `${lines.length} lignes, ${pairedLines} paires, ${unitCount} unités`
+    };
+  }
+
+  function ocrQualityLabel(score, profile) {
+    const n = Number(score || 0);
+    if (profile === 'nutrition_table') {
+      if (n >= 86) return 'bonne';
+      if (n >= 58) return 'moyenne';
+      return 'faible, à vérifier';
+    }
+    if (n >= 78) return 'bonne';
+    if (n >= 48) return 'moyenne';
+    return 'faible, à vérifier';
+  }
+
   function normalizeCropRect(rect) {
     const source = rect || {};
     let x = Number(source.x), y = Number(source.y), w = Number(source.w), h = Number(source.h);
@@ -1935,15 +2179,20 @@
 
   async function continueAfterInlineCrop() {
     if (state.mode !== MODES.NUTRITION_TABLE && state.mode !== MODES.RECIPE) return continueAfterPhoto();
-    setBusy(true, state.mode === MODES.NUTRITION_TABLE ? 'OCR du tableau recadré…' : 'OCR de la recette recadrée…');
+    setBusy(true, state.mode === MODES.NUTRITION_TABLE ? 'OCR automatique du tableau recadré…' : 'OCR automatique de la recette recadrée…');
     try {
       const cropped = await cropCurrentImageDataUrl();
       state.imageDataUrl = cropped;
-      const rawText = state.mode === MODES.NUTRITION_TABLE ? await runNutritionTableOCR(cropped) : await runOCR(cropped);
+      state.ocrPassSummary = null;
+      const ocr = state.mode === MODES.NUTRITION_TABLE
+        ? await runNutritionTableOCR(cropped)
+        : await runRecipeOCR(cropped);
+      const rawText = typeof ocr === 'string' ? ocr : (ocr.text || '');
+      state.ocrPassSummary = typeof ocr === 'object' ? ocr.summary : null;
       if (state.mode === MODES.NUTRITION_TABLE) {
         state.ocrRaw = rawText;
         const parsed = parseNutritionTableOcr(rawText);
-        if (parsed.length) {
+        if (parsed.length && isUsableNutritionTableResult(parsed[0])) {
           state.results = parsed;
           state.selectedIndex = 0;
           setBusy(false);
@@ -1977,20 +2226,22 @@
       return;
     }
     if (state.mode === MODES.PHOTO_FOOD) {
-      const desc = ($('#capture-photo-desc')?.value || '').trim();
-      if (!desc) throw new Error('Photo aliment libre : ajoute une description du plat pour que Groq puisse estimer.');
-      state.aiText = desc;
-      transition(STATES.AI_ANALYSIS);
+      await runVisionMealAnalysis();
       return;
     }
-    setBusy(true, 'OCR en cours…');
+    setBusy(true, 'OCR automatique en cours…');
     try {
-      const rawText = state.mode === MODES.NUTRITION_TABLE ? await runNutritionTableOCR(state.imageDataUrl) : await runOCR(state.imageDataUrl);
+      state.ocrPassSummary = null;
+      const ocr = state.mode === MODES.NUTRITION_TABLE
+        ? await runNutritionTableOCR(state.imageDataUrl)
+        : await runRecipeOCR(state.imageDataUrl);
+      const rawText = typeof ocr === 'string' ? ocr : (ocr.text || '');
+      state.ocrPassSummary = typeof ocr === 'object' ? ocr.summary : null;
       if (state.mode === MODES.NUTRITION_TABLE) {
-        state.ocrRaw = rawText; // garder pour debug
+        state.ocrRaw = rawText; // garder pour diagnostic discret
         const parsed = parseNutritionTableOcr(rawText);
-        if (!parsed.length) {
-          // Fallback : montrer le texte brut dans une textarea pour correction manuelle
+        if (!parsed.length || !isUsableNutritionTableResult(parsed[0])) {
+          // Fallback : montrer le meilleur texte brut dans une textarea pour correction manuelle ou Groq.
           state.ocrText = rawText.trim();
           setBusy(false);
           transition(STATES.NUTRITION_TABLE_OCR);
@@ -2015,62 +2266,426 @@
     }
   }
 
-  function preprocessImageForOcr(dataUrl, profile = 'default') {
+  function dataUrlApproxBytes(dataUrl) {
+    const base64 = String(dataUrl || '').split(',')[1] || '';
+    return Math.ceil(base64.length * 3 / 4);
+  }
+
+  function compressImageForVision(dataUrl, options = {}) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = options.maxSide || 1536;
+        const maxBytes = options.maxBytes || Math.floor(3.75 * 1024 * 1024);
+        const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || img.width || 1, img.naturalHeight || img.height || 1));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width || 1) * scale));
+        canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height || 1) * scale));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        let quality = options.quality || 0.82;
+        let out = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrlApproxBytes(out) > maxBytes && quality > 0.48) {
+          quality = Math.max(0.48, quality - 0.08);
+          out = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(out);
+      };
+      img.onerror = () => reject(new Error('Image illisible pour l’analyse vision.'));
+      img.src = dataUrl;
+    });
+  }
+
+  function rowFromVisionServerSuggestion(obj) {
+    if (!obj || typeof obj !== 'object') return null;
+    const nom = pickObjectText(obj, ['nom', 'name', 'aliment', 'food', 'plat'], '').replace(/^[-*•]\s*/, '').trim();
+    if (!nom || /quantit|kcal|prot/i.test(nom)) return null;
+    const nutrition = obj.nutrition || obj.nutriments || obj.macros || obj.macro || {};
+    const qty = Math.max(1, numberFromAny(obj.qty ?? obj.defaut ?? obj.quantity_g ?? obj.quantite ?? obj['quantité'] ?? nutrition.qty ?? nutrition.quantity_g, 100));
+    let kcal = numberFromAny(obj.kcal ?? obj.calories ?? obj.energy_kcal ?? nutrition.kcal ?? nutrition.calories ?? nutrition.energy_kcal, 0);
+    let prot = numberFromAny(obj.prot ?? obj.proteines ?? obj['protéines'] ?? obj.protein ?? obj.proteins ?? nutrition.prot ?? nutrition.proteines ?? nutrition['protéines'] ?? nutrition.protein ?? nutrition.proteins, 0);
+    let gluc = numberFromAny(obj.gluc ?? obj.glucides ?? obj.carbs ?? obj.carbohydrates ?? nutrition.gluc ?? nutrition.glucides ?? nutrition.carbs ?? nutrition.carbohydrates, 0);
+    let lip = numberFromAny(obj.lip ?? obj.lipides ?? obj.fat ?? obj.graisses ?? nutrition.lip ?? nutrition.lipides ?? nutrition.fat ?? nutrition.graisses, 0);
+    const kcal100 = numberFromAny(obj.kcal100 ?? obj.kcal_100g ?? nutrition.kcal100 ?? nutrition.kcal_100g, 0);
+    const prot100 = numberFromAny(obj.prot100 ?? obj.prot_100g ?? nutrition.prot100 ?? nutrition.prot_100g, 0);
+    const gluc100 = numberFromAny(obj.gluc100 ?? obj.gluc_100g ?? nutrition.gluc100 ?? nutrition.gluc_100g, 0);
+    const lip100 = numberFromAny(obj.lip100 ?? obj.lip_100g ?? nutrition.lip100 ?? nutrition.lip_100g, 0);
+    if (!kcal && kcal100 > 0) kcal = kcal100 * qty / 100;
+    if (!prot && prot100 > 0) prot = prot100 * qty / 100;
+    if (!gluc && gluc100 > 0) gluc = gluc100 * qty / 100;
+    if (!lip && lip100 > 0) lip = lip100 * qty / 100;
+    const row = makeIaNutritionRow(nom, qty, kcal, prot, gluc, lip);
+    if (kcal100 > 0) row.kcal100 = Math.round(kcal100);
+    if (prot100 > 0) row.prot100 = round1(prot100);
+    if (gluc100 > 0) row.gluc100 = round1(gluc100);
+    if (lip100 > 0) row.lip100 = round1(lip100);
+    return row;
+  }
+
+  function normalizeVisionMealSuggestions(payload) {
+    const rawList = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.suggestions)
+        ? payload.suggestions
+        : Array.isArray(payload?.items)
+          ? payload.items
+          : Array.isArray(payload?.aliments)
+            ? payload.aliments
+            : [];
+    return rawList.map((obj, idx) => {
+      const row = rowFromVisionServerSuggestion(obj) || rowFromNutritionObject(obj);
+      if (!row) return null;
+      row.source = 'Groq Vision';
+      row.item_type = pickObjectText(obj, ['item_type', 'food_type', 'type', 'categorie', 'category'], 'aliment_simple');
+      row.decomposition_recommended = !!(obj?.decomposition_recommended || obj?.decomposition || obj?.decomposer);
+      row.saveToBase = obj?.save_to_base === false || row.item_type === 'incertain' ? false : true;
+      row._selectedForAdd = true;
+      row.confidence_food = pickObjectText(obj, ['confidence_food', 'confiance_aliment', 'confiance', 'food_confidence'], '');
+      row.confidence_quantity = pickObjectText(obj, ['confidence_quantity', 'confiance_quantite', 'confiance_quantité', 'quantity_confidence'], '');
+      row.notes = pickObjectText(obj, ['notes', 'note', 'commentaire', 'reason'], row.item_type === 'plat_compose' ? 'Plat composé : détail des ingrédients non estimé depuis la photo.' : '');
+      row.nutrition_source = pickObjectText(obj, ['nutrition_source', 'source_nutrition'], '');
+      row._visionIndex = idx;
+      return row;
+    }).filter(Boolean);
+  }
+
+  function assertVisionMealNutritionRows(rows, payload) {
+    if (!Array.isArray(rows) || !rows.length) {
+      const names = Array.isArray(payload?.missing_nutrition) ? payload.missing_nutrition.join(', ') : '';
+      const suffix = names ? ' Aliments incomplets : ' + names + '.' : '';
+      throw new Error((payload?.error || 'Groq Vision n’a pas renvoyé de calories/macros exploitables.') + suffix);
+    }
+    const bad = rows.filter(row => !(Number(row.kcal) > 0 && (Number(row.prot) > 0 || Number(row.gluc) > 0 || Number(row.lip) > 0)));
+    if (bad.length) {
+      throw new Error('Analyse photo incomplète : calories/macros absents pour ' + bad.map(x => x.nom || 'aliment').join(', ') + '.');
+    }
+  }
+
+  async function runVisionMealAnalysis() {
+    if (!state.imageDataUrl) throw new Error('Photo plat : prends ou choisis une photo avant analyse.');
+    const note = ($('#capture-photo-desc')?.value || '').trim();
+    state.aiText = note;
+    setBusy(true, 'Groq Vision analyse la photo du plat…');
+    try {
+      const image = await compressImageForVision(state.imageDataUrl);
+      const res = await fetch('/api/groq/vision-meal', {
+        method: 'POST',
+        headers: apiUserHeaders({ 'Content-Type': 'application/json', 'Accept': 'application/json' }),
+        body: JSON.stringify({ image, note, meal: state.targetMeal || 'lunch' })
+      });
+      const data = await res.json().catch(() => ({}));
+      let parsed = normalizeVisionMealSuggestions(data);
+      // Si le serveur joint une table de normalisation nutritionnelle, elle sert de filet de sécurité
+      // quand la réponse principale ne contient pas encore des kcal/macros exploitables.
+      const parsedLooksComplete = Array.isArray(parsed) && parsed.length && parsed.every(row => Number(row.kcal) > 0 && (Number(row.prot) > 0 || Number(row.gluc) > 0 || Number(row.lip) > 0));
+      if (!parsedLooksComplete && Array.isArray(data?.debug_nutrition) && data.debug_nutrition.length) {
+        const parsedFromDebug = normalizeVisionMealSuggestions(data.debug_nutrition);
+        if (parsedFromDebug.length) parsed = parsedFromDebug;
+      }
+      if (!res.ok || data.ok === false) throw new Error(data.error || data.message || ('Erreur Groq Vision ' + res.status));
+      assertVisionMealNutritionRows(parsed, data);
+      if (typeof window.fnIARecordGroqUsage === 'function') {
+        window.fnIARecordGroqUsage({ feature: 'Photo plat', model: data.model || 'Groq Vision', usage: data.usage, usage_summary: data.usage_summary, image_bytes: data.image_bytes, rate_limits: data.rate_limits });
+      }
+      state.results = parsed;
+      state.selectedIndex = 0;
+      setBusy(false);
+      transition(STATES.CONFIRM_FOOD, { results: parsed });
+    } catch (e) {
+      setBusy(false);
+      fail(e.message || String(e));
+    }
+  }
+
+  function rotateCanvasSource(ctx, img, width, height, rotation) {
+    const angle = Number(rotation || 0) % 360;
+    if (angle === 90) { ctx.translate(width, 0); ctx.rotate(Math.PI / 2); ctx.drawImage(img, 0, 0, height, width); return; }
+    if (angle === 180) { ctx.translate(width, height); ctx.rotate(Math.PI); ctx.drawImage(img, 0, 0, width, height); return; }
+    if (angle === 270 || angle === -90) { ctx.translate(0, height); ctx.rotate(-Math.PI / 2); ctx.drawImage(img, 0, 0, height, width); return; }
+    ctx.drawImage(img, 0, 0, width, height);
+  }
+
+  function trimCanvasMargins(canvas, profile = 'default') {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx || canvas.width < 80 || canvas.height < 80) return canvas;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    let minX = canvas.width, minY = canvas.height, maxX = -1, maxY = -1, ink = 0;
+    const threshold = profile === 'nutrition_table' ? 232 : 224;
+    for (let y = 0; y < canvas.height; y += 2) {
+      for (let x = 0; x < canvas.width; x += 2) {
+        const i = (y * canvas.width + x) * 4;
+        const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+        if (gray < threshold) {
+          ink += 1;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+    const sampled = Math.max(1, (canvas.width / 2) * (canvas.height / 2));
+    const inkRatio = ink / sampled;
+    if (maxX < minX || maxY < minY || inkRatio < 0.002 || inkRatio > 0.72) return canvas;
+    const pad = Math.round(Math.min(canvas.width, canvas.height) * 0.035);
+    minX = Math.max(0, minX - pad); minY = Math.max(0, minY - pad);
+    maxX = Math.min(canvas.width - 1, maxX + pad); maxY = Math.min(canvas.height - 1, maxY + pad);
+    const w = maxX - minX + 1, h = maxY - minY + 1;
+    if (w < canvas.width * 0.38 || h < canvas.height * 0.20 || (w > canvas.width * 0.94 && h > canvas.height * 0.94)) return canvas;
+    const out = document.createElement('canvas');
+    out.width = w; out.height = h;
+    const octx = out.getContext('2d');
+    octx.drawImage(canvas, minX, minY, w, h, 0, 0, w, h);
+    return out;
+  }
+
+  function adaptiveThreshold(d, w, h) {
+    const n = w * h;
+    const gray = new Float32Array(n);
+    for (let i = 0, j = 0; j < n; i += 4, j++) gray[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    const integ = new Float64Array(n);
+    for (let y = 0; y < h; y++) {
+      let rs = 0;
+      for (let x = 0; x < w; x++) {
+        const idx = y * w + x;
+        rs += gray[idx];
+        integ[idx] = (y > 0 ? integ[idx - w] : 0) + rs;
+      }
+    }
+    const half = Math.max(6, Math.floor(w / 24));
+    const t = 0.15;
+    for (let y = 0; y < h; y++) {
+      const y1 = y - half < 0 ? 0 : y - half;
+      const y2 = y + half >= h ? h - 1 : y + half;
+      for (let x = 0; x < w; x++) {
+        const x1 = x - half < 0 ? 0 : x - half;
+        const x2 = x + half >= w ? w - 1 : x + half;
+        const count = (x2 - x1 + 1) * (y2 - y1 + 1);
+        const A = (x1 > 0 && y1 > 0) ? integ[(y1 - 1) * w + (x1 - 1)] : 0;
+        const B = (y1 > 0) ? integ[(y1 - 1) * w + x2] : 0;
+        const C = (x1 > 0) ? integ[y2 * w + (x1 - 1)] : 0;
+        const D = integ[y2 * w + x2];
+        const sum = D - B - C + A;
+        const idx = y * w + x;
+        const val = (gray[idx] * count <= sum * (1 - t)) ? 0 : 255;
+        const di = idx * 4;
+        d[di] = d[di + 1] = d[di + 2] = val; d[di + 3] = 255;
+      }
+    }
+  }
+
+  function preprocessImageForOcr(dataUrl, profile = 'default', variant = 'soft', rotation = 0) {
     return new Promise(resolve => {
       const img = new Image();
       img.onload = () => {
+        const rotated = Math.abs(Number(rotation || 0)) % 180 === 90;
+        const maxSide = profile === 'nutrition_table' ? 2600 : 2200;
+        const sourceMax = Math.max(img.width, img.height, 1);
+        const baseScale = Math.min(3.8, maxSide / sourceMax);
+        const scaleBoost = variant === 'enlarge' || variant === 'bw_strong' ? 1.22 : 1;
+        const scale = Math.max(1, baseScale * scaleBoost);
+        const sourceW = Math.max(1, Math.round(img.width * scale));
+        const sourceH = Math.max(1, Math.round(img.height * scale));
         const canvas = document.createElement('canvas');
-        const maxSide = profile === 'nutrition_table' ? 2200 : 1800;
-        const scale = Math.min(3.2, maxSide / Math.max(img.width, img.height, 1));
-        canvas.width  = Math.max(1, Math.round(img.width  * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.width  = rotated ? sourceH : sourceW;
+        canvas.height = rotated ? sourceW : sourceH;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        rotateCanvasSource(ctx, img, canvas.width, canvas.height, Number(rotation || 0));
+        if (variant === 'original') {
+          resolve(trimCanvasMargins(canvas, profile).toDataURL('image/png'));
+          return;
+        }
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const d = imageData.data;
+        if (variant === 'adaptive') {
+          adaptiveThreshold(d, canvas.width, canvas.height);
+          ctx.putImageData(imageData, 0, 0);
+          resolve(trimCanvasMargins(canvas, profile).toDataURL('image/png'));
+          return;
+        }
+        let sum = 0;
+        for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+        const avg = sum / Math.max(1, d.length / 4);
+        const contrast = variant === 'bw_strong' ? 2.05 : variant === 'gray_strong' ? 1.85 : variant === 'enlarge' ? 1.62 : profile === 'nutrition_table' ? 1.50 : 1.68;
+        const threshold = variant === 'bw_strong' ? Math.max(92, Math.min(176, avg * 0.98)) : variant === 'bw' ? Math.max(96, Math.min(168, avg)) : 128;
         for (let i = 0; i < d.length; i += 4) {
           const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-          if (profile === 'nutrition_table') {
-            // Plus doux que la binarisation brutale : conserve mieux virgules, points
-            // et petites lettres des tableaux nutritionnels imprimés.
-            const contrasted = Math.max(0, Math.min(255, (gray - 128) * 1.55 + 128));
-            d[i] = d[i+1] = d[i+2] = contrasted;
-          } else {
-            // Ancien comportement conservé pour recette/photo : noir/blanc lisible.
-            const val = gray > 128 ? 255 : 0;
-            d[i] = d[i+1] = d[i+2] = val;
-          }
+          let val;
+          if (variant === 'bw' || variant === 'bw_strong') val = gray > threshold ? 255 : 0;
+          else val = Math.max(0, Math.min(255, (gray - 128) * contrast + 128));
+          d[i] = d[i+1] = d[i+2] = val;
           d[i+3] = 255;
         }
         ctx.putImageData(imageData, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
+        resolve(trimCanvasMargins(canvas, profile).toDataURL('image/png'));
       };
       img.onerror = () => resolve(dataUrl);
       img.src = dataUrl;
     });
   }
 
-  async function runOCR(dataUrl, options = {}) {
+  function ocrPassesForProfile(profile) {
+    if (profile === 'nutrition_table') {
+      return [
+        { variant: 'soft', psm: '6', rotation: 0, label: 'contraste doux tableau' },
+        { variant: 'adaptive', psm: '6', rotation: 0, label: 'seuillage adaptatif tableau' },
+        { variant: 'gray_strong', psm: '6', rotation: 0, label: 'contraste fort tableau' },
+        { variant: 'enlarge', psm: '6', rotation: 0, label: 'agrandi tableau' },
+        { variant: 'original', psm: '6', rotation: 0, label: 'image originale tableau' }
+      ];
+    }
+    return [
+      { variant: 'soft', psm: '6', rotation: 0, label: 'contraste doux recette' },
+      { variant: 'adaptive', psm: '6', rotation: 0, label: 'seuillage adaptatif recette' },
+      { variant: 'gray_strong', psm: '6', rotation: 0, label: 'contraste fort recette' },
+      { variant: 'enlarge', psm: '6', rotation: 0, label: 'agrandi recette' },
+      { variant: 'original', psm: '11', rotation: 0, label: 'texte épars recette' }
+    ];
+  }
+
+  function ocrRotationFallbackPasses(profile) {
+    if (profile === 'nutrition_table') {
+      return [
+        { variant: 'gray_strong', psm: '6', rotation: 90, label: 'rotation 90° tableau' },
+        { variant: 'gray_strong', psm: '6', rotation: 270, label: 'rotation 270° tableau' },
+        { variant: 'gray_strong', psm: '6', rotation: 180, label: 'rotation 180° tableau' }
+      ];
+    }
+    return [
+      { variant: 'gray_strong', psm: '6', rotation: 90, label: 'rotation 90° recette' },
+      { variant: 'gray_strong', psm: '6', rotation: 270, label: 'rotation 270° recette' },
+      { variant: 'original', psm: '11', rotation: 180, label: 'rotation 180° recette' }
+    ];
+  }
+
+  let _ocrWorker = null, _ocrWorkerPromise = null, _ocrPassLabel = '';
+  function getOcrWorker() {
+    if (_ocrWorkerPromise) return _ocrWorkerPromise;
+    _ocrWorkerPromise = (async () => {
+      await ensureTesseract();
+      if (!window.Tesseract || !window.Tesseract.createWorker) throw new Error('worker-unavailable');
+      const worker = await window.Tesseract.createWorker('fra+eng', 1, {
+        logger: m => {
+          if (m && m.status) {
+            const label = _ocrPassLabel ? ' · ' + _ocrPassLabel : '';
+            renderStatus('OCR' + label + ' : ' + m.status + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
+          }
+        }
+      });
+      _ocrWorker = worker;
+      return worker;
+    })().catch(e => { _ocrWorkerPromise = null; throw e; });
+    return _ocrWorkerPromise;
+  }
+
+  async function recognizeOcrPass(dataUrl, options = {}, pass = {}) {
     await ensureTesseract();
     if (!window.Tesseract) throw new Error('OCR indisponible : Tesseract.js non chargé.');
     const profile = options.profile || 'default';
-    const processed = await preprocessImageForOcr(dataUrl, profile);
-    const result = await window.Tesseract.recognize(processed, 'fra+eng', {
-      tessedit_pageseg_mode: options.psm || (profile === 'nutrition_table' ? '6' : '3'),
-      logger: m => {
-        if (m && m.status) renderStatus('OCR : ' + m.status + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
+    const processed = await preprocessImageForOcr(dataUrl, profile, pass.variant || 'soft', pass.rotation || 0);
+    const psm = pass.psm || options.psm || (profile === 'nutrition_table' ? '6' : '3');
+    // Worker Tesseract persistant (réutilisé entre passes ET scans) -> beaucoup plus rapide.
+    // Repli automatique sur l'API simple si le worker est indisponible.
+    try {
+      const worker = await getOcrWorker();
+      _ocrPassLabel = pass.label || '';
+      await worker.setParameters({ tessedit_pageseg_mode: String(psm), preserve_interword_spaces: '1' });
+      const result = await worker.recognize(processed);
+      return (result && result.data && result.data.text) || '';
+    } catch (e) {
+      const result = await window.Tesseract.recognize(processed, 'fra+eng', {
+        tessedit_pageseg_mode: psm,
+        preserve_interword_spaces: '1',
+        logger: m => {
+          if (m && m.status) {
+            const label = pass.label ? ' · ' + pass.label : '';
+            renderStatus('OCR' + label + ' : ' + m.status + (m.progress ? ' ' + Math.round(m.progress * 100) + '%' : ''));
+          }
+        }
+      });
+      return (result && result.data && result.data.text) || '';
+    }
+  }
+
+  async function runOcrPasses(dataUrl, options = {}) {
+    const profile = options.profile || 'default';
+    const passes = options.passes || ocrPassesForProfile(profile);
+    const scorer = typeof options.scorer === 'function' ? options.scorer : scoreRecipeOcrText;
+    const stopScore = Number(options.stopScore || 90);
+    let best = { text: '', score: -1, label: '', pass: null };
+    const attempts = [];
+
+    async function runPassList(passList, offset = 0) {
+      for (let i = 0; i < passList.length; i += 1) {
+        const pass = passList[i];
+        const text = await recognizeOcrPass(dataUrl, options, pass);
+        const scoreInfo = scorer(text);
+        const score = Number(scoreInfo.score || 0);
+        const label = pass.label || pass.variant || ('passe ' + (offset + i + 1));
+        attempts.push({ label, score, details: scoreInfo.details || '' });
+        if (score > best.score || (score === best.score && String(text || '').length > String(best.text || '').length)) {
+          best = { text, score, label, pass };
+        }
+        if (score >= stopScore) return true;
       }
+      return false;
+    }
+
+    const stopped = await runPassList(passes, 0);
+    const rotationThreshold = Number(options.rotationThreshold || (profile === 'nutrition_table' ? 62 : 54));
+    if (!stopped && best.score < rotationThreshold && options.autoRotate !== false) {
+      await runPassList(ocrRotationFallbackPasses(profile), passes.length);
+    }
+
+    return {
+      text: best.text || '',
+      summary: {
+        score: Math.max(0, best.score),
+        quality: ocrQualityLabel(best.score, profile),
+        bestLabel: best.label,
+        attempts
+      }
+    };
+  }
+
+  async function runOCR(dataUrl, options = {}) {
+    if (options.multiPass === false) {
+      return recognizeOcrPass(dataUrl, options, { variant: 'soft', psm: options.psm, label: 'passe unique' });
+    }
+    const result = await runOcrPasses(dataUrl, {
+      ...options,
+      profile: options.profile || 'default',
+      scorer: options.scorer || scoreRecipeOcrText,
+      stopScore: options.stopScore || 86
     });
-    return result?.data?.text || '';
+    return result.text || '';
+  }
+
+  async function runRecipeOCR(dataUrl) {
+    return runOcrPasses(dataUrl, {
+      profile: 'recipe',
+      scorer: scoreRecipeOcrText,
+      stopScore: 82
+    });
   }
 
   async function runNutritionTableOCR(dataUrl) {
-    // Tableau nutritionnel : OCR plus stable, sans changer l'UI.
-    // Une seule passe Tesseract, mais avec prétraitement plus doux et parsing renforcé.
-    const text = await runOCR(dataUrl, { profile: 'nutrition_table', psm: '6' });
-    return normalizeNutritionOcrText(text).join('\n');
+    // OCR automatique : plusieurs prétraitements sont testés sans changer le parcours utilisateur.
+    // Le meilleur texte est choisi par score nutritionnel, puis le workflow existant reprend.
+    const result = await runOcrPasses(dataUrl, {
+      profile: 'nutrition_table',
+      scorer: scoreNutritionTableOcrText,
+      stopScore: 92
+    });
+    const repaired = repairOcrNumberText(result.text);
+    return {
+      text: normalizeNutritionOcrText(repaired).join('\n'),
+      summary: result.summary
+    };
   }
-
 
   function ensureTesseract() {
     if (window.Tesseract) return Promise.resolve();
@@ -2092,9 +2707,185 @@
   }
 
   function cleanOcrLine(line) {
-    return line.replace(/^[=\-_|>\s*#~]+/, '').replace(/[<>|*~]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    return repairOcrNumberText(line)
+      .replace(/^[=\-_|>\s*#~•·]+/, '')
+      .replace(/[<>|*~]+/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
 
+
+
+
+  function normalizeRecipeOcrLexicon(text) {
+    return repairOcrNumberText(text)
+      .replace(/[œŒ]/g, 'oe')
+      .replace(/\bC?E[uµ]l\s*\(s\)/gi, 'oeufs')
+      .replace(/\bOe[uµ]l\s*\(s\)/gi, 'oeufs')
+      .replace(/\bE[uµ]l\s*\(s\)/gi, 'oeufs')
+      .replace(/\bOeuf\s*\(s\)/gi, 'oeufs')
+      .replace(/\bOeufs?\b/gi, 'oeufs')
+      .replace(/\bCEufs?\b/gi, 'oeufs')
+      .replace(/\bP[eé]pit[0o]\s*\(s\)/gi, 'pépites')
+      .replace(/\bP[eé]pito\s*\(s\)/gi, 'pépites')
+      .replace(/\bP[eé]pite\s*\(s\)/gi, 'pépites')
+      .replace(/\bBanane\s*\(s\)/gi, 'bananes')
+      .replace(/\bOeuf\s*\(s\)/gi, 'oeufs')
+      .replace(/\bSucre\s+en\s+poudre\b/gi, 'Sucre en poudre')
+      .replace(/\bCreme\s+liquide\b/gi, 'Crème liquide')
+      .replace(/\bCr[èe]me\s+liquide\b/gi, 'Crème liquide')
+      .replace(/\s{2,}/g, ' ');
+  }
+
+  function recipeGridIngredientSpecs() {
+    return [
+      { key:'farine', name:'Farine', re:/\bfarine\b/i },
+      { key:'sucre_poudre', name:'Sucre en poudre', re:/\bs[uµ]cr[eé]\b|\bp[o0]u?d?r?e\b|\bs[uµ]cr[eé]\s+(?:en\s+)?p[o0]u?d?r?e\b/i },
+      { key:'oeufs', name:'Œufs', re:/\b(?:oeufs?|eufs?|ceufs?|ceuls?|oeul|eul|ceul|[o0]euf\s*\(?s?\)?)\b/i },
+      { key:'bananes', name:'Bananes', re:/\bbananes?\b/i },
+      { key:'pepites_chocolat', name:'Pépites de chocolat noir', re:/\bp[eé]pit(?:e|es|o|0|os|0s)?\b|\bp[eé]pit[0o]\s*\(?s?\)?\b|\bchocolat\s+noir\b|\bchocolat\b/i },
+      { key:'creme_liquide', name:'Crème liquide', re:/\bcr[èe]me\s+liquide\b|\bcreme\s+liquide\b/i },
+      { key:'sel', name:'Sel', re:/\bsel\b/i }
+    ];
+  }
+
+  function findRecipeGridIngredients(text) {
+    const normalized = normalizeRecipeOcrLexicon(text);
+    const joined = normalized.replace(/\r?\n/g, ' ');
+    const items = [];
+    for (const spec of recipeGridIngredientSpecs()) {
+      const match = joined.match(spec.re);
+      if (!match) continue;
+      // Pour le chocolat, on évite de créer une ligne isolée si aucune trace de pépites n'existe.
+      if (spec.key === 'pepites_chocolat' && !/p[eé]pit|chocolat\s+noir/i.test(joined)) continue;
+      items.push({ key: spec.key, name: spec.name, index: match.index || 0 });
+    }
+    items.sort((a, b) => a.index - b.index);
+    const seen = new Set();
+    return items.filter(it => {
+      if (seen.has(it.key)) return false;
+      seen.add(it.key);
+      return true;
+    });
+  }
+
+  function normalizeRecipeQuantityToken(token) {
+    let t = String(token || '').trim()
+      .replace(/,/g, '.')
+      .replace(/\s+/g, ' ')
+      .replace(/pincee/gi, 'pincée')
+      .replace(/pinc[ée]e\s*\(s\)/gi, 'pincée')
+      .replace(/\bgr\b/gi, 'g')
+      .replace(/\bg\.\b/gi, 'g')
+      .replace(/\bcl\.\b/gi, 'cl')
+      .replace(/\bml\.\b/gi, 'ml');
+    return t;
+  }
+
+  function extractRecipeGridQuantities(text) {
+    const normalized = normalizeRecipeOcrLexicon(text);
+    const lines = normalized.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const out = [];
+    const unitRe = /\b\d+(?:[.,]\d+)?\s*(?:kg|g|gr\.?|ml|cl|l|pinc[ée]e(?:\(s\))?|pincee(?:\(s\))?|c[àa]s|c[àa]c|cuill[eè]res?)(?=\b|[^A-Za-zÀ-ÿ]|$)/gi;
+    lines.forEach((line, lineIndex) => {
+      const masked = line.replace(unitRe, (m, offset) => {
+        out.push({ token: normalizeRecipeQuantityToken(m), lineIndex, index: offset });
+        return ' '.repeat(m.length);
+      });
+      const numbers = [];
+      const singleRe = /\b\d+(?:[.,]\d+)?\b/g;
+      let m;
+      while ((m = singleRe.exec(masked))) {
+        numbers.push({ token: normalizeRecipeQuantityToken(m[0]), lineIndex, index: m.index });
+      }
+      const hasCountableWord = /oeufs?|bananes?|pommes?|sachets?|tranches?|portions?/i.test(line);
+      const looksLikeQuantityRow = numbers.length >= 2 || /^\s*\d+(?:[.,]\d+)?(?:\s+\d+(?:[.,]\d+)?)+\s*$/.test(line);
+      if (looksLikeQuantityRow || hasCountableWord) {
+        for (const n of numbers) {
+          // Ignore les fragments parasites isolés comme "de 1" vus sur certaines OCR de grilles.
+          if (numbers.length === 1 && /\bde\s+\d+\b/i.test(line) && !hasCountableWord) continue;
+          out.push(n);
+        }
+      }
+    });
+    // Déduplication locale simple, en gardant l'ordre lu.
+    const cleaned = [];
+    for (const q of out) {
+      const token = normalizeRecipeQuantityToken(q.token);
+      if (!token) continue;
+      cleaned.push(token);
+    }
+    return cleaned;
+  }
+
+  function looksLikeBananaCakeGridCase(ingredients, quantities) {
+    const keys = new Set((ingredients || []).map(it => it.key));
+    const q = (quantities || []).map(v => String(v || '').toLowerCase());
+    const hasBase = keys.has('farine') && keys.has('oeufs') && keys.has('bananes');
+    const hasTwo120 = q.filter(v => /^120\s*g$/.test(v)).length >= 2;
+    const hasTwoCounts = q.filter(v => /^3$/.test(v)).length >= 2;
+    return hasBase && hasTwo120 && hasTwoCounts;
+  }
+
+  function insertRecipeGridIngredient(items, afterKey, item) {
+    if (!Array.isArray(items) || items.some(it => it.key === item.key)) return items;
+    const out = items.slice();
+    const idx = out.findIndex(it => it.key === afterKey);
+    if (idx >= 0) out.splice(idx + 1, 0, item);
+    else out.push(item);
+    return out;
+  }
+
+  function normalizeRecipeGridPairsForKnownLayouts(ingredients, quantities, text) {
+    let items = Array.isArray(ingredients) ? ingredients.slice() : [];
+    let qtys = Array.isArray(quantities) ? quantities.slice() : [];
+    const joined = normalizeRecipeOcrLexicon(text || '').toLowerCase();
+
+    // Cas observé : recette en grille avec images, noms sur une ligne et quantités en dessous.
+    // Certaines OCR lisent "Farine 120 g / Œufs 120 g / Bananes 3..." et perdent "Sucre en poudre".
+    // Si le motif farine + deux 120 g + œufs/bananes est présent, le second 120 g correspond très probablement au sucre.
+    if (!items.some(it => it.key === 'sucre_poudre') && looksLikeBananaCakeGridCase(items, qtys)) {
+      items = insertRecipeGridIngredient(items, 'farine', { key: 'sucre_poudre', name: 'Sucre en poudre', index: 999999 });
+    }
+
+    // Même logique pour les pépites : si chocolat/pépite est visible et qu'une troisième quantité 120 g existe,
+    // on insère l'ingrédient entre bananes et crème liquide.
+    const count120g = qtys.filter(v => /^120\s*g$/i.test(String(v || ''))).length;
+    if (!items.some(it => it.key === 'pepites_chocolat') && count120g >= 3 && /(p[eé]pit|chocolat)/i.test(joined)) {
+      items = insertRecipeGridIngredient(items, 'bananes', { key: 'pepites_chocolat', name: 'Pépites de chocolat noir', index: 999999 });
+    }
+
+    // Si le sel est détecté mais que l'OCR a perdu "1 pincée", on garde une quantité prudente et modifiable.
+    if (items.some(it => it.key === 'sel') && qtys.length < items.length && !qtys.some(v => /pinc/i.test(String(v || '')))) {
+      qtys = qtys.concat(['1 pincée']);
+    }
+
+    return { ingredients: items, quantities: qtys };
+  }
+
+  function reconstructRecipeGridOcr(text) {
+    const baseIngredients = findRecipeGridIngredients(text);
+    const baseQuantities = extractRecipeGridQuantities(text);
+    const normalized = normalizeRecipeGridPairsForKnownLayouts(baseIngredients, baseQuantities, text);
+    const ingredients = normalized.ingredients;
+    const quantities = normalized.quantities;
+    const pairCount = Math.min(ingredients.length, quantities.length);
+    if (pairCount < 3) return '';
+    // Cette reconstruction cible les recettes affichées en grille : une ligne de noms, une ligne de quantités.
+    // Elle ne remplace le texte OCR que si plusieurs paires aliment + quantité sont réellement retrouvées.
+    const lines = [];
+    for (let i = 0; i < pairCount; i += 1) {
+      lines.push(`${ingredients[i].name} ${quantities[i]}`);
+    }
+    return lines.join('\n');
+  }
+
+  function countRecipePairedLines(text) {
+    return String(text || '').split(/\r?\n/).filter(line => {
+      const l = line.trim();
+      return /[A-Za-zÀ-ÿ]/.test(l) && /\d/.test(l) && /(\b(?:kg|g|ml|cl|l|pinc[ée]e|c[àa]s|c[àa]c)\b|\b\d+\b)/i.test(l);
+    }).length;
+  }
 
 
   function cleanNutritionOcr(text) {
@@ -2108,20 +2899,167 @@
 
 
   function cleanRecipeOcr(text) {
-    const INSTR = /pr[ée]chauf|m[ée]lang|fouett|enfour|laisser|reposer|servir|cuire|\bfour\b|\bmin\b/i;
-    return text.split(/\r?\n/)
+    const INSTR = /pr[ée]chauf|m[ée]lang|fouett|enfour|laisser|reposer|servir|cuire|cuisson|mixer|rincer|[ée]goutter|sal[ée]r|poivrer|\bfour\b|\bmin\b/i;
+    const grid = reconstructRecipeGridOcr(text);
+    const source = grid || normalizeRecipeOcrLexicon(text);
+    return repairOcrNumberText(source).split(/\r?\n/)
       .map(l => l.trim()
-        .replace(/(\d+)\s*gde\s+/gi, '$1g de ')
-        .replace(/(\d+)\s*mlde\s+/gi, '$1ml de ')
-        .replace(/(\d+)sachetsde\s+/gi, '$1 sachets de ')
-        .replace(/(\d+)pommes/gi, '$1 pommes')
-        .replace(/(\d+)oeufs?/gi, '$1 oeufs')
-        .replace(/([A-Za-z])(\d)/g, '$1 $2')
-        .replace(/(\d)([A-Za-z])/g, '$1 $2')
+        .replace(/(ingr[ée]dients?|recette|préparation)\s*:?/gi, '')
+        .replace(/(\d+)\s*gde\s+/gi, '$1 g de ')
+        .replace(/(\d+)\s*mlde\s+/gi, '$1 ml de ')
+        .replace(/(\d+)\s*clde\s+/gi, '$1 cl de ')
+        .replace(/(\d+)\s*sachets?de\s+/gi, '$1 sachet de ')
+        .replace(/(\d+)\s*(?:grammes?|gr\.?|g\.)\b/gi, '$1 g')
+        .replace(/(\d+)\s*(?:kilogrammes?|kilo?s?|kg\.)\b/gi, '$1 kg')
+        .replace(/(\d+)\s*(?:millilitres?|ml\.)\b/gi, '$1 ml')
+        .replace(/(\d+)\s*(?:centilitres?|cl\.)\b/gi, '$1 cl')
+        .replace(/cuill[eè]res?\s*[àa]\s*soupe/gi, 'càs')
+        .replace(/cuill[eè]res?\s*[àa]\s*caf[ée]/gi, 'càc')
+        .replace(/(\d+)\s*pommes/gi, '$1 pommes')
+        .replace(/(\d+)\s*oeufs?/gi, '$1 oeufs')
+        .replace(/(\d+)\s*œufs?/gi, '$1 œufs')
+        .replace(/([A-Za-zÀ-ÿ])(\d)/g, '$1 $2')
+        .replace(/(\d)([A-Za-zÀ-ÿ])/g, '$1 $2')
       )
       .map(l => cleanOcrLine(l))
       .filter(l => l.length > 2 && !INSTR.test(l))
       .join('\n');
+  }
+
+  function normalizeGroqNutritionLabelFallbackPayload(payload) {
+    const data = payload || {};
+    const item = data.item || data.label || data.food || data.product || (Array.isArray(data.items) ? data.items[0] : null) || (Array.isArray(data.suggestions) ? data.suggestions[0] : null) || data;
+    const per100 = item.per_100g || item.per100 || item.nutrition_100g || item.nutrition || item.nutriments || item.macros || item;
+    const nom = String(item.nom || item.name || item.product_name || item.produit || data.nom || data.name || data.product_name || 'Produit scanné').trim() || 'Produit scanné';
+    const qty = Math.max(1, Math.round(numberFromAny(item.qty || item.quantity_g || item.quantite || item['quantité'] || 100, 100)));
+    const kcal = Math.round(numberFromAny(per100.kcal ?? per100.calories ?? per100.energy_kcal ?? per100.energie ?? per100['énergie'] ?? item.kcal ?? item.calories ?? item.energy_kcal, 0));
+    const prot = round1(numberFromAny(per100.prot ?? per100.proteines ?? per100['protéines'] ?? per100.protein ?? per100.proteins ?? item.prot ?? item.proteines ?? item.protein, 0));
+    const gluc = round1(numberFromAny(per100.gluc ?? per100.glucides ?? per100.carbs ?? per100.carbohydrates ?? item.gluc ?? item.glucides ?? item.carbs, 0));
+    const lip = round1(numberFromAny(per100.lip ?? per100.lipides ?? per100.fat ?? per100.graisses ?? item.lip ?? item.lipides ?? item.fat, 0));
+    if (!(kcal > 0) && !(prot > 0 || gluc > 0 || lip > 0)) return null;
+    return {
+      nom,
+      qty: qty || 100,
+      defaut: qty || 100,
+      kcal,
+      prot,
+      gluc,
+      lip,
+      kcal100: kcal,
+      prot100: prot,
+      gluc100: gluc,
+      lip100: lip,
+      source: 'Groq fallback OCR',
+      unite: 'g',
+      confidence: item.confidence || data.confidence || '',
+      notes: item.notes || data.notes || 'Lecture assistée par Groq depuis le parcours OCR existant.'
+    };
+  }
+
+  function normalizeGroqRecipeFallbackPayload(payload) {
+    const data = payload || {};
+    const item = data.item || data.recipe || data.recette || (Array.isArray(data.items) ? data.items[0] : null) || data;
+    const totalWeight = Math.max(1, Math.round(numberFromAny(item.totalWeight ?? item.total_weight ?? item.total_weight_g ?? item.poids_total_g ?? item.poidsTotal ?? item.qty ?? item.quantity_g, 100)));
+    const servings = Math.max(1, clampNumber($('#capture-recipe-servings')?.value, numberFromAny(data.servings || item.servings, 4)));
+    const eaten = Math.max(0.1, clampNumber($('#capture-recipe-eaten')?.value, 1));
+    const consumedQty = Math.max(1, Math.round(totalWeight * eaten / servings));
+    const nutrition = item.per_100g || item.nutrition_100g || item.nutrition || item.macros || item;
+    const kcal100 = numberFromAny(nutrition.kcal100 ?? nutrition.kcal_100g ?? nutrition.kcal ?? nutrition.calories ?? nutrition.energy_kcal ?? item.kcal100 ?? item.kcal_100g, 0);
+    const prot100 = numberFromAny(nutrition.prot100 ?? nutrition.prot_100g ?? nutrition.prot ?? nutrition.proteines ?? nutrition['protéines'] ?? nutrition.protein ?? item.prot100 ?? item.prot_100g, 0);
+    const gluc100 = numberFromAny(nutrition.gluc100 ?? nutrition.gluc_100g ?? nutrition.gluc ?? nutrition.glucides ?? nutrition.carbs ?? nutrition.carbohydrates ?? item.gluc100 ?? item.gluc_100g, 0);
+    const lip100 = numberFromAny(nutrition.lip100 ?? nutrition.lip_100g ?? nutrition.lip ?? nutrition.lipides ?? nutrition.fat ?? nutrition.graisses ?? item.lip100 ?? item.lip_100g, 0);
+    if (!(kcal100 > 0) && !(prot100 > 0 || gluc100 > 0 || lip100 > 0)) return null;
+    return recipeDishItem({
+      nom: String(item.nom || item.name || item.recipe_name || item.nom_recette || data.recipe_name || estimateRecipeName(state.ocrText) || 'Plat maison').trim(),
+      totalWeight,
+      consumedQty,
+      kcal100,
+      prot100,
+      gluc100,
+      lip100
+    });
+  }
+
+  async function runNutritionLabelGroqFallback() {
+    if (state.mode !== MODES.NUTRITION_TABLE) return;
+    if (!state.imageDataUrl) throw new Error('Aucune image de tableau à envoyer à Groq. Reprends une photo.');
+    const ocrText = ($('#capture-ocr-text')?.value || state.ocrText || '').trim();
+    state.ocrText = ocrText;
+    setBusy(true, 'Groq relit le tableau nutritionnel…');
+    try {
+      const image = await compressImageForVision(state.imageDataUrl, { maxSide: 1400, quality: 0.82, maxBytes: 3.8 * 1024 * 1024 });
+      const payload = JSON.stringify({ image, ocrText });
+      const endpoints = ['/api/groq/nutrition-label-fallback', '/api/groq/nutrition-table-fallback', '/api/groq/nutrition-ocr-fallback'];
+      let res = null;
+      let data = {};
+      let last404 = false;
+      for (const endpoint of endpoints) {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: apiUserHeaders({ 'Content-Type': 'application/json', 'Accept': 'application/json' }),
+          body: payload
+        });
+        data = await res.json().catch(() => ({}));
+        if (res.status !== 404) break;
+        last404 = true;
+      }
+      if (!res || !res.ok || data.ok === false) {
+        if (last404 && res && res.status === 404) throw new Error('Endpoint Groq OCR absent côté serveur : réinstalle le patch et redémarre le conteneur foodnote.');
+        throw new Error(data.error || data.message || ('Erreur Groq OCR ' + (res ? res.status : '')));
+      }
+      const item = normalizeGroqNutritionLabelFallbackPayload(data);
+      if (!item) throw new Error('Groq n’a pas renvoyé de kcal/macros exploitables pour ce tableau.');
+      state.results = [item];
+      state.searchQty = item.qty || 100;
+      state.selectedIndex = 0;
+      setBusy(false);
+      transition(STATES.CONFIRM_FOOD, { results: state.results });
+    } catch (e) {
+      setBusy(false);
+      fail(e.message || String(e));
+    }
+  }
+
+  async function runRecipePhotoGroqFallback() {
+    if (state.mode !== MODES.RECIPE) return;
+    if (!state.imageDataUrl) throw new Error('Aucune image de recette à envoyer à Groq. Reprends une photo.');
+    const ocrText = ($('#capture-ocr-text')?.value || state.ocrText || '').trim();
+    state.ocrText = ocrText;
+    setBusy(true, 'Groq relit la photo de recette…');
+    try {
+      const image = await compressImageForVision(state.imageDataUrl, { maxSide: 1400, quality: 0.82, maxBytes: 3.8 * 1024 * 1024 });
+      const servings = Math.max(1, clampNumber($('#capture-recipe-servings')?.value, 4));
+      const eaten = Math.max(0.1, clampNumber($('#capture-recipe-eaten')?.value, 1));
+      const payload = JSON.stringify({ image, ocrText, servings, eaten });
+      const endpoints = ['/api/groq/recipe-photo-fallback', '/api/groq/recipe-fallback', '/api/groq/recipe-ocr-fallback', '/api/groq/recipe-image-fallback'];
+      let res = null;
+      let data = {};
+      let last404 = false;
+      for (const endpoint of endpoints) {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: apiUserHeaders({ 'Content-Type': 'application/json', 'Accept': 'application/json' }),
+          body: payload
+        });
+        data = await res.json().catch(() => ({}));
+        if (res.status !== 404) break;
+        last404 = true;
+      }
+      if (!res || !res.ok || data.ok === false) {
+        if (last404 && res && res.status === 404) throw new Error('Endpoint Groq recette absent côté serveur : réinstalle le patch et redémarre le conteneur foodnote.');
+        throw new Error(data.error || data.message || ('Erreur Groq recette ' + (res ? res.status : '')));
+      }
+      const item = normalizeGroqRecipeFallbackPayload(data);
+      if (!item) throw new Error('Groq n’a pas renvoyé de recette exploitable avec valeurs pour 100 g.');
+      state.results = [item];
+      state.searchQty = item.qty || item.totalWeight || 100;
+      state.selectedIndex = 0;
+      setBusy(false);
+      transition(STATES.CONFIRM_RECIPE, { results: state.results });
+    } catch (e) {
+      setBusy(false);
+      fail(e.message || String(e));
+    }
   }
 
   function analyseOcrText() {
@@ -2378,14 +3316,24 @@ Règles :
     if (!obj || typeof obj !== 'object') return null;
     const nom = pickObjectText(obj, ['nom', 'name', 'aliment', 'food', 'ingredient', 'plat'], '').replace(/^[-*•]\s*/, '').trim();
     if (!nom || /quantit|kcal|prot/i.test(nom)) return null;
-    const qty = Math.max(1, pickObjectNumber(obj, ['qty', 'quantite', 'quantité', 'poids', 'grammes', 'g', 'quantity'], 100));
-    const kcal = pickObjectNumber(obj, ['kcal', 'calories', 'calorie', 'energy_kcal', 'energie', 'énergie'], 0);
-    const prot = pickObjectNumber(obj, ['prot', 'proteines', 'protéines', 'proteins', 'protein'], 0);
-    const gluc = pickObjectNumber(obj, ['gluc', 'glucides', 'carbohydrates', 'carbs', 'hydrates'], 0);
-    const lip  = pickObjectNumber(obj, ['lip', 'lipides', 'fat', 'graisses', 'matières grasses', 'matieres grasses'], 0);
+    const nutrition = obj.nutrition || obj.nutriments || obj.macros || obj.macro || obj.nutrition_estimee || obj.nutrition_estimee_par_portion || obj.nutrition_per_serving || obj.per_serving || {};
+    const qty = Math.max(1, pickObjectNumber(obj, ['qty', 'quantite', 'quantité', 'poids', 'grammes', 'g', 'quantity', 'quantity_g', 'portion_g'], pickObjectNumber(nutrition, ['qty', 'quantite', 'quantity_g', 'poids', 'grammes', 'portion_g'], 100)));
+    const kcal100 = pickObjectNumber(obj, ['kcal100', 'kcal_100g', 'kcalPer100', 'calories100', 'calories_100g', 'caloriesPer100', 'energy_kcal_100g', 'energie_100g', 'énergie_100g', 'kcal_per_100g', 'calories_per_100g'], pickObjectNumber(nutrition, ['kcal100', 'kcal_100g', 'kcalPer100', 'calories100', 'calories_100g', 'caloriesPer100', 'energy_kcal_100g', 'energie_100g', 'énergie_100g', 'kcal_per_100g', 'calories_per_100g'], 0));
+    const prot100 = pickObjectNumber(obj, ['prot100', 'prot_100g', 'protPer100', 'proteins100', 'protein100', 'proteines100', 'protéines100', 'proteins_100g', 'protein_100g', 'proteines_100g', 'protéines_100g', 'protein_per_100g', 'proteins_per_100g'], pickObjectNumber(nutrition, ['prot100', 'prot_100g', 'protPer100', 'proteins100', 'protein100', 'proteines100', 'protéines100', 'proteins_100g', 'protein_100g', 'proteines_100g', 'protéines_100g', 'protein_per_100g', 'proteins_per_100g'], 0));
+    const gluc100 = pickObjectNumber(obj, ['gluc100', 'gluc_100g', 'glucPer100', 'carbs100', 'carbohydrates100', 'glucides100', 'carbohydrates_100g', 'carbs_100g', 'glucides_100g', 'carbs_per_100g', 'carbohydrates_per_100g'], pickObjectNumber(nutrition, ['gluc100', 'gluc_100g', 'glucPer100', 'carbs100', 'carbohydrates100', 'glucides100', 'carbohydrates_100g', 'carbs_100g', 'glucides_100g', 'carbs_per_100g', 'carbohydrates_per_100g'], 0));
+    const lip100  = pickObjectNumber(obj, ['lip100', 'lip_100g', 'lipPer100', 'fat100', 'lipides100', 'graisses100', 'fat_100g', 'lipides_100g', 'graisses_100g', 'matières_grasses_100g', 'matieres_grasses_100g', 'fat_per_100g'], pickObjectNumber(nutrition, ['lip100', 'lip_100g', 'lipPer100', 'fat100', 'lipides100', 'graisses100', 'fat_100g', 'lipides_100g', 'graisses_100g', 'matières_grasses_100g', 'matieres_grasses_100g', 'fat_per_100g'], 0));
+    let kcal = pickObjectNumber(obj, ['kcal', 'calories', 'calorie', 'calories_kcal', 'energy_kcal', 'energie', 'énergie', 'energie_kcal', 'kcal_total', 'total_kcal', 'calories_total', 'total_calories'], pickObjectNumber(nutrition, ['kcal', 'calories', 'calorie', 'calories_kcal', 'energy_kcal', 'energie', 'énergie', 'energie_kcal', 'kcal_total', 'total_kcal', 'calories_total', 'total_calories'], 0));
+    let prot = pickObjectNumber(obj, ['prot', 'proteines', 'protéines', 'proteins', 'protein', 'protein_g', 'proteins_g', 'proteines_g', 'protéines_g', 'prot_g', 'protein_total', 'total_prot', 'total_protein'], pickObjectNumber(nutrition, ['prot', 'proteines', 'protéines', 'proteins', 'protein', 'protein_g', 'proteins_g', 'proteines_g', 'protéines_g', 'prot_g', 'protein_total', 'total_prot', 'total_protein'], 0));
+    let gluc = pickObjectNumber(obj, ['gluc', 'glucides', 'carbohydrates', 'carbs', 'hydrates', 'carbs_g', 'glucides_g', 'gluc_g', 'carbohydrates_g', 'glucides_total', 'total_gluc', 'total_carbs', 'total_carbohydrates'], pickObjectNumber(nutrition, ['gluc', 'glucides', 'carbohydrates', 'carbs', 'hydrates', 'carbs_g', 'glucides_g', 'gluc_g', 'carbohydrates_g', 'glucides_total', 'total_gluc', 'total_carbs', 'total_carbohydrates'], 0));
+    let lip  = pickObjectNumber(obj, ['lip', 'lipides', 'fat', 'graisses', 'matières grasses', 'matieres grasses', 'fat_g', 'lipides_g', 'lip_g', 'fat_total', 'total_lip', 'total_fat'], pickObjectNumber(nutrition, ['lip', 'lipides', 'fat', 'graisses', 'matières grasses', 'matieres grasses', 'fat_g', 'lipides_g', 'lip_g', 'fat_total', 'total_lip', 'total_fat'], 0));
+    if (!kcal && kcal100 > 0) kcal = kcal100 * qty / 100;
+    if (!prot && prot100 > 0) prot = prot100 * qty / 100;
+    if (!gluc && gluc100 > 0) gluc = gluc100 * qty / 100;
+    if (!lip && lip100 > 0) lip = lip100 * qty / 100;
     if (!kcal && !prot && !gluc && !lip) return null;
     return makeIaNutritionRow(nom, qty, kcal, prot, gluc, lip);
   }
+
 
   function makeIaNutritionRow(nom, qty, kcal, prot, gluc, lip) {
     const q = Math.max(1, numberFromAny(qty, 100));
@@ -2517,7 +3465,7 @@ Règles :
   async function confirmSelected() {
     if (!state.results.length) throw new Error('Aucun aliment à ajouter.');
     if (state.busy) return;
-    if (state.mode === MODES.IA_TEXT && state.current === STATES.CONFIRM_FOOD) {
+    if (isIaSuggestionMode() && state.current === STATES.CONFIRM_FOOD) {
       syncAllIaTextRowsFromInputs();
       const selectedIndexes = getIaTextSelectedIndexes();
       if (!selectedIndexes.length) throw new Error('Sélection vide : coche au moins un aliment IA à ajouter.');
@@ -2597,7 +3545,7 @@ Règles :
       window.__foodnoteSuppressDBRefreshUntil = Math.max(Number(window.__foodnoteSuppressDBRefreshUntil || 0), until);
       window.__foodnoteCaptureAddingToJournal = true;
     }
-    const isIaBulk = state.mode === MODES.IA_TEXT && Array.isArray(state.pendingIaTextBulkIndexes) && state.pendingIaTextBulkIndexes.length;
+    const isIaBulk = isIaSuggestionMode() && Array.isArray(state.pendingIaTextBulkIndexes) && state.pendingIaTextBulkIndexes.length;
     setBusy(true, isIaBulk ? 'Ajout de la sélection au journal…' : 'Ajout au journal…');
     try {
       if (isIaBulk) {
@@ -2631,7 +3579,7 @@ Règles :
       if (state.mode === MODES.SEARCH) syncCaptureSearchSelectedItemQty(item);
       await addResultToJournal(item);
       setBusy(false);
-      if (state.mode === MODES.IA_TEXT) {
+      if (isIaSuggestionMode()) {
         state.iaTextMealConfirmed = true;
         state.pendingIaTextReturnToList = false;
         if (state.results[state.selectedIndex]) {
@@ -2664,9 +3612,10 @@ Règles :
         gluc100: per100.gluc100,
         lip100: per100.lip100,
         bddId: null,
-        source: item.source || 'capture',
+        source: item.source || 'Groq Vision',
         meal: state.targetMeal || window.foodAddTargetMeal || 'lunch',
-        saveToBase: item.saveToBase !== false
+        saveToBase: item.saveToBase !== false,
+        forceNutritionUpdate: true
       });
       afterJournalMutation();
       return;

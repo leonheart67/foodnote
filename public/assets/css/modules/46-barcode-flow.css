@@ -1,0 +1,33 @@
+/*
+ * FoodNote — retour ajout après code-barres
+ * Rôle : Gérer l'état visuel du produit scanné prêt à être ajouté.
+ * Ne doit pas gérer : le scan code-barres, la recherche OpenFoodFacts, la quantité ou le choix du repas.
+ */
+
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-add-panel .journal-add-row{
+  display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;min-width:0!important;overflow:visible!important;
+}
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-selected-card.visible{
+  display:block!important;opacity:1!important;visibility:visible!important;
+  border:1px solid color-mix(in srgb, var(--green) 42%, var(--border2))!important;
+  background:color-mix(in srgb, var(--green) 8%, var(--bg))!important;
+}
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-add-actions{
+  display:flex!important;flex-direction:column!important;gap:8px!important;width:100%!important;
+}
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-qty{
+  display:block!important;
+}
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready .food-inline-filters,
+body > #food-add-modal.food-add-modal.fn-add-v0160.fn-barcode-ready #db-suggestions{
+  display:none!important;
+}
+.fn-barcode-ready-note{
+  font-size:12px;line-height:1.25;color:var(--text3);padding:7px 9px;border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--green) 34%, var(--border2));
+  background:color-mix(in srgb, var(--green) 7%, var(--bg2));
+}
+.fn-barcode-ready-note b{color:var(--green);font-weight:900;}
+@media(max-width:760px){
+  .fn-barcode-ready-note{font-size:11px;padding:6px 8px;}
+}

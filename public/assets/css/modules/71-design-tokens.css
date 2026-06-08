@@ -1,0 +1,5129 @@
+/*
+ * FoodNote — tokens design
+ * Rôle : Définir les tokens design de haut niveau : couleurs, rayons, ombres, poids et dimensions partagées.
+ * Ne doit pas gérer : les styles de page ou les corrections ponctuelles.
+ */
+
+:root {
+  color-scheme: light;
+
+  --fn-ds-bg: #efe7da;
+  --fn-ds-bg-soft: #f8f1e7;
+  --fn-ds-surface: #fffdf8;
+  --fn-ds-surface-soft: #f3eadf;
+  --fn-ds-surface-muted: #e7dcca;
+
+  --fn-ds-text: #211f1a;
+  --fn-ds-text-soft: #5b5b51;
+  --fn-ds-muted: #8b8172;
+
+  --fn-ds-border: rgba(97, 74, 46, .14);
+  --fn-ds-border-strong: rgba(63, 122, 87, .38);
+
+  --fn-ds-accent: #3f7a57;
+  --fn-ds-accent-strong: #2e5d42;
+  --fn-ds-accent-soft: #e1efe2;
+
+  --fn-ds-warning: #d9822b;
+  --fn-ds-info: #4a93b8;
+  --fn-ds-danger: #bf5c4b;
+
+  --fn-ds-radius-xl: 20px;
+  --fn-ds-radius-lg: 16px;
+  --fn-ds-radius-md: 12px;
+  --fn-ds-radius-sm: 10px;
+
+  --fn-ds-page-width: 1280px;
+  --fn-ds-page-padding-x: clamp(18px, 2.5vw, 36px);
+  --fn-ds-card-padding: 24px;
+
+  --fn-ds-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  
+  --fn-ds-w-regular: 400;
+  --fn-ds-w-medium: 600;
+  --fn-ds-w-semibold: 700;
+  --fn-ds-w-bold: 800;
+  --fn-ds-w-heavy: 900;
+
+  
+  --fn-v3-bg: var(--fn-ds-bg);
+  --fn-v3-bg-soft: var(--fn-ds-bg-soft);
+  --fn-v3-surface: var(--fn-ds-surface);
+  --fn-v3-surface-soft: var(--fn-ds-surface-soft);
+  --fn-v3-surface-muted: var(--fn-ds-surface-muted);
+  --fn-v3-text: var(--fn-ds-text);
+  --fn-v3-text-soft: var(--fn-ds-text-soft);
+  --fn-v3-muted: var(--fn-ds-muted);
+  --fn-v3-border: var(--fn-ds-border);
+  --fn-v3-border-strong: var(--fn-ds-border-strong);
+  --fn-v3-green: var(--fn-ds-accent);
+  --fn-v3-green-dark: var(--fn-ds-accent-strong);
+  --fn-v3-green-soft: var(--fn-ds-accent-soft);
+  --fn-v3-header: rgba(255, 255, 255, .88);
+  --fn-v3-shadow: none;
+  --fn-v3-shadow-soft: none;
+  --fn-v3-radius-xl: var(--fn-ds-radius-xl);
+  --fn-v3-radius-lg: var(--fn-ds-radius-lg);
+  --fn-v3-radius-md: var(--fn-ds-radius-md);
+  --fn-v3-page-width: var(--fn-ds-page-width);
+  --fn-v3-wide-width: var(--fn-ds-page-width);
+  --fn-v3-font: var(--fn-ds-font);
+}
+
+html[data-theme="dark"],
+body.foodnote-theme-dark,
+body.dark {
+  color-scheme: dark;
+
+  --fn-ds-bg: #161513;
+  --fn-ds-bg-soft: #1b1916;
+  --fn-ds-surface: #221f1c;
+  --fn-ds-surface-soft: #2b2824;
+  --fn-ds-surface-muted: #34302b;
+  --fn-ds-text: #f2efe7;
+  --fn-ds-text-soft: #c7c0b2;
+  --fn-ds-muted: #9c968c;
+  --fn-ds-border: rgba(255, 255, 255, .12);
+  --fn-ds-border-strong: rgba(159, 189, 142, .46);
+  --fn-ds-accent: #82ac8c;
+  --fn-ds-accent-strong: #bdd2b0;
+  --fn-ds-accent-soft: rgba(159, 189, 142, .17);
+}
+
+
+html,
+body {
+  width: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+  font-family: var(--fn-ds-font) !important;
+  color: var(--fn-ds-text) !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.66), transparent 28%),
+    linear-gradient(180deg, var(--fn-ds-bg-soft) 0%, var(--fn-ds-bg) 48%, var(--fn-ds-bg) 100%) !important;
+}
+
+body.foodnote-theme-dark,
+body.dark {
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.045), transparent 28%),
+    linear-gradient(180deg, #1a1714 0%, var(--fn-ds-bg) 52%, var(--fn-ds-bg) 100%) !important;
+}
+
+* { box-sizing: border-box !important; }
+button, input, select, textarea { font-family: inherit !important; }
+.page { display: none; }
+.page.active { display: block; }
+
+
+.sb-overlay,
+.sb-toggle,
+.sb-collapse-btn,
+.sb-section,
+.app-header,
+.fn-page-title-icon,
+.app-title {
+  display: none !important;
+}
+
+.app-layout {
+  display: block !important;
+  min-height: 100vh !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  min-height: 64px !important;
+  height: auto !important;
+  max-height: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 10px clamp(16px, 2vw, 28px) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-ds-border) !important;
+  background: rgba(255, 255, 255, .88) !important;
+  color: var(--fn-ds-text) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) !important;
+  transform: none !important;
+  overflow: hidden !important;
+}
+
+body.foodnote-theme-dark .sidebar,
+body.dark .sidebar,
+html[data-theme="dark"] .sidebar {
+  background: rgba(23, 26, 20, .90) !important;
+}
+
+.sb-header {
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.sb-logo {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.sb-logo-icon {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+  background: var(--fn-ds-accent) !important;
+}
+
+.sb-logo-icon img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.sb-logo-name {
+  color: var(--fn-ds-text) !important;
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  line-height: 1.05 !important;
+}
+
+.sb-logo-phase,
+#header-subtitle {
+  margin-top: 2px !important;
+  color: var(--fn-ds-muted) !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.sb-nav {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+}
+.sb-nav::-webkit-scrollbar { display: none !important; }
+
+.sb-nav > .sb-item,
+.sb-nav > .sb-item:nth-of-type(n),
+.sb-nav > .sb-item:nth-of-type(n+5),
+.sb-sub-item {
+  position: static !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-width: auto !important;
+  width: auto !important;
+  min-height: 32px !important;
+  height: 32px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--fn-ds-text-soft) !important;
+  font-size: 11.5px !important;
+  line-height: 1 !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.sb-nav > .sb-item:hover,
+.sb-nav > .sb-item.active,
+.sb-sub-item:hover,
+.sb-sub-item.active {
+  background: var(--fn-ds-surface-soft) !important;
+  color: var(--fn-ds-text) !important;
+}
+
+.sb-item i:not(.sb-chevron),
+.sb-chevron { display: none !important; }
+
+.sb-sub {
+  position: fixed !important;
+  top: 72px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1005 !important;
+  min-width: 280px !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 10px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 16px !important;
+  background: var(--fn-ds-surface) !important;
+  box-shadow: none !important;
+}
+
+.sb-footer {
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.theme-toggle {
+  width: 34px !important;
+  height: 28px !important;
+  min-width: 34px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+}
+
+.sb-user {
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 2px 10px 2px 4px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+}
+
+.sb-avatar {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+#sb-prenom,
+.fn-ui-sidebar-name {
+  color: var(--fn-ds-text) !important;
+  font-size: 12px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+#header-macros,
+.fn-ui-sidebar-macros { display: none !important; }
+
+
+.main-wrap {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 var(--fn-ds-page-padding-x) 72px !important;
+  background: transparent !important;
+}
+
+#page-journal,
+#page-sport,
+#page-historique,
+#page-stats,
+#page-objectif,
+#page-recap,
+#page-ia,
+#page-bases,
+#page-donnees,
+#page-profil,
+#page-onboarding,
+#page-themelab,
+.fn-ui-page,
+.fn-ui-page-narrow {
+  width: min(100%, var(--fn-ds-page-width)) !important;
+  max-width: var(--fn-ds-page-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-top: 30px !important;
+}
+
+#page-stats,
+#page-bases,
+#page-donnees {
+  max-width: var(--fn-ds-page-width) !important;
+}
+
+
+.card,
+.fn-ui-surface,
+.fn-ui-panel,
+.fn-ui-panel-pad,
+.journal-section-card,
+.journal-tile-card,
+.journal-main-card,
+.journal-foods-block,
+.journal-meals-card,
+details.card,
+.food-add-panel,
+.food-add-dialog,
+.food-current-meal-card,
+.ocr-panel,
+.recipe-ai-result,
+.barcode-result,
+.database-explorer-card,
+.notification-card,
+.fn-ui-chart-tile,
+.fn-ui-chart-wide,
+.stat-card,
+.chart-card,
+.profile-summary-main,
+#hist-list > *,
+#page-sport .fn-ui-panel,
+#page-profil .fn-ui-panel,
+#page-objectif .card,
+#page-objectif .fn-ui-panel,
+#page-ia .card,
+#page-ia .fn-ui-panel,
+#page-bases .card,
+#page-bases .fn-ui-panel,
+#page-donnees .card,
+#page-donnees .fn-ui-panel,
+#page-stats .card,
+#page-stats .fn-ui-panel,
+#page-recap .card,
+#page-recap .fn-ui-panel {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg) !important;
+  box-shadow: none !important;
+}
+
+.card,
+.fn-ui-panel-pad,
+.journal-section-card,
+.journal-tile-card,
+.journal-main-card,
+.journal-foods-block,
+.journal-meals-card,
+.food-add-panel,
+#page-sport #sport-card,
+#hist-list > * {
+  padding: var(--fn-ds-card-padding) !important;
+}
+
+.fn-ui-surface-soft,
+.card.fn-ui-surface-soft,
+.food-current-meal-card,
+.ocr-panel,
+.recipe-ai-result,
+.barcode-result,
+.fn-ui-feature,
+.fn-ui-tile,
+.fn-ui-alert {
+  background: var(--fn-ds-bg-soft) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+.fn-ui-title-row,
+.profile-summary-main {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+.fn-ui-title-left {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+
+.fn-ui-icon,
+.fn-section-icon,
+.journal-meals-icon {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 10px !important;
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  font-size: 16px !important;
+}
+
+.fn-ui-kicker,
+.profile-chip,
+.fn-orbit-kicker {
+  color: var(--fn-ds-muted) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: .13em !important;
+  text-transform: uppercase !important;
+}
+
+.fn-ui-title,
+.profile-name,
+.card-title,
+.fn-section-title,
+.journal-meals-title,
+.fn-orbit-title {
+  color: var(--fn-ds-text) !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: -.035em !important;
+}
+
+.fn-ui-title,
+.profile-name {
+  font-size: clamp(22px, 2.1vw, 28px) !important;
+  line-height: 1.08 !important;
+}
+
+.fn-ui-sub,
+.profile-muted,
+.journal-meals-subtitle,
+.section-subtitle,
+.fn-ui-muted {
+  color: var(--fn-ds-muted) !important;
+  opacity: 1 !important;
+}
+
+.fn-ui-section-head {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.fn-ui-section-head b {
+  color: var(--fn-ds-text) !important;
+  font-size: 18px !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+}
+
+.fn-ui-section-head em {
+  color: var(--fn-ds-muted) !important;
+  font-size: 12px !important;
+  font-style: normal !important;
+}
+
+.fn-ui-actions,
+.profile-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+button,
+.fn-ui-button,
+.btn-primary,
+.journal-add-btn,
+.food-source-chip,
+.food-meal-chip,
+.journal-date-launch,
+.journal-day-nav {
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text-soft) !important;
+  box-shadow: none !important;
+}
+
+.btn-primary,
+.fn-ui-button-primary,
+.journal-add-btn,
+.food-meal-chip.active,
+.food-source-chip.active {
+  border-color: transparent !important;
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+input,
+select,
+textarea,
+.db-search-input,
+.db-qty-input,
+.fn-ui-field input,
+.fn-ui-field select,
+.fn-ui-field textarea {
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 10px !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+
+.fn-ui-field,
+label.fn-ui-field {
+  color: var(--fn-ds-muted) !important;
+}
+
+.fn-ui-feature-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+
+.journal-hero {
+  padding-top: 30px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.journal-page-heading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin-bottom: 22px !important;
+}
+
+.journal-page-title {
+  color: var(--fn-ds-text) !important;
+  font-size: clamp(30px, 3vw, 36px) !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: -.045em !important;
+}
+
+.journal-day-row-carousel,
+#page-journal .journal-day-row-carousel,
+#page-sport .journal-day-row-carousel {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 0 18px !important;
+  padding: 14px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 16px !important;
+  background: var(--fn-ds-surface) !important;
+}
+
+.journal-day-carousel-wrap { min-width: 0 !important; overflow: hidden !important; }
+.journal-day-carousel {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.journal-day-card {
+  min-width: 0 !important;
+  height: 74px !important;
+  min-height: 74px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  box-shadow: none !important;
+}
+
+.journal-day-card.active {
+  background: color-mix(in srgb, var(--fn-ds-accent-soft) 42%, var(--fn-ds-surface)) !important;
+  border-color: var(--fn-ds-border-strong) !important;
+}
+
+.journal-floating-macro-card,
+.fn-home-nutrition-panel,
+.fn-orbit-nutrition-card {
+  margin: 0 0 16px !important;
+  padding: 26px 24px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  box-shadow: none !important;
+}
+
+.fn-home-nutrition-layout {
+  display: grid !important;
+  grid-template-columns: 150px minmax(0, 1fr) !important;
+  gap: 24px !important;
+  align-items: center !important;
+}
+
+.fn-calorie-summary-card { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+.fn-calorie-ring-wrap { width: 128px !important; height: 128px !important; }
+.fn-calorie-ring-visual {
+  width: 126px !important;
+  height: 126px !important;
+  border-radius: 50% !important;
+  background: conic-gradient(var(--macro-bar-color, var(--fn-ds-accent)) var(--macro-pct, 0%), var(--fn-ds-surface-muted) 0) !important;
+}
+.fn-calorie-ring-core {
+  width: 108px !important;
+  height: 108px !important;
+  border-radius: 50% !important;
+  background: var(--fn-ds-surface) !important;
+}
+.fn-calorie-flame {
+  display: grid !important;
+  width: 28px !important;
+  height: 28px !important;
+  place-items: center !important;
+  font-size: 13px !important;
+}
+#m-kcal {
+  color: var(--fn-ds-text) !important;
+  font-size: 27px !important;
+  line-height: 1 !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+}
+.fn-calorie-unit,
+.fn-calorie-target-line { color: var(--fn-ds-muted) !important; }
+
+.fn-home-macro-row,
+.macro-cell-prot,
+.macro-cell-gluc,
+.macro-cell-lip {
+  min-height: 50px !important;
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 18px 13px 12px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background:
+    linear-gradient(to bottom, var(--fn-ds-surface-soft) 0 calc(100% - 6px), transparent calc(100% - 6px) 100%),
+    linear-gradient(90deg, var(--macro-bar-color, var(--fn-ds-accent)) 0 var(--macro-pct, 0%), #d8ccb8 var(--macro-pct, 0%) 100%) !important;
+  box-shadow: none !important;
+}
+.fn-macro-home-card::after,
+.fn-home-macro-row::after { display: none !important; }
+.fn-mini-ring,
+.fn-macro-icon-bubble,
+.fn-nutri-home-icon {
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+}
+.macro-lbl { color: var(--fn-ds-muted) !important; }
+.fn-macro-copy .macro-val,
+.macro-cell-prot .macro-val,
+.macro-cell-gluc .macro-val,
+.macro-cell-lip .macro-val {
+  color: var(--fn-ds-text) !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+
+#page-sport .fn-ui-page > .fn-ui-panel:first-child {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+#page-sport .fn-ui-page > .fn-ui-panel:first-child .fn-ui-title-row { margin-bottom: 18px !important; }
+#page-sport .sport-day-row-carousel { margin-top: 0 !important; }
+#page-sport #sport-card { margin-top: 16px !important; }
+
+#page-historique #hist-list { display: grid !important; gap: 14px !important; }
+
+#page-stats canvas,
+#page-stats .chart-card,
+#page-stats .stat-card,
+#page-stats .fn-ui-chart-tile { max-width: 100% !important; background: var(--fn-ds-surface) !important; }
+
+#page-bases .fn-ui-alert,
+#page-donnees .fn-ui-alert,
+#page-profil .fn-ui-alert,
+#page-objectif .fn-ui-alert,
+#page-ia .fn-ui-alert {
+  background: var(--fn-ds-bg-soft) !important;
+  color: var(--fn-ds-text) !important;
+}
+
+table,
+.fn-ui-table,
+.database-table {
+  color: var(--fn-ds-text) !important;
+  background: var(--fn-ds-surface) !important;
+  border-color: var(--fn-ds-border) !important;
+}
+th, td { border-color: var(--fn-ds-border) !important; }
+
+.food-add-dialog {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  box-shadow: none !important;
+}
+
+
+@media (max-width: 820px) {
+  body { padding-bottom: 86px !important; }
+  .sidebar {
+    min-height: 58px !important;
+    height: 58px !important;
+    max-height: 58px !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+  }
+  .sb-logo-text { display: none !important; }
+  .sb-footer { min-width: auto !important; }
+  .theme-toggle { display: none !important; }
+  .sb-user { padding: 0 !important; border: 0 !important; background: transparent !important; }
+  #sb-prenom { display: none !important; }
+  .sb-nav { justify-content: flex-start !important; overflow-x: auto !important; padding: 0 !important; }
+  .sb-nav > .sb-item,
+  .sb-nav > .sb-item:nth-of-type(n),
+  .sb-nav > .sb-item:nth-of-type(n+5) { display: inline-flex !important; flex: 0 0 auto !important; }
+
+  .main-wrap {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-bottom: 110px !important;
+  }
+
+  #page-journal,
+  #page-sport,
+  #page-historique,
+  #page-stats,
+  #page-objectif,
+  #page-recap,
+  #page-ia,
+  #page-bases,
+  #page-donnees,
+  #page-profil,
+  #page-onboarding,
+  .fn-ui-page,
+  .fn-ui-page-narrow {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-top: 18px !important;
+  }
+
+  .fn-ui-title-row,
+  .profile-summary-main,
+  .fn-ui-title-left,
+  .journal-page-heading {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .fn-ui-feature-grid { grid-template-columns: 1fr !important; }
+
+  .journal-day-row-carousel,
+  #page-journal .journal-day-row-carousel,
+  #page-sport .journal-day-row-carousel {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 12px !important;
+  }
+  .journal-day-nav { display: none !important; }
+  .journal-day-carousel-wrap { overflow-x: auto !important; scrollbar-width: none !important; }
+  .journal-day-carousel-wrap::-webkit-scrollbar { display: none !important; }
+  .journal-day-carousel {
+    display: flex !important;
+    gap: 8px !important;
+    width: max-content !important;
+    min-width: 100% !important;
+  }
+  .journal-day-card {
+    width: 84px !important;
+    min-width: 84px !important;
+    height: 66px !important;
+    min-height: 66px !important;
+  }
+
+  .fn-home-nutrition-layout { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .fn-calorie-summary-card { min-height: 148px !important; text-align: center !important; }
+  .fn-calorie-ring-wrap,
+  .fn-calorie-ring-visual { width: 118px !important; height: 118px !important; }
+  .fn-calorie-ring-core { width: 100px !important; height: 100px !important; }
+
+  .card,
+  .fn-ui-panel-pad,
+  .journal-section-card,
+  .journal-tile-card,
+  .journal-main-card,
+  .journal-foods-block,
+  .journal-meals-card,
+  #page-sport #sport-card { padding: 18px !important; }
+}
+
+@media (max-width: 430px) {
+  .journal-page-title { font-size: 26px !important; }
+  .fn-orbit-status { display: none !important; }
+}
+
+
+
+
+
+:root {
+  --fn-ds-page-width: 1280px;
+  --fn-ds-content-width: 1280px;
+  --fn-ds-bg: #efe7da;
+  --fn-ds-bg-soft: #f8f1e7;
+  --fn-ds-surface: #fffdf8;
+  --fn-ds-surface-soft: #f3eadf;
+  --fn-ds-surface-muted: #e7dcca;
+  --fn-ds-text: #211f1a;
+  --fn-ds-text-soft: #5b5b51;
+  --fn-ds-muted: #8b8172;
+  --fn-ds-border: rgba(97, 74, 46, .14);
+  --fn-ds-border-strong: rgba(63, 122, 87, .38);
+  --fn-ds-accent: #3f7a57;
+  --fn-ds-accent-strong: #2e5d42;
+  --fn-ds-accent-soft: #e1efe2;
+
+  --fn-v3-bg: var(--fn-ds-bg);
+  --fn-v3-bg-soft: var(--fn-ds-bg-soft);
+  --fn-v3-surface: var(--fn-ds-surface);
+  --fn-v3-surface-soft: var(--fn-ds-surface-soft);
+  --fn-v3-surface-muted: var(--fn-ds-surface-muted);
+  --fn-v3-text: var(--fn-ds-text);
+  --fn-v3-text-soft: var(--fn-ds-text-soft);
+  --fn-v3-muted: var(--fn-ds-muted);
+  --fn-v3-border: var(--fn-ds-border);
+  --fn-v3-border-strong: var(--fn-ds-border-strong);
+  --fn-v3-green: var(--fn-ds-accent);
+  --fn-v3-green-dark: var(--fn-ds-accent-strong);
+  --fn-v3-green-soft: var(--fn-ds-accent-soft);
+  --fn-v3-page-width: var(--fn-ds-content-width);
+  --fn-v3-wide-width: var(--fn-ds-content-width);
+
+  --calm-page-max: var(--fn-ds-content-width);
+  --calm-pad-page: 0;
+  --calm-surface: var(--fn-ds-surface);
+  --calm-surface-2: var(--fn-ds-bg-soft);
+  --calm-soft: var(--fn-ds-surface-soft);
+  --calm-line: var(--fn-ds-border);
+  --calm-green: var(--fn-ds-accent);
+  --calm-green-strong: var(--fn-ds-accent-strong);
+
+  --bg: var(--fn-ds-bg);
+  --bg2: var(--fn-ds-bg-soft);
+  --bg3: var(--fn-ds-surface-soft);
+  --card: var(--fn-ds-surface);
+  --border: var(--fn-ds-border);
+  --border2: var(--fn-ds-border);
+  --text: var(--fn-ds-text);
+  --muted: var(--fn-ds-muted);
+
+  --fn-page-max: var(--fn-ds-content-width);
+  --fn-page-card-bg: var(--fn-ds-surface);
+  --fn-page-soft-bg: var(--fn-ds-bg-soft);
+  --fn-page-sub-bg: var(--fn-ds-surface-soft);
+  --fn-page-border: var(--fn-ds-border);
+  --fn-page-border-soft: var(--fn-ds-border);
+  --fn-page-shadow: none;
+
+  --fn-nav-surface: var(--fn-ds-surface);
+  --fn-nav-surface-2: var(--fn-ds-surface-soft);
+  --fn-nav-text: var(--fn-ds-text-soft);
+  --fn-nav-active-text: var(--fn-ds-text);
+  --fn-nav-line: var(--fn-ds-border);
+
+  --fn-home-panel-surface: var(--fn-ds-surface);
+  --fn-home-panel-surface-2: var(--fn-ds-bg-soft);
+  --fn-home-panel-border: var(--fn-ds-border);
+  --fn-home-macro-surface: var(--fn-ds-surface-soft);
+  --fn-home-macro-surface-2: var(--fn-ds-surface-soft);
+  --fn-home-macro-label-text: var(--fn-ds-muted);
+  --fn-home-macro-value-text: var(--fn-ds-text);
+  --fn-home-macro-sub-text: var(--fn-ds-muted);
+  --fn-home-calorie-surface: var(--fn-ds-surface);
+  --fn-home-calorie-card-surface: transparent;
+  --fn-home-calorie-ring-inner-surface: var(--fn-ds-surface);
+  --fn-home-calorie-value-text: var(--fn-ds-text);
+  --fn-home-calorie-unit-text: var(--fn-ds-muted);
+  --fn-home-calorie-label-text: var(--fn-ds-muted);
+  --fn-home-progress-track: #d8ccb8;
+
+  --fn-add-surface: var(--fn-ds-surface);
+  --fn-add-soft: var(--fn-ds-bg-soft);
+}
+
+
+html,
+body,
+.app-layout,
+.main-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  background:
+    radial-gradient(circle at 0 0, rgba(255,255,255,.66), transparent 28%),
+    linear-gradient(180deg, var(--fn-ds-bg-soft) 0%, var(--fn-ds-bg) 48%, var(--fn-ds-bg) 100%) !important;
+  color: var(--fn-ds-text) !important;
+}
+
+.main-wrap {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 clamp(18px, 2.5vw, 36px) 72px !important;
+  overflow: visible !important;
+}
+
+
+html body .main-wrap > .page,
+html body #page-journal,
+html body #page-sport,
+html body #page-historique,
+html body #page-stats,
+html body #page-objectif,
+html body #page-recap,
+html body #page-ia,
+html body #page-bases,
+html body #page-donnees,
+html body #page-profil,
+html body #page-onboarding {
+  width: min(100%, var(--fn-ds-content-width)) !important;
+  max-width: var(--fn-ds-content-width) !important;
+  min-width: 0 !important;
+  margin-inline: auto !important;
+  padding-top: 30px !important;
+  background: transparent !important;
+  color: var(--fn-ds-text) !important;
+}
+
+
+html body .main-wrap > .page > .fn-ui-page,
+html body .main-wrap > .page > .fn-ui-page-narrow,
+html body .main-wrap > .page > .fn-ui-stack,
+html body #page-sport > .fn-ui-page,
+html body #page-profil > .fn-ui-page,
+html body #page-stats > .fn-ui-page,
+html body #page-bases > .fn-ui-page,
+html body #page-donnees > .fn-ui-page,
+html body #page-ia > .fn-ui-page,
+html body #page-historique > .fn-ui-page {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+
+html body #page-objectif > *,
+html body #page-recap > *,
+html body #page-journal > *,
+html body #page-sport > *,
+html body #page-profil > *,
+html body #page-stats > *,
+html body #page-bases > *,
+html body #page-donnees > *,
+html body #page-ia > * {
+  max-width: 100% !important;
+}
+
+
+html body .card,
+html body .fn-ui-surface,
+html body .fn-ui-panel,
+html body .fn-ui-panel-pad,
+html body .journal-section-card,
+html body .journal-tile-card,
+html body .journal-main-card,
+html body .journal-foods-block,
+html body .journal-meals-card,
+html body details.card,
+html body .profile-summary-main,
+html body .profile-summary,
+html body .stats-commercial-grid > *,
+html body .fn-ui-chart-tile,
+html body .fn-ui-chart-wide,
+html body .chart-card,
+html body .stat-card,
+html body .database-explorer-card,
+html body .notification-card,
+html body .food-add-panel,
+html body .food-add-dialog,
+html body .food-current-meal-card,
+html body .ocr-panel,
+html body .recipe-ai-result,
+html body .barcode-result,
+html body #hist-list > *,
+html body #page-sport .fn-ui-panel,
+html body #page-profil .fn-ui-panel,
+html body #page-objectif .card,
+html body #page-objectif .fn-ui-panel,
+html body #page-ia .card,
+html body #page-ia .fn-ui-panel,
+html body #page-bases .card,
+html body #page-bases .fn-ui-panel,
+html body #page-donnees .card,
+html body #page-donnees .fn-ui-panel,
+html body #page-stats .card,
+html body #page-stats .fn-ui-panel,
+html body #page-recap .card,
+html body #page-recap .fn-ui-panel {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-ui-surface-soft,
+html body .card.fn-ui-surface-soft,
+html body .fn-ui-feature,
+html body .fn-ui-tile,
+html body .fn-ui-alert,
+html body .food-current-meal-card,
+html body .ocr-panel,
+html body .recipe-ai-result,
+html body .barcode-result,
+html body .db-row,
+html body .database-row,
+html body .meal-card,
+html body .meal-section,
+html body .meal-group,
+html body .aliment-item,
+html body .food-line,
+html body .custom-food-row,
+html body .entry-row {
+  background: var(--fn-ds-bg-soft) !important;
+  color: var(--fn-ds-text) !important;
+  border-color: var(--fn-ds-border) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-ui-title,
+html body .profile-name,
+html body .card-title,
+html body .fn-section-title,
+html body .journal-meals-title,
+html body .fn-orbit-title,
+html body h1,
+html body h2,
+html body h3 {
+  color: var(--fn-ds-text) !important;
+}
+
+html body .fn-ui-sub,
+html body .profile-muted,
+html body .journal-meals-subtitle,
+html body .section-subtitle,
+html body .fn-ui-muted,
+html body small,
+html body .muted {
+  color: var(--fn-ds-muted) !important;
+  opacity: 1 !important;
+}
+
+html body .fn-ui-icon,
+html body .fn-section-icon,
+html body .journal-meals-icon,
+html body .fn-mini-ring,
+html body .fn-macro-icon-bubble,
+html body .fn-nutri-home-icon {
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  border-color: var(--fn-ds-border) !important;
+}
+
+
+html body button,
+html body .fn-ui-button,
+html body .btn-primary,
+html body .journal-add-btn,
+html body .food-source-chip,
+html body .food-meal-chip,
+html body .journal-date-launch,
+html body .journal-day-nav {
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html body .btn-primary,
+html body .fn-ui-button-primary,
+html body .journal-add-btn,
+html body .food-meal-chip.active,
+html body .food-source-chip.active {
+  border-color: transparent !important;
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+}
+
+html body input,
+html body select,
+html body textarea,
+html body .db-search-input,
+html body .db-qty-input,
+html body .fn-ui-field input,
+html body .fn-ui-field select,
+html body .fn-ui-field textarea {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-journal .journal-hero {
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-journal .journal-day-row-carousel,
+html body #page-sport .journal-day-row-carousel {
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 16px !important;
+}
+
+html body #page-journal .journal-floating-macro-card,
+html body #page-journal .fn-home-nutrition-panel {
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: 16px !important;
+}
+
+html body #page-journal .fn-home-macro-row {
+  background:
+    linear-gradient(to bottom, var(--fn-ds-surface-soft) 0 calc(100% - 6px), transparent calc(100% - 6px) 100%),
+    linear-gradient(90deg, var(--macro-bar-color, var(--fn-ds-accent)) 0 var(--macro-pct, 0%), #d8ccb8 var(--macro-pct, 0%) 100%) !important;
+}
+
+
+html body #page-sport .fn-ui-page > .fn-ui-panel:first-child {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+html body #page-sport #sport-card {
+  margin-top: 16px !important;
+  background: var(--fn-ds-surface) !important;
+}
+
+
+html body .stats-commercial-grid,
+html body .fn-ui-feature-grid,
+html body .fn-ui-form-grid-2,
+html body .fn-ui-form-grid-3,
+html body .fn-ui-form-grid-4,
+html body .stats-grid,
+html body .chart-grid,
+html body .database-grid {
+  max-width: 100% !important;
+}
+
+
+html body table,
+html body thead,
+html body tbody,
+html body tr,
+html body th,
+html body td,
+html body .fn-ui-table,
+html body .database-table {
+  background-color: transparent !important;
+  color: var(--fn-ds-text) !important;
+  border-color: var(--fn-ds-border) !important;
+}
+
+
+@media (max-width: 820px) {
+  html body .main-wrap {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  html body .main-wrap > .page,
+  html body #page-journal,
+  html body #page-sport,
+  html body #page-historique,
+  html body #page-stats,
+  html body #page-objectif,
+  html body #page-recap,
+  html body #page-ia,
+  html body #page-bases,
+  html body #page-donnees,
+  html body #page-profil,
+  html body #page-onboarding {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-top: 18px !important;
+  }
+
+  html body .main-wrap > .page > .fn-ui-page,
+  html body .main-wrap > .page > .fn-ui-page-narrow,
+  html body .main-wrap > .page > .fn-ui-stack {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+
+
+
+
+html body aside.sidebar#sidebar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  min-height: 64px !important;
+  height: 64px !important;
+  max-height: 64px !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  grid-template-areas: "brand nav user" !important;
+  align-items: center !important;
+  justify-items: stretch !important;
+  gap: 14px !important;
+  padding: 0 clamp(16px, 2vw, 28px) !important;
+  overflow: hidden !important;
+  background: var(--fn-ds-header, var(--fn-v3-header, rgba(255,255,255,.88))) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-ds-border) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+html body aside.sidebar#sidebar .sb-header {
+  grid-area: brand !important;
+  align-self: center !important;
+  justify-self: start !important;
+  width: auto !important;
+  min-width: max-content !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body aside.sidebar#sidebar .sb-nav {
+  grid-area: nav !important;
+  align-self: center !important;
+  justify-self: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 40px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  scrollbar-width: none !important;
+}
+
+html body aside.sidebar#sidebar .sb-nav::-webkit-scrollbar {
+  display: none !important;
+}
+
+html body aside.sidebar#sidebar .sb-footer {
+  grid-area: user !important;
+  align-self: center !important;
+  justify-self: end !important;
+  width: auto !important;
+  min-width: max-content !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html body aside.sidebar#sidebar .sb-nav > .sb-item,
+html body aside.sidebar#sidebar .sb-nav > .sb-item:nth-of-type(n),
+html body aside.sidebar#sidebar .sb-nav > .sb-item:nth-of-type(n+5) {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: auto !important;
+  min-width: auto !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
+  font-size: 11.5px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  line-height: 1 !important;
+}
+
+html body #nav-themelab,
+html body #page-themelab {
+  display: none !important;
+}
+
+
+html body #page-journal .journal-floating-macro-card,
+html body #page-journal .fn-home-nutrition-panel,
+html body #page-journal .journal-main-card,
+html body #page-journal .journal-section-card,
+html body #page-journal .journal-foods-block,
+html body #page-journal .journal-meals-card,
+html body #page-journal .journal-extra-grid {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+
+html body #page-journal .fn-home-nutrition-layout,
+html body #page-journal .journal-card-head,
+html body #page-journal .food-add-panel,
+html body #page-sport .fn-ui-panel,
+html body #page-profil .fn-ui-panel,
+html body #page-stats .fn-ui-panel,
+html body #page-bases .fn-ui-panel {
+  max-width: 100% !important;
+}
+
+
+html body #page-sport,
+html body #page-profil,
+html body #page-stats,
+html body #page-bases,
+html body #page-donnees,
+html body #page-objectif,
+html body #page-ia,
+html body #page-recap {
+  background: transparent !important;
+  color: var(--fn-ds-text) !important;
+}
+
+html body #page-sport *,
+html body #page-profil *,
+html body #page-stats *,
+html body #page-bases *,
+html body #page-donnees *,
+html body #page-objectif *,
+html body #page-ia *,
+html body #page-recap * {
+  border-color: var(--fn-ds-border);
+}
+
+@media (max-width: 820px) {
+  html body aside.sidebar#sidebar {
+    height: 58px !important;
+    min-height: 58px !important;
+    max-height: 58px !important;
+    grid-template-columns: auto minmax(0, 1fr) auto !important;
+    grid-template-areas: "brand nav user" !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  html body aside.sidebar#sidebar .sb-logo-text {
+    display: none !important;
+  }
+
+  html body aside.sidebar#sidebar .sb-nav {
+    height: 40px !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important;
+  }
+
+  html body aside.sidebar#sidebar .theme-toggle,
+  html body aside.sidebar#sidebar #sb-prenom {
+    display: none !important;
+  }
+
+  html body aside.sidebar#sidebar .sb-user {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+}
+
+
+
+
+html body #page-objectif.objectif-page {
+  display: none;
+}
+html body #page-objectif.objectif-page.active {
+  display: block !important;
+  width: min(100%, var(--fn-ds-content-width)) !important;
+  max-width: var(--fn-ds-content-width) !important;
+  margin-inline: auto !important;
+  padding-top: 30px !important;
+  background: transparent !important;
+  color: var(--fn-ds-text) !important;
+}
+html body #page-objectif.objectif-page > .profile-summary-main,
+html body #page-objectif.objectif-page > .objectif-method-card,
+html body #page-objectif.objectif-page > .stats-commercial-grid,
+html body #page-objectif.objectif-page > #objectif-programme,
+html body #page-objectif.objectif-page > .card {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-bottom: 16px !important;
+}
+html body #page-objectif.objectif-page > .profile-summary-main,
+html body #page-objectif.objectif-page > .objectif-method-card,
+html body #page-objectif.objectif-page > #objectif-programme,
+html body #page-objectif.objectif-page .stats-commercial-card,
+html body #page-objectif.objectif-page .fn-ui-calc-box,
+html body #page-objectif.objectif-page .objectif-method-box,
+html body #page-objectif.objectif-page .fn-ui-phase-pool,
+html body #page-objectif.objectif-page .fn-ui-phase-timeline,
+html body #page-objectif.objectif-page .fn-ui-note,
+html body #page-objectif.objectif-page .fn-ui-empty {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg) !important;
+  box-shadow: none !important;
+}
+html body #page-objectif.objectif-page .stats-commercial-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html body #page-objectif.objectif-page .objectif-method-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+html body #page-objectif.objectif-page .fn-ui-calc-box,
+html body #page-objectif.objectif-page .objectif-method-box,
+html body #page-objectif.objectif-page .stats-commercial-card {
+  padding: 18px !important;
+}
+html body #page-objectif.objectif-page .profile-chip,
+html body #page-objectif.objectif-page .fn-ui-section-label,
+html body #page-objectif.objectif-page .objectif-method-title,
+html body #page-objectif.objectif-page .objectif-method-summary-text {
+  color: var(--fn-ds-muted) !important;
+}
+html body #page-objectif.objectif-page .profile-name,
+html body #page-objectif.objectif-page .card-title,
+html body #page-objectif.objectif-page .fn-section-title,
+html body #page-objectif.objectif-page .objectif-method-title b,
+html body #page-objectif.objectif-page .stats-commercial-card b {
+  color: var(--fn-ds-text) !important;
+}
+html body #page-objectif.objectif-page table,
+html body #page-objectif.objectif-page .fn-ui-table,
+html body #page-objectif.objectif-page .objectif-rules-table {
+  width: 100% !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border-color: var(--fn-ds-border) !important;
+}
+
+
+html body #page-recap.active,
+html body #page-recap.page.active {
+  display: block !important;
+  width: min(100%, var(--fn-ds-content-width)) !important;
+  max-width: var(--fn-ds-content-width) !important;
+  margin-inline: auto !important;
+  padding-top: 30px !important;
+  background: transparent !important;
+  color: var(--fn-ds-text) !important;
+}
+html body #page-recap > .fn-ui-page,
+html body #page-recap > .fn-ui-recap-page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+html body #page-recap .fn-ui-panel,
+html body #page-recap .fn-ui-panel-pad,
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-card,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-card,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-empty-note,
+html body #page-recap .fn-ui-tile,
+html body #page-recap .fn-ui-smart-badge,
+html body #page-recap .journal-dashboard-badge,
+html body #page-recap .recap-badge-compact {
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg) !important;
+  box-shadow: none !important;
+}
+html body #page-recap .fn-ui-panel,
+html body #page-recap .fn-ui-panel-pad {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 16px !important;
+  padding: 24px !important;
+}
+html body #page-recap .recap-trends,
+html body #page-recap .recap-trend-panels,
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .fn-ui-metric-grid,
+html body #page-recap .foodnote-smart-dashboard-grid,
+html body #page-recap .foodnote-smart-dashboard-metrics {
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html body #page-recap .recap-trend-grid,
+html body #page-recap .fn-ui-metric-grid,
+html body #page-recap .foodnote-smart-dashboard-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+html body #page-recap .recap-advice-groups {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+html body #page-recap .recap-trend-tabs {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+}
+html body #page-recap .recap-trend-tab,
+html body #page-recap .fn-ui-chip,
+html body #page-recap .recap-badge-compact {
+  background: var(--fn-ds-surface-soft) !important;
+  color: var(--fn-ds-text-soft) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  box-shadow: none !important;
+}
+html body #page-recap .recap-trend-tab.active,
+html body #page-recap .fn-ui-button-primary {
+  background: var(--fn-ds-accent-soft) !important;
+  color: var(--fn-ds-accent-strong) !important;
+  border-color: transparent !important;
+}
+html body #page-recap .recap-trend-track,
+html body #page-recap .fn-chip-progress,
+html body #page-recap .recap-badge-track {
+  background: var(--fn-ds-surface-muted) !important;
+  border-radius: 999px !important;
+  overflow: hidden !important;
+}
+html body #page-recap .recap-trend-track i,
+html body #page-recap .fn-chip-progress i,
+html body #page-recap .recap-badge-track span {
+  background: var(--fn-ds-accent) !important;
+}
+html body #page-recap .fn-ui-title,
+html body #page-recap .recap-trend-column-head b,
+html body #page-recap .recap-advice-title b,
+html body #page-recap .recap-advice-group-head b,
+html body #page-recap .recap-trend-values strong {
+  color: var(--fn-ds-text) !important;
+}
+html body #page-recap .fn-ui-sub,
+html body #page-recap .recap-trend-column-head span,
+html body #page-recap .recap-advice-title span,
+html body #page-recap .recap-advice-group-head span,
+html body #page-recap .recap-trend-values span,
+html body #page-recap .recap-advice-summary-meta,
+html body #page-recap .recap-advice-empty {
+  color: var(--fn-ds-muted) !important;
+}
+
+@media (max-width: 820px) {
+  html body #page-objectif.objectif-page.active,
+  html body #page-recap.page.active {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-top: 18px !important;
+  }
+  html body #page-objectif.objectif-page .stats-commercial-grid,
+  html body #page-objectif.objectif-page .objectif-method-grid,
+  html body #page-recap .recap-trend-grid,
+  html body #page-recap .fn-ui-metric-grid,
+  html body #page-recap .foodnote-smart-dashboard-grid,
+  html body #page-recap .recap-advice-groups {
+    grid-template-columns: 1fr !important;
+  }
+  html body #page-recap .fn-ui-panel,
+  html body #page-recap .fn-ui-panel-pad,
+  html body #page-objectif.objectif-page .fn-ui-panel,
+  html body #page-objectif.objectif-page .card {
+    padding: 18px !important;
+  }
+}
+
+
+
+
+html body #page-objectif.objectif-page .profile-summary-main::before,
+html body #page-objectif.objectif-page .profile-summary-main::after,
+html body #page-objectif.objectif-page .objectif-method-card::before,
+html body #page-objectif.objectif-page .objectif-method-card::after,
+html body #page-objectif.objectif-page .stats-commercial-card::before,
+html body #page-objectif.objectif-page .stats-commercial-card::after,
+html body #page-objectif.objectif-page #objectif-programme::before,
+html body #page-objectif.objectif-page #objectif-programme::after,
+html body #page-objectif.objectif-page #objectif-programme-builder::before,
+html body #page-objectif.objectif-page #objectif-programme-builder::after,
+html body #page-objectif.objectif-page .objectif-phase-guide::before,
+html body #page-objectif.objectif-page .objectif-phase-guide::after {
+  content: none !important;
+  display: none !important;
+}
+html body #page-objectif.objectif-page .profile-summary-main,
+html body #page-objectif.objectif-page .objectif-method-card,
+html body #page-objectif.objectif-page .stats-commercial-card,
+html body #page-objectif.objectif-page #objectif-programme {
+  position: relative !important;
+  overflow: visible !important;
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-ds-text) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg) !important;
+  box-shadow: none !important;
+}
+html body #page-objectif.objectif-page .profile-summary-main {
+  min-height: 0 !important;
+  padding: 24px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+html body #page-objectif.objectif-page .profile-chip {
+  position: static !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 6px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--fn-ds-muted) !important;
+  font-size: 10px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  letter-spacing: .13em !important;
+  text-transform: uppercase !important;
+  box-shadow: none !important;
+}
+html body #page-objectif.objectif-page .profile-name {
+  font-size: clamp(22px, 2.1vw, 28px) !important;
+  line-height: 1.08 !important;
+  font-weight: var(--fn-ds-w-medium) !important;
+  letter-spacing: -.035em !important;
+  color: var(--fn-ds-text) !important;
+}
+html body #page-objectif.objectif-page .profile-muted {
+  max-width: 620px !important;
+  color: var(--fn-ds-muted) !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+html body #page-objectif.objectif-page .profile-actions {
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  display: flex !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+}
+
+
+html body #page-recap .recap-badge-compact::before,
+html body #page-recap .recap-badge-compact::after,
+html body #page-recap .recap-trend-card::before,
+html body #page-recap .recap-trend-card::after,
+html body #page-recap .recap-advice-card::before,
+html body #page-recap .recap-advice-card::after,
+html body #page-recap .recap-advice-board::before,
+html body #page-recap .recap-advice-board::after {
+  content: none !important;
+  display: none !important;
+}
+html body #page-recap .recap-badge-compact.macro-kcal,
+html body #page-recap .recap-badge-compact.macro-prot,
+html body #page-recap .recap-badge-compact.macro-gluc,
+html body #page-recap .recap-badge-compact.macro-lip,
+html body #page-recap .recap-badge-compact.is-ok,
+html body #page-recap .recap-badge-compact.is-warn,
+html body #page-recap .recap-badge-compact.trend-up,
+html body #page-recap .recap-badge-compact.trend-down,
+html body #page-recap .recap-advice-card.is-good,
+html body #page-recap .recap-advice-card.is-warn,
+html body #page-recap .recap-advice-card.is-bad,
+html body #page-recap .recap-trend-card.is-good,
+html body #page-recap .recap-trend-card.is-warn,
+html body #page-recap .recap-trend-card.is-bad {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-ds-text) !important;
+  border-color: var(--fn-ds-border) !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 820px) {
+  html body #page-objectif.objectif-page .profile-summary-main {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  html body #page-objectif.objectif-page .profile-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+}
+
+
+
+
+
+:root {
+  --fn-ds-kcal: #df7f2a;
+  --fn-ds-kcal-soft: #faead9;
+  --fn-ds-prot: #2878a8;
+  --fn-ds-prot-soft: #e2f0f7;
+  --fn-ds-gluc: #8266c7;
+  --fn-ds-gluc-soft: #eee8fa;
+  --fn-ds-lip: #c9932e;
+  --fn-ds-lip-soft: #f7edce;
+  --fn-ds-neutral-line: rgba(46, 53, 43, .10);
+}
+
+
+:root {
+  --fn-macro-kcal: var(--fn-ds-kcal);
+  --fn-macro-prot: var(--fn-ds-prot);
+  --fn-macro-gluc: var(--fn-ds-gluc);
+  --fn-macro-lip: var(--fn-ds-lip);
+
+  --fn-main-macro-kcal: var(--fn-ds-kcal);
+  --fn-main-macro-prot: var(--fn-ds-prot);
+  --fn-main-macro-gluc: var(--fn-ds-gluc);
+  --fn-main-macro-lip: var(--fn-ds-lip);
+
+  --calm-orange: var(--fn-ds-kcal);
+  --calm-green: var(--fn-ds-prot);
+  --calm-blue: var(--fn-ds-lip);
+  --calm-yellow: var(--fn-ds-gluc);
+
+  --fn-energy-orange: var(--fn-ds-kcal);
+  --fn-energy-green: var(--fn-ds-prot);
+  --fn-energy-pink: var(--fn-ds-gluc);
+}
+
+
+
+
+
+
+:root {
+  --fn-page-width: var(--fn-ds-content-width, 1280px);
+
+  --fn-surface: var(--fn-ds-surface, #ffffff);
+  --fn-surface-soft: var(--fn-ds-bg-soft, #fbf8f2);
+  --fn-text: var(--fn-ds-text, #20231f);
+  --fn-text-soft: var(--fn-ds-text-soft, #5c6258);
+  --fn-muted: var(--fn-ds-muted, #89857c);
+  --fn-border: var(--fn-ds-border, rgba(46, 53, 43, .12));
+  --fn-border-soft: rgba(46, 53, 43, .10);
+
+  --fn-radius-panel: 18px;
+  --fn-radius-widget: 14px;
+  --fn-radius-row: 12px;
+  --fn-radius-field: 10px;
+  --fn-radius-pill: 999px;
+
+  --fn-panel-padding: 24px;
+  --fn-widget-padding: 16px;
+  --fn-row-padding: 12px 14px;
+
+  --fn-accent: var(--fn-ds-accent, #3f7a57);
+  --fn-accent-soft: var(--fn-ds-accent-soft, #e1efe2);
+  --fn-accent-strong: var(--fn-ds-accent-strong, #2e5d42);
+
+  --fn-kcal: var(--fn-ds-kcal, #d6a257);
+  --fn-kcal-soft: var(--fn-ds-kcal-soft, #f6ead8);
+  --fn-protein: var(--fn-ds-prot, #3f7a57);
+  --fn-protein-soft: var(--fn-ds-prot-soft, #e1efe2);
+  --fn-carbs: var(--fn-ds-gluc, #c79055);
+  --fn-carbs-soft: var(--fn-ds-gluc-soft, #f5e7d6);
+  --fn-fat: var(--fn-ds-lip, #6f9eb7);
+  --fn-fat-soft: var(--fn-ds-lip-soft, #e4f0f5);
+}
+
+
+html body .fn-page {
+  width: min(100%, var(--fn-page-width)) !important;
+  max-width: var(--fn-page-width) !important;
+  margin-inline: auto !important;
+  color: var(--fn-text) !important;
+}
+
+html body .fn-page-body {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+
+html body .fn-panel {
+  background: var(--fn-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text) !important;
+  border: 1px solid var(--fn-border) !important;
+  border-radius: var(--fn-radius-panel) !important;
+  box-shadow: none !important;
+}
+
+html body .fn-panel:not(.journal-hero):not(.journal-sticky-summary) {
+  padding: var(--fn-panel-padding) !important;
+}
+
+
+html body .fn-panel .fn-panel {
+  background: var(--fn-surface-soft) !important;
+  border-radius: var(--fn-radius-widget) !important;
+  padding: var(--fn-widget-padding) !important;
+}
+
+
+html body .fn-widget {
+  background: var(--fn-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text) !important;
+  border: 1px solid var(--fn-border-soft) !important;
+  border-radius: var(--fn-radius-widget) !important;
+  box-shadow: none !important;
+}
+
+html body .fn-widget:not(.fn-metric):not(.fn-grid):not(.recap-advice-board) {
+  padding: var(--fn-widget-padding) !important;
+}
+
+
+html body .fn-widget .fn-widget {
+  background: transparent !important;
+  border-color: transparent !important;
+  padding: 0 !important;
+}
+
+
+html body .fn-metric {
+  --fn-local-accent: var(--fn-accent);
+  --fn-local-accent-soft: var(--fn-accent-soft);
+
+  position: relative !important;
+  background: var(--fn-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text) !important;
+  border: 1px solid var(--fn-border-soft) !important;
+  border-radius: var(--fn-radius-widget) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html body .fn-metric::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 16px !important;
+  right: 16px !important;
+  bottom: 10px !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+  background: var(--fn-local-accent) !important;
+  opacity: .32 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+
+html body .fn-row {
+  background: transparent !important;
+  color: var(--fn-text) !important;
+  border-color: var(--fn-border-soft) !important;
+  box-shadow: none !important;
+}
+
+html body .fn-list .fn-row {
+  border-bottom: 1px solid var(--fn-border-soft) !important;
+}
+
+
+html body .fn-field {
+  background: var(--fn-surface) !important;
+  color: var(--fn-text) !important;
+  border: 1px solid var(--fn-border) !important;
+  border-radius: var(--fn-radius-field) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-pill {
+  background: var(--fn-ds-surface-soft) !important;
+  background-image: none !important;
+  color: var(--fn-text-soft) !important;
+  border: 1px solid var(--fn-border-soft) !important;
+  border-radius: var(--fn-radius-pill) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-btn {
+  border-radius: var(--fn-radius-pill) !important;
+  border: 1px solid var(--fn-border) !important;
+  background: var(--fn-surface) !important;
+  color: var(--fn-text-soft) !important;
+  box-shadow: none !important;
+}
+
+html body .fn-btn.active,
+html body .fn-btn.is-active,
+html body .fn-btn.fn-ui-button-primary,
+html body .fn-btn.btn-primary,
+html body .fn-btn.journal-add-btn {
+  background: var(--fn-accent-soft) !important;
+  color: var(--fn-accent-strong) !important;
+  border-color: transparent !important;
+}
+
+
+html body .fn-icon {
+  background: var(--fn-accent-soft) !important;
+  color: var(--fn-accent-strong) !important;
+  border-color: var(--fn-border-soft) !important;
+  box-shadow: none !important;
+  filter: saturate(.72) !important;
+}
+
+
+html body .fn-grid,
+html body .fn-list {
+  max-width: 100% !important;
+}
+
+
+html body .fn-accent-neutral {
+  --fn-local-accent: var(--fn-accent);
+  --fn-local-accent-soft: var(--fn-accent-soft);
+}
+
+html body .fn-accent-kcal {
+  --fn-local-accent: var(--fn-kcal);
+  --fn-local-accent-soft: var(--fn-kcal-soft);
+}
+
+html body .fn-accent-protein {
+  --fn-local-accent: var(--fn-protein);
+  --fn-local-accent-soft: var(--fn-protein-soft);
+}
+
+html body .fn-accent-carbs {
+  --fn-local-accent: var(--fn-carbs);
+  --fn-local-accent-soft: var(--fn-carbs-soft);
+}
+
+html body .fn-accent-fat {
+  --fn-local-accent: var(--fn-fat);
+  --fn-local-accent-soft: var(--fn-fat-soft);
+}
+
+html body .fn-accent-good {
+  --fn-local-accent: var(--fn-accent);
+  --fn-local-accent-soft: var(--fn-accent-soft);
+}
+
+html body .fn-accent-warning {
+  --fn-local-accent: var(--fn-ds-warning, #d19845);
+  --fn-local-accent-soft: #f6ead8;
+}
+
+html body .fn-accent-danger {
+  --fn-local-accent: var(--fn-ds-danger, #b96758);
+  --fn-local-accent-soft: #f4e2df;
+}
+
+
+html body .fn-accent-kcal .fn-icon,
+html body .fn-icon.fn-accent-kcal {
+  background: var(--fn-kcal-soft) !important;
+  color: var(--fn-kcal) !important;
+}
+
+html body .fn-accent-protein .fn-icon,
+html body .fn-icon.fn-accent-protein {
+  background: var(--fn-protein-soft) !important;
+  color: var(--fn-protein) !important;
+}
+
+html body .fn-accent-carbs .fn-icon,
+html body .fn-icon.fn-accent-carbs {
+  background: var(--fn-carbs-soft) !important;
+  color: var(--fn-carbs) !important;
+}
+
+html body .fn-accent-fat .fn-icon,
+html body .fn-icon.fn-accent-fat {
+  background: var(--fn-fat-soft) !important;
+  color: var(--fn-fat) !important;
+}
+
+
+html body #page-recap .recap-advice-board.fn-grid {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-groups.fn-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+}
+
+html body #page-recap .recap-advice-card.fn-row {
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-border-soft) !important;
+  border-radius: 0 !important;
+  padding: 12px 0 !important;
+}
+
+html body #page-recap .recap-advice-card.fn-row:last-child {
+  border-bottom: 0 !important;
+}
+
+
+html body #page-objectif .fn-metric,
+html body #page-recap .fn-metric {
+  background: var(--fn-surface) !important;
+  background-image: none !important;
+}
+
+
+@media (max-width: 820px) {
+  :root {
+    --fn-panel-padding: 18px;
+    --fn-widget-padding: 14px;
+  }
+
+  html body .fn-page {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html body #page-recap .recap-advice-groups.fn-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
+
+
+
+
+html body .fn-panel,
+html body .fn-widget,
+html body .fn-metric,
+html body .fn-row,
+html body .card,
+html body .fn-ui-panel,
+html body .fn-ui-surface,
+html body .fn-ui-tile,
+html body .fn-ui-alert,
+html body .journal-section-card,
+html body .journal-tile-card,
+html body .journal-foods-block,
+html body .journal-meals-card,
+html body .database-explorer-card,
+html body .notification-card,
+html body .food-current-meal-card,
+html body .ocr-panel,
+html body .recipe-ai-result,
+html body .barcode-result {
+  background-color: var(--fn-surface, #fff) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-grid,
+html body .fn-list,
+html body .recap-advice-board,
+html body .recap-advice-groups,
+html body .journal-extra-grid,
+html body .stats-commercial-grid,
+html body .objectif-commercial-grid,
+html body .objectif-target-grid,
+html body .fn-ui-metric-grid,
+html body .foodnote-smart-dashboard-grid,
+html body .foodnote-dashboard-editor-zone {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+
+html body .fn-row,
+html body .meal-row,
+html body .journal-meal-row,
+html body .journal-food-row,
+html body .entry-row,
+html body .db-row,
+html body .database-row,
+html body .unit-row,
+html body .sport-row,
+html body .recap-row,
+html body .recap-item,
+html body #hist-list > *,
+html body .meal-card,
+html body .meal-section,
+html body .meal-group,
+html body .aliment-item,
+html body .custom-food-row,
+html body .food-line {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: var(--fn-radius-row, 12px) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-list .fn-row,
+html body .journal-meals-card .fn-row,
+html body #hist-list > *,
+html body .database-list .fn-row,
+html body .recap-advice-group-list .fn-row {
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  border-radius: 0 !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+
+html body #page-journal .journal-meals-card [class*="meal"],
+html body #page-journal .journal-meals-card [class*="repas"],
+html body #page-journal .journal-meals-card [class*="row"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+}
+
+
+
+html body #page-journal .journal-extra-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+  margin-top: 16px !important;
+}
+
+html body #page-journal .journal-extra-grid > *,
+html body #page-journal .journal-advanced,
+html body #page-journal details.journal-advanced {
+  width: 100% !important;
+  max-width: 100% !important;
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border, rgba(46, 53, 43, .12)) !important;
+  border-radius: var(--fn-radius-panel, 18px) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #food-add-modal .fn-panel,
+html body #food-add-modal .fn-widget,
+html body #food-add-modal .fn-metric,
+html body #food-add-modal .food-add-panel,
+html body #food-add-modal .food-add-dialog,
+html body #food-add-modal .food-current-meal-card,
+html body #food-add-modal .recipe-ai-result,
+html body #food-add-modal .ocr-panel,
+html body #food-add-modal .barcode-result,
+html body [class*="recipe"] .fn-widget,
+html body [class*="recipe"] .fn-metric,
+html body [class*="ingredient"] .fn-widget,
+html body [class*="ingredient"] .fn-metric {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body [class*="recipe"] .fn-metric,
+html body [class*="nutrition"] .fn-metric,
+html body [class*="nutri"] .fn-metric,
+html body .recipe-ai-result [class*="kcal"],
+html body .recipe-ai-result [class*="prot"],
+html body .recipe-ai-result [class*="gluc"],
+html body .recipe-ai-result [class*="lip"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-objectif .fn-metric,
+html body #page-objectif .stats-commercial-card,
+html body #page-objectif .stats-commercial-grid > *,
+html body #page-objectif .objectif-commercial-grid > *,
+html body #page-objectif .objectif-target-grid > *,
+html body #page-objectif [class*="target"],
+html body #page-objectif .fn-ui-phase-zone,
+html body #page-objectif .fn-ui-phase-bar,
+html body #page-objectif .phase-info-panel {
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-objectif [class*="target"]::before,
+html body #page-objectif [class*="target"]::after,
+html body #page-objectif .fn-ui-phase-zone::before,
+html body #page-objectif .fn-ui-phase-zone::after {
+  opacity: .12 !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-objectif .fn-ui-phase-zone {
+  background: color-mix(in srgb, var(--fn-ds-surface-soft) 62%, var(--fn-ds-surface)) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: var(--fn-ds-radius-lg, 16px) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-donnees .fn-panel,
+html body #page-donnees .fn-widget,
+html body #page-donnees .fn-row,
+html body #page-donnees .card,
+html body #page-bases .fn-panel,
+html body #page-bases .fn-widget,
+html body #page-bases .fn-row,
+html body #page-bases .card,
+html body #page-bases [class*="unit"],
+html body #page-bases [class*="row"],
+html body #page-donnees [class*="backup"],
+html body #page-donnees [class*="diagnostic"],
+html body #page-donnees [class*="mqtt"] {
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-donnees pre,
+html body #page-donnees code,
+html body #page-bases pre,
+html body #page-bases code {
+  background: #faf9f5 !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+}
+
+
+
+html body #page-sport .fn-panel,
+html body #page-sport .fn-widget,
+html body #page-sport .fn-row,
+html body #page-sport [class*="activity"],
+html body #page-sport [class*="sport-row"],
+html body #page-stats .fn-panel,
+html body #page-stats .fn-widget,
+html body #page-stats .fn-metric,
+html body #page-stats .card,
+html body #page-historique .fn-row,
+html body #page-historique #hist-list > *,
+html body #page-historique .card {
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-historique #hist-list > * {
+  margin-bottom: 10px !important;
+}
+
+
+
+html body .fn-metric {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+html body .fn-metric::before {
+  display: none !important;
+}
+
+html body .fn-metric::after {
+  height: 3px !important;
+  opacity: .28 !important;
+}
+
+
+html body .fn-pill,
+html body .badge,
+html body [class*="badge"],
+html body [class*="chip"],
+html body [class*="pill"] {
+  background: var(--fn-ds-surface-soft) !important;
+  background-image: none !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-btn.fn-ui-button-primary,
+html body .fn-btn.btn-primary,
+html body .fn-btn.journal-add-btn,
+html body button.btn-primary {
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+  color: var(--fn-accent-strong, var(--fn-ds-accent-strong)) !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body #page-journal .journal-extra-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body .fn-row,
+  html body .fn-widget,
+  html body .fn-metric {
+    border-radius: 12px !important;
+  }
+}
+
+
+
+
+
+
+html body .fn-carousel-zone,
+html body .journal-day-row-carousel,
+html body .sport-day-row-carousel,
+html body .fn-ui-day-strip {
+  width: 100% !important;
+  max-width: 100% !important;
+  background: var(--fn-surface, var(--fn-ds-surface)) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border, rgba(46, 53, 43, .12)) !important;
+  border-radius: var(--fn-radius-panel, 18px) !important;
+  box-shadow: none !important;
+}
+
+html body .journal-day-row-carousel.fn-carousel-zone,
+html body .sport-day-row-carousel.fn-carousel-zone {
+  padding: 14px !important;
+  margin-bottom: 18px !important;
+}
+
+html body .fn-carousel-zone .journal-day-card,
+html body .fn-carousel-zone .fn-ui-day-chip {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+html body .fn-carousel-zone .journal-day-card.active,
+html body .fn-carousel-zone .fn-ui-day-chip.active {
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border-color: rgba(65, 101, 70, .28) !important;
+}
+
+
+html body .fn-carousel-zone .journal-day-carousel-wrap,
+html body .fn-carousel-zone .journal-day-carousel,
+html body .fn-carousel-zone .fn-ui-day-strip {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-journal .journal-meals-card .meal-card,
+html body #page-journal .journal-meals-card .meal-section,
+html body #page-journal .journal-meals-card .meal-group,
+html body #page-journal .journal-meals-card .journal-meal-row,
+html body #page-journal .journal-meals-card .journal-row,
+html body #page-journal .journal-meals-card [class*="meal"],
+html body #page-journal .journal-meals-card [class*="repas"],
+html body #page-historique #hist-list > *,
+html body #page-historique .history-row,
+html body #page-historique .hist-row,
+html body #page-historique [class*="history"],
+html body #page-historique [class*="journal-day"],
+html body #page-bases [class*="unit"],
+html body #page-bases [class*="row"],
+html body #page-donnees [class*="backup"],
+html body #page-donnees [class*="diagnostic"],
+html body #page-donnees [class*="mqtt"],
+html body #page-sport [class*="activity"],
+html body #page-sport [class*="sport-row"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-historique #hist-list > *,
+html body #page-historique .history-row,
+html body #page-historique .hist-row {
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: var(--fn-radius-row, 12px) !important;
+  margin-bottom: 10px !important;
+}
+
+
+html body #page-journal .journal-meals-card tbody,
+html body #page-journal .journal-meals-card tr,
+html body #page-journal .journal-meals-card td,
+html body #page-journal .journal-meals-card .meal-summary,
+html body #page-journal .journal-meals-card .meal-header {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-group {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: var(--fn-radius-widget, 14px) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html body #page-recap .recap-advice-card,
+html body #page-recap .recap-advice-action,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-empty {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-action {
+  border-radius: 10px !important;
+}
+
+
+html body #page-recap .recap-trend-card,
+html body #page-recap .fn-ui-smart-badge,
+html body #page-recap .fn-metric {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-objectif .fn-metric,
+html body #page-objectif .stats-commercial-card,
+html body #page-objectif .stats-commercial-grid > *,
+html body #page-objectif .objectif-commercial-grid > *,
+html body #page-objectif .objectif-target-grid > *,
+html body #page-objectif [class*="target-tile"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+}
+
+
+html body #page-objectif .fn-ui-program-builder {
+  display: grid !important;
+  gap: 12px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-objectif .fn-ui-program-builder .fn-ui-section-head {
+  margin: 10px 2px 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #page-objectif .fn-ui-program-builder .fn-ui-section-head b {
+  font-size: .96rem !important;
+  font-weight: var(--fn-ds-w-semibold, 700) !important;
+}
+
+html body #page-objectif .fn-ui-program-builder .fn-ui-section-head em {
+  color: var(--fn-ds-muted) !important;
+  font-size: .78rem !important;
+}
+
+
+html body #page-objectif .fn-ui-phase-card {
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 30%, var(--fn-ds-surface)),
+      color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 9%, var(--fn-ds-surface)) 78%
+    ) !important;
+  border: 1px solid color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 52%, var(--fn-ds-border)) !important;
+  border-left: 4px solid color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 72%, var(--fn-ds-surface)) !important;
+  border-radius: var(--fn-ds-radius-md, 12px) !important;
+  box-shadow: none !important;
+}
+
+html body #page-objectif .fn-ui-phase-card-pool {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  min-height: 42px !important;
+  padding: 11px 14px !important;
+}
+
+html body #page-objectif .fn-ui-phase-card-program {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+  padding: 12px 14px !important;
+}
+
+html body #page-objectif .fn-ui-phase-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 30%, transparent) !important;
+}
+
+html body #page-objectif .fn-ui-phase-name {
+  color: var(--fn-ds-text) !important;
+  font-weight: var(--fn-ds-w-semibold, 700) !important;
+}
+
+html body #page-objectif .fn-ui-phase-desc {
+  color: var(--fn-ds-muted) !important;
+}
+
+html body #page-objectif .fn-ui-phase-main {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+
+html body #page-objectif .fn-ui-phase-controls {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+}
+
+html body #page-objectif .fn-ui-icon-btn,
+html body #page-objectif .phase-info-btn {
+  border: 1px solid color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 16%, var(--fn-ds-border)) !important;
+  background: color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 9%, var(--fn-ds-surface)) !important;
+  color: var(--fn-ds-text) !important;
+  box-shadow: none !important;
+}
+
+html body #page-objectif .fn-ui-week-input {
+  border: 1px solid var(--fn-ds-border) !important;
+  background: var(--fn-ds-surface) !important;
+  color: var(--fn-ds-text) !important;
+  border-radius: var(--fn-ds-radius-sm, 10px) !important;
+}
+
+
+html body #page-objectif .fn-ui-phase-bar {
+  background: color-mix(in srgb, var(--fn-ds-surface-soft) 58%, var(--fn-ds-surface)) !important;
+  border: 1px solid var(--fn-ds-border) !important;
+  border-radius: var(--fn-ds-radius-lg, 16px) !important;
+  padding: 12px !important;
+  box-shadow: none !important;
+}
+
+html body #page-objectif .fn-ui-phase-bar-head {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 8px !important;
+  color: var(--fn-ds-muted) !important;
+}
+
+html body #page-objectif .fn-ui-phase-bar-head strong {
+  color: var(--fn-ds-text) !important;
+}
+
+html body #page-objectif .fn-ui-phase-segments {
+  display: flex !important;
+  height: 18px !important;
+  overflow: hidden !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--fn-ds-text) 7%, transparent) !important;
+}
+
+html body #page-objectif .fn-ui-phase-segments i {
+  flex: var(--phase-weeks, 1) 1 0 !important;
+  min-width: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--phase-color, var(--fn-ds-accent)) 72%, #fff),
+    var(--phase-color, var(--fn-ds-accent))
+  ) !important;
+  color: color-mix(in srgb, var(--fn-ds-text) 18%, #fff) !important;
+  font-style: normal !important;
+  font-size: .68rem !important;
+  font-weight: var(--fn-ds-w-semibold, 700) !important;
+}
+
+html body #page-objectif .fn-ui-phase-labels {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 8px !important;
+  color: var(--fn-ds-muted) !important;
+  font-size: .75rem !important;
+}
+
+html body #page-objectif .fn-ui-phase-labels span {
+  flex: var(--phase-weeks, 1) 1 0 !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+html body #page-objectif [class*="target-tile"]::before {
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+
+
+html body [class*="recipe"] .fn-metric,
+html body [class*="nutrition"] .fn-metric,
+html body [class*="nutri"] .fn-metric,
+html body [class*="recipe"] [class*="kcal"],
+html body [class*="recipe"] [class*="prot"],
+html body [class*="recipe"] [class*="gluc"],
+html body [class*="recipe"] [class*="lip"],
+html body [class*="ingredient"] [class*="kcal"],
+html body [class*="ingredient"] [class*="prot"],
+html body [class*="ingredient"] [class*="gluc"],
+html body [class*="ingredient"] [class*="lip"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+html body [class*="recipe"] .fn-accent-kcal,
+html body [class*="recipe"] .fn-accent-protein,
+html body [class*="recipe"] .fn-accent-carbs,
+html body [class*="recipe"] .fn-accent-fat,
+html body [class*="nutrition"] .fn-accent-kcal,
+html body [class*="nutrition"] .fn-accent-protein,
+html body [class*="nutrition"] .fn-accent-carbs,
+html body [class*="nutrition"] .fn-accent-fat {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-donnees pre,
+html body #page-donnees code,
+html body #page-donnees .log,
+html body #page-donnees [class*="log"],
+html body #page-donnees [class*="status"],
+html body #page-donnees [class*="result"],
+html body #page-bases pre,
+html body #page-bases code {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body .fn-metric {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+html body .fn-metric::after {
+  opacity: .24 !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body .journal-day-row-carousel.fn-carousel-zone,
+  html body .sport-day-row-carousel.fn-carousel-zone {
+    padding: 12px !important;
+  }
+}
+
+
+
+
+
+
+html body .recipe-layout,
+html body .recipe-layout > *,
+html body .recipe-summary-panel,
+html body .recipe-ingredients-panel,
+html body .recipe-ingredient-card,
+html body .recipe-card,
+html body .recipe-totals > *,
+html body .recipe-nutri-100g > *,
+html body .recipe-save-row,
+html body .recipe-empty,
+html body .recipe-photo-box {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  box-shadow: none !important;
+}
+
+html body .recipe-totals,
+html body .recipe-nutri-100g {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+html body .recipe-nutri-100g [class*="kcal"],
+html body .recipe-nutri-100g [class*="cal"],
+html body .recipe-nutri-100g [class*="prot"],
+html body .recipe-nutri-100g [class*="gluc"],
+html body .recipe-nutri-100g [class*="lip"],
+html body .recipe-totals [class*="kcal"],
+html body .recipe-totals [class*="cal"],
+html body .recipe-totals [class*="prot"],
+html body .recipe-totals [class*="gluc"],
+html body .recipe-totals [class*="lip"] {
+  background: var(--fn-mini-badge-bg, var(--fn-ds-surface)) !important;
+  background-image: none !important;
+  border-color: var(--fn-mini-badge-border, var(--fn-ds-border)) !important;
+  color: var(--fn-mini-badge-text, var(--fn-ds-text)) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-donnees .fn-ui-code-log,
+html body #page-donnees #auto-backup-status,
+html body #page-donnees #backup-status-panel,
+html body #page-donnees [id*="status"],
+html body #page-donnees [id*="diagnostic"],
+html body #page-donnees [class*="code-log"],
+html body #page-donnees [class*="log"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-donnees .fn-ui-code-log *,
+html body #page-donnees #auto-backup-status *,
+html body #page-donnees #backup-status-panel * {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-donnees #auto-backup-status div,
+html body #page-donnees #auto-backup-status li,
+html body #page-donnees #backup-status-panel div,
+html body #page-donnees #backup-status-panel li {
+  border-color: var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+}
+
+
+
+html body #page-recap .recap-advice-list,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-summary {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+  margin-bottom: 14px !important;
+}
+
+
+html body #page-recap .recap-advice-group {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-group-head {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 8px !important;
+}
+
+html body #page-recap .recap-advice-group-list {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+
+html body #page-recap .recap-advice-card {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 12px 0 !important;
+}
+
+html body #page-recap .recap-advice-card:last-child {
+  border-bottom: 0 !important;
+}
+
+
+html body #page-recap .recap-advice-action {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-left: 3px solid rgba(91, 138, 97, .22) !important;
+  border-radius: 0 !important;
+  padding: 6px 0 6px 10px !important;
+  margin-top: 8px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-advice-summary-meta,
+html body #page-recap .recap-advice-title span,
+html body #page-recap .recap-advice-group-head span {
+  background: var(--fn-ds-surface-soft) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 999px !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+}
+
+
+
+html body #page-historique #hist-list,
+html body #page-stats #stats-daily-rows {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-historique #hist-list > *,
+html body #page-historique details.fn-ui-day-card,
+html body #page-historique .fn-ui-row--history,
+html body #page-stats #stats-daily-rows > *,
+html body #page-stats .fn-ui-day-card,
+html body #page-stats .fn-ui-row--history,
+html body #page-stats [class*="daily-row"],
+html body #page-stats [class*="day-row"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html body #page-historique .fn-ui-day-head,
+html body #page-historique .fn-ui-day-body,
+html body #page-stats .fn-ui-day-head,
+html body #page-stats .fn-ui-day-body,
+html body #page-stats #stats-daily-rows summary,
+html body #page-stats #stats-daily-rows .fn-ui-row {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+
+
+
+html body .fn-carousel-zone {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+html body .fn-carousel-zone .journal-day-card {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+html body .fn-carousel-zone .journal-day-card.active {
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+}
+
+
+
+html body .fn-panel > .fn-widget.fn-grid,
+html body .fn-panel > .fn-grid,
+html body .fn-widget > .fn-grid,
+html body .fn-list {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-widget[class*="is-"],
+html body .fn-row[class*="is-"],
+html body .fn-panel[class*="is-"] {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+
+
+
+html body #page-recap .recap-advice-board {
+  display: block !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-summary {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 14px !important;
+}
+
+html body #page-recap .recap-advice-groups {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-group {
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-advice-group-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .08) !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 8px !important;
+}
+
+html body #page-recap .recap-advice-group-head b {
+  font-size: 13px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+html body #page-recap .recap-advice-group-head span {
+  font-size: 10.5px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--fn-muted, var(--fn-ds-muted)) !important;
+}
+
+
+html body #page-recap .recap-advice-card {
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: start !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .07) !important;
+  border-radius: 0 !important;
+  padding: 12px 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-card:last-child {
+  border-bottom: 0 !important;
+}
+
+html body #page-recap .recap-advice-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+  border: 1px solid rgba(46, 53, 43, .08) !important;
+}
+
+html body #page-recap .recap-advice-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 4px !important;
+}
+
+html body #page-recap .recap-advice-title b {
+  font-size: 12.5px !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+html body #page-recap .recap-advice-title span {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--fn-muted, var(--fn-ds-muted)) !important;
+  font-size: 10.5px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+}
+
+html body #page-recap .recap-advice-body p {
+  margin: 0 !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  line-height: 1.35 !important;
+}
+
+
+html body #page-recap .recap-advice-action,
+html body #page-recap .recap-advice-card .recap-advice-action {
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 2px solid rgba(91, 138, 97, .20) !important;
+  border-radius: 0 !important;
+  padding: 5px 0 5px 10px !important;
+  margin-top: 8px !important;
+}
+
+html body #page-recap .recap-advice-action strong {
+  display: block !important;
+  color: var(--fn-accent-strong, var(--fn-ds-accent-strong)) !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+  letter-spacing: .05em !important;
+}
+
+html body #page-recap .recap-advice-action em {
+  display: block !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  font-style: normal !important;
+}
+
+
+
+html body #page-journal .journal-section-card,
+html body #page-journal .journal-foods-block,
+html body #page-journal .journal-meals-card,
+html body #page-journal .journal-extra-grid > *,
+html body #page-journal details.journal-advanced {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+html body #page-journal .journal-meals-card .meal-card,
+html body #page-journal .journal-meals-card .meal-section,
+html body #page-journal .journal-meals-card .meal-group,
+html body #page-journal .journal-meals-card .journal-meal-row {
+  background: var(--fn-ds-surface) !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .07) !important;
+  border-radius: 0 !important;
+}
+
+html body #page-journal .journal-meals-card .meal-card:last-child,
+html body #page-journal .journal-meals-card .meal-section:last-child,
+html body #page-journal .journal-meals-card .meal-group:last-child,
+html body #page-journal .journal-meals-card .journal-meal-row:last-child {
+  border-bottom: 0 !important;
+}
+
+
+
+html body #page-donnees .fn-ui-code-log {
+  background: var(--fn-ds-surface) !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 12px !important;
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+}
+
+html body #page-donnees .fn-ui-code-log div,
+html body #page-donnees .fn-ui-code-log li,
+html body #page-donnees #auto-backup-status div,
+html body #page-donnees #backup-status-panel div {
+  background: transparent !important;
+  border-color: rgba(46, 53, 43, .07) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-historique #hist-list > *,
+html body #page-stats #stats-daily-rows > * {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft, rgba(46, 53, 43, .10)) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+html body #page-historique #hist-list > * *,
+html body #page-stats #stats-daily-rows > * * {
+  box-shadow: none !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body #page-recap .recap-advice-groups {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body #page-recap .recap-advice-card {
+    grid-template-columns: 30px minmax(0, 1fr) !important;
+  }
+}
+
+
+
+
+
+
+:root {
+  --fn-mini-badge-bg: var(--fn-ds-surface-soft, #f8f2e8);
+  --fn-mini-badge-border: var(--fn-ds-border, rgba(46, 53, 43, .10));
+  --fn-mini-badge-text: var(--fn-text-soft, #5c6258);
+
+  --fn-mini-kcal: var(--fn-ds-kcal, #df7f2a);
+  --fn-mini-protein: var(--fn-ds-prot, #2878a8);
+  --fn-mini-carbs: var(--fn-ds-gluc, #8266c7);
+  --fn-mini-fat: var(--fn-ds-lip, #c9932e);
+}
+
+
+
+
+html body .nutri-chip.fn-mini-badge,
+html body .fn-db-macro.fn-mini-badge,
+html body .recap-badge-compact.fn-mini-badge,
+html body .journal-dashboard-badge.fn-mini-badge,
+html body .fn-smart-chip.fn-mini-badge,
+html body .macro-status-badge.fn-mini-badge,
+html body .fn-mini-badge:not(.fn-ui-smart-badge):not(.recipe-nutri-card) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-height: 18px !important;
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-mini-badge-border) !important;
+  background: var(--fn-mini-badge-bg) !important;
+  background-image: none !important;
+  color: var(--fn-mini-badge-text) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-mini-badge-kcal,
+html body .fn-mini-badge.fn-ui-macro-kcal,
+html body .fn-mini-badge.macro-kcal,
+html body .nutri-chip.macro-kcal,
+html body .recap-badge-compact.macro-kcal,
+html body .journal-dashboard-badge.macro-kcal,
+html body .fn-smart-chip.macro-kcal,
+html body .fn-ui-chip.fn-ui-chip-kcal,
+html body .food-macro-line > .macro-kcal,
+html body .db-suggestion-macros > .macro-kcal,
+html body .recipe-card-macros > .macro-kcal,
+html body .recipe-ing-chip.macro-kcal {
+  --macro-color: var(--fn-mini-kcal);
+  --fn-local-accent: var(--fn-mini-kcal);
+  --fn-local-accent-soft: var(--fn-ds-kcal-soft);
+  --fn-indicator-border: color-mix(in srgb, var(--fn-mini-kcal) 28%, var(--fn-ds-border));
+  --fn-mini-badge-text: var(--fn-mini-kcal);
+  --fn-mini-badge-bg: var(--fn-ds-kcal-soft, color-mix(in srgb, var(--fn-mini-kcal) 10%, #ffffff));
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-mini-kcal) 24%, var(--fn-ds-border, rgba(46, 53, 43, .10)));
+}
+
+html body .fn-mini-badge-protein,
+html body .fn-mini-badge.fn-ui-macro-prot,
+html body .fn-mini-badge.macro-prot,
+html body .nutri-chip.macro-prot,
+html body .recap-badge-compact.macro-prot,
+html body .journal-dashboard-badge.macro-prot,
+html body .fn-smart-chip.macro-prot,
+html body .fn-ui-chip.fn-ui-chip-prot,
+html body .food-macro-line > .macro-prot,
+html body .db-suggestion-macros > .macro-prot,
+html body .recipe-card-macros > .macro-prot,
+html body .recipe-ing-chip.macro-prot {
+  --macro-color: var(--fn-mini-protein);
+  --fn-local-accent: var(--fn-mini-protein);
+  --fn-local-accent-soft: var(--fn-ds-prot-soft);
+  --fn-indicator-border: color-mix(in srgb, var(--fn-mini-protein) 28%, var(--fn-ds-border));
+  --fn-mini-badge-text: var(--fn-mini-protein);
+  --fn-mini-badge-bg: var(--fn-ds-prot-soft, color-mix(in srgb, var(--fn-mini-protein) 10%, #ffffff));
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-mini-protein) 24%, var(--fn-ds-border, rgba(46, 53, 43, .10)));
+}
+
+html body .fn-mini-badge-carbs,
+html body .fn-mini-badge.fn-ui-macro-gluc,
+html body .fn-mini-badge.macro-gluc,
+html body .nutri-chip.macro-gluc,
+html body .recap-badge-compact.macro-gluc,
+html body .journal-dashboard-badge.macro-gluc,
+html body .fn-smart-chip.macro-gluc,
+html body .fn-ui-chip.fn-ui-chip-gluc,
+html body .food-macro-line > .macro-gluc,
+html body .db-suggestion-macros > .macro-gluc,
+html body .recipe-card-macros > .macro-gluc,
+html body .recipe-ing-chip.macro-gluc {
+  --macro-color: var(--fn-mini-carbs);
+  --fn-local-accent: var(--fn-mini-carbs);
+  --fn-local-accent-soft: var(--fn-ds-gluc-soft);
+  --fn-indicator-border: color-mix(in srgb, var(--fn-mini-carbs) 28%, var(--fn-ds-border));
+  --fn-mini-badge-text: var(--fn-mini-carbs);
+  --fn-mini-badge-bg: var(--fn-ds-gluc-soft, color-mix(in srgb, var(--fn-mini-carbs) 10%, #ffffff));
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-mini-carbs) 24%, var(--fn-ds-border, rgba(46, 53, 43, .10)));
+}
+
+html body .fn-mini-badge-fat,
+html body .fn-mini-badge.fn-ui-macro-lip,
+html body .fn-mini-badge.macro-lip,
+html body .nutri-chip.macro-lip,
+html body .recap-badge-compact.macro-lip,
+html body .journal-dashboard-badge.macro-lip,
+html body .fn-smart-chip.macro-lip,
+html body .fn-ui-chip.fn-ui-chip-lip,
+html body .food-macro-line > .macro-lip,
+html body .db-suggestion-macros > .macro-lip,
+html body .recipe-card-macros > .macro-lip,
+html body .recipe-ing-chip.macro-lip {
+  --macro-color: var(--fn-mini-fat);
+  --fn-local-accent: var(--fn-mini-fat);
+  --fn-local-accent-soft: var(--fn-ds-lip-soft);
+  --fn-indicator-border: color-mix(in srgb, var(--fn-mini-fat) 28%, var(--fn-ds-border));
+  --fn-mini-badge-text: var(--fn-mini-fat);
+  --fn-mini-badge-bg: var(--fn-ds-lip-soft, color-mix(in srgb, var(--fn-mini-fat) 10%, #ffffff));
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-mini-fat) 24%, var(--fn-ds-border, rgba(46, 53, 43, .10)));
+}
+
+
+html body .fn-mini-badge::before,
+html body .fn-mini-badge::after,
+html body .nutri-chip::before,
+html body .nutri-chip::after,
+html body .fn-db-macro::before,
+html body .fn-db-macro::after,
+html body .recap-badge-compact::before,
+html body .recap-badge-compact::after,
+html body .journal-dashboard-badge::before,
+html body .journal-dashboard-badge::after,
+html body .fn-smart-chip::before,
+html body .fn-smart-chip::after,
+html body .food-macro-line > span::before,
+html body .food-macro-line > span::after,
+html body .db-suggestion-macros > span::before,
+html body .db-suggestion-macros > span::after,
+html body .recipe-card-macros > span::before,
+html body .recipe-card-macros > span::after,
+html body .recipe-ing-chip::before,
+html body .recipe-ing-chip::after {
+  display: none !important;
+  content: none !important;
+}
+
+
+
+html body .fn-ui-smart-badge.fn-mini-badge {
+  border: 1px solid var(--fn-indicator-border, var(--fn-ds-border)) !important;
+  border-radius: var(--fn-ds-radius-md, 14px) !important;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--fn-local-accent, var(--fn-ds-accent)) 10%, var(--fn-ds-surface)) 0%,
+      color-mix(in srgb, var(--fn-local-accent, var(--fn-ds-accent)) 4%, var(--fn-ds-surface)) 100%) !important;
+  color: var(--fn-ds-text) !important;
+  box-shadow: none !important;
+}
+
+html body .fn-ui-smart-badge.fn-mini-badge::before,
+html body .fn-ui-smart-badge.fn-mini-badge::after {
+  display: none !important;
+  content: none !important;
+}
+
+html body .fn-ui-smart-badge.fn-mini-badge .fn-ui-smart-dot {
+  color: var(--fn-local-accent, var(--fn-ds-accent)) !important;
+  background: color-mix(in srgb, var(--fn-local-accent, var(--fn-ds-accent)) 14%, var(--fn-ds-surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--fn-local-accent, var(--fn-ds-accent)) 34%, var(--fn-ds-border)) !important;
+}
+
+
+
+
+html body #page-journal .fn-home-macro-row::after,
+html body #page-journal .fn-home-macro-row::before,
+html body #page-journal .macro-cell::after,
+html body #page-journal .macro-cell::before,
+html body #page-journal .journal-main-macros .fn-metric::after,
+html body #page-journal .journal-main-macros .fn-metric::before,
+html body #page-journal .fn-home-macro-grid .fn-metric::after,
+html body #page-journal .fn-home-macro-grid .fn-metric::before {
+  display: none !important;
+  content: none !important;
+}
+
+
+html body #page-journal .fn-home-macro-row,
+html body #page-journal .macro-cell,
+html body #page-journal .journal-main-macros .fn-home-macro-row {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body .fn-progress-line {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+html body .fn-progress-line::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  left: 12px !important;
+  right: 12px !important;
+  bottom: 8px !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+  background:
+    linear-gradient(
+      90deg,
+      var(--fn-local-accent, var(--fn-accent, var(--fn-ds-accent))) 0 var(--fn-progress, 0%),
+      rgba(46, 53, 43, .10) var(--fn-progress, 0%) 100%
+    ) !important;
+  opacity: .45 !important;
+}
+
+
+
+html body .nutri-chip,
+html body .fn-db-macro,
+html body .recap-badge-compact,
+html body .journal-dashboard-badge,
+html body .fn-smart-chip,
+html body .fn-ui-chip.fn-ui-chip-kcal,
+html body .fn-ui-chip.fn-ui-chip-prot,
+html body .fn-ui-chip.fn-ui-chip-gluc,
+html body .fn-ui-chip.fn-ui-chip-lip,
+html body .food-macro-line > span[class*="macro-"],
+html body .db-suggestion-macros > span[class*="macro-"],
+html body .recipe-card-macros > span[class*="macro-"],
+html body .recipe-ing-chip:not(.meta) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  min-height: 18px !important;
+  padding: 2px 7px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--fn-mini-badge-border) !important;
+  background: var(--fn-mini-badge-bg) !important;
+  background-image: none !important;
+  color: var(--fn-mini-badge-text) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+}
+
+
+
+
+html body .db-suggestion-macros {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+}
+
+html body .db-suggestion-macros > .macro-kcal {
+  --fn-mini-badge-text: var(--fn-ds-kcal) !important;
+  --fn-mini-badge-bg: color-mix(in srgb, var(--fn-ds-kcal) 14%, var(--fn-ds-surface)) !important;
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-ds-kcal) 34%, var(--fn-ds-border)) !important;
+}
+
+html body .db-suggestion-macros > .macro-prot {
+  --fn-mini-badge-text: var(--fn-ds-prot) !important;
+  --fn-mini-badge-bg: color-mix(in srgb, var(--fn-ds-prot) 14%, var(--fn-ds-surface)) !important;
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-ds-prot) 34%, var(--fn-ds-border)) !important;
+}
+
+html body .db-suggestion-macros > .macro-gluc {
+  --fn-mini-badge-text: var(--fn-ds-gluc) !important;
+  --fn-mini-badge-bg: color-mix(in srgb, var(--fn-ds-gluc) 14%, var(--fn-ds-surface)) !important;
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-ds-gluc) 34%, var(--fn-ds-border)) !important;
+}
+
+html body .db-suggestion-macros > .macro-lip {
+  --fn-mini-badge-text: var(--fn-ds-lip) !important;
+  --fn-mini-badge-bg: color-mix(in srgb, var(--fn-ds-lip) 14%, var(--fn-ds-surface)) !important;
+  --fn-mini-badge-border: color-mix(in srgb, var(--fn-ds-lip) 34%, var(--fn-ds-border)) !important;
+}
+
+
+
+
+
+
+html body #page-recap .recap-advice-panel,
+html body #page-recap .recap-advice-section,
+html body #page-recap .fn-ui-panel:has(.recap-advice-board) {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border, rgba(46, 53, 43, .12)) !important;
+  border-radius: var(--fn-radius-panel, 18px) !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-list {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+
+
+html body #page-recap .recap-advice-summary {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid rgba(46, 53, 43, .10) !important;
+  border-radius: 14px !important;
+  padding: 14px 16px !important;
+  margin: 0 0 16px !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-summary::before,
+html body #page-recap .recap-advice-summary::after {
+  display: none !important;
+  content: none !important;
+}
+
+html body #page-recap .recap-advice-summary-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+  border: 1px solid rgba(46, 53, 43, .08) !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-summary-main,
+html body #page-recap .recap-advice-summary-body {
+  min-width: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-summary-main b,
+html body #page-recap .recap-advice-summary-body b,
+html body #page-recap .recap-advice-summary-title {
+  display: block !important;
+  font-size: 15px !important;
+  line-height: 1.15 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+  margin: 0 0 3px !important;
+}
+
+html body #page-recap .recap-advice-summary-main p,
+html body #page-recap .recap-advice-summary-body p,
+html body #page-recap .recap-advice-summary-sub {
+  margin: 0 !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  line-height: 1.35 !important;
+}
+
+
+html body #page-recap .recap-advice-summary-meta {
+  justify-self: end !important;
+  max-width: 320px !important;
+  white-space: normal !important;
+  text-align: right !important;
+  background: var(--fn-ds-surface-soft) !important;
+  border: 1px solid rgba(46, 53, 43, .10) !important;
+  border-radius: 999px !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  line-height: 1.2 !important;
+  padding: 5px 10px !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .recap-advice-groups {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-group {
+  flex: 1 1 calc(50% - 8px) !important;
+  min-width: min(100%, 360px) !important;
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid rgba(46, 53, 43, .10) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .recap-advice-group-head {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .08) !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 2px !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-group-head b {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+html body #page-recap .recap-advice-group-head span {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--fn-muted, var(--fn-ds-muted)) !important;
+  font-size: 10.5px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  padding: 0 !important;
+}
+
+
+
+html body #page-recap .recap-advice-group-list {
+  display: block !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-card {
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  column-gap: 10px !important;
+  align-items: start !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(46, 53, 43, .07) !important;
+  border-radius: 0 !important;
+  padding: 12px 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-card:last-child {
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+html body #page-recap .recap-advice-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--fn-accent-soft, var(--fn-ds-accent-soft)) !important;
+  border: 1px solid rgba(46, 53, 43, .08) !important;
+  box-shadow: none !important;
+  filter: saturate(.75) !important;
+}
+
+html body #page-recap .recap-advice-body {
+  min-width: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-title {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin: 0 0 4px !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-title b {
+  font-size: 12.5px !important;
+  line-height: 1.15 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+html body #page-recap .recap-advice-title span {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--fn-muted, var(--fn-ds-muted)) !important;
+  font-size: 10.5px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  padding: 0 !important;
+}
+
+html body #page-recap .recap-advice-body p {
+  margin: 0 !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  line-height: 1.35 !important;
+}
+
+
+html body #page-recap .recap-advice-action {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-left: 2px solid rgba(91, 138, 97, .22) !important;
+  border-radius: 0 !important;
+  padding: 5px 0 5px 10px !important;
+  margin: 8px 0 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-action strong {
+  display: block !important;
+  color: var(--fn-accent-strong, var(--fn-ds-accent-strong)) !important;
+  font-size: 10px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .05em !important;
+  text-transform: uppercase !important;
+}
+
+html body #page-recap .recap-advice-action em {
+  display: block !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  font-style: normal !important;
+  line-height: 1.3 !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body #page-recap .recap-advice-summary {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+  }
+
+  html body #page-recap .recap-advice-summary-meta {
+    grid-column: 2 !important;
+    justify-self: start !important;
+    text-align: left !important;
+    max-width: 100% !important;
+    margin-top: 6px !important;
+  }
+
+  html body #page-recap .recap-advice-groups {
+    display: block !important;
+  }
+
+  html body #page-recap .recap-advice-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: 14px !important;
+  }
+}
+
+
+
+
+
+
+html body #page-recap {
+  --fn-recap-page-bg: #f7f5ef;
+  --fn-recap-panel-bg: #ffffff;
+  --fn-recap-widget-bg: #fbfaf6;
+  --fn-recap-row-bg: transparent;
+  --fn-recap-border: rgba(40, 45, 38, .12);
+  --fn-recap-border-soft: rgba(40, 45, 38, .075);
+  --fn-recap-shadow: 0 10px 30px rgba(30, 35, 28, .035);
+}
+
+
+
+html body #page-recap {
+  background: transparent !important;
+}
+
+html body #page-recap .fn-ui-page,
+html body #page-recap .fn-page-body {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 24px !important;
+}
+
+
+html body #page-recap > .card,
+html body #page-recap .fn-ui-page > .fn-ui-panel,
+html body #page-recap .fn-ui-page > .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section {
+  background: var(--fn-recap-panel-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  margin: 0 0 24px !important;
+  box-shadow: var(--fn-recap-shadow) !important;
+  overflow: hidden !important;
+}
+
+
+html body #page-recap .fn-ui-page > .fn-ui-panel {
+  margin-bottom: 0 !important;
+}
+
+
+
+html body #page-recap .fn-ui-panel-head,
+html body #page-recap .recap-section-head,
+html body #page-recap .recap-panel-head {
+  margin-bottom: 16px !important;
+  padding-bottom: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+html body #page-recap .fn-ui-panel-head h2,
+html body #page-recap .fn-ui-panel-head h3,
+html body #page-recap .recap-section-head h2,
+html body #page-recap .recap-panel-head h2 {
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-widget,
+html body #page-recap .fn-widget:not(.fn-metric):not(.fn-grid),
+html body #page-recap .recap-card:not(.fn-metric) {
+  background: var(--fn-recap-widget-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list,
+html body #page-recap .fn-grid,
+html body #page-recap .fn-list {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .fn-metric,
+html body #page-recap .recap-trend-card,
+html body #page-recap .fn-ui-smart-badge:not(.fn-mini-badge) {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .fn-metric::after,
+html body #page-recap .recap-trend-card::after {
+  opacity: .26 !important;
+  height: 3px !important;
+}
+
+
+html body #page-recap .fn-mini-badge,
+html body #page-recap .recap-badge-compact,
+html body #page-recap .fn-ui-smart-badge.fn-mini-badge {
+  box-shadow: none !important;
+}
+
+html body #page-recap .fn-mini-badge::before,
+html body #page-recap .fn-mini-badge::after,
+html body #page-recap .recap-badge-compact::before,
+html body #page-recap .recap-badge-compact::after,
+html body #page-recap .fn-ui-smart-badge.fn-mini-badge::before,
+html body #page-recap .fn-ui-smart-badge.fn-mini-badge::after {
+  display: none !important;
+  content: none !important;
+}
+
+
+
+html body #page-recap .recap-trend-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel {
+  min-width: 0 !important;
+}
+
+html body #page-recap .recap-trend-column > .recap-trend-head,
+html body #page-recap .recap-trend-panel > .recap-trend-head {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 0 !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 12px !important;
+  box-shadow: none !important;
+}
+
+
+
+
+html body #page-recap .recap-advice-summary {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 0 18px !important;
+}
+
+html body #page-recap .recap-advice-summary-meta {
+  justify-self: end !important;
+  max-width: 280px !important;
+  background: var(--fn-ds-surface-soft) !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 999px !important;
+  color: var(--fn-text-soft, var(--fn-ds-text-soft)) !important;
+  font-size: 11px !important;
+  font-weight: var(--fn-ds-w-semibold) !important;
+  line-height: 1.2 !important;
+  padding: 5px 10px !important;
+  text-align: right !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-advice-groups {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+html body #page-recap .recap-advice-group {
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+
+
+html body #page-recap .recap-advice-group-head {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 0 !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 4px !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-group-head b {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  font-weight: var(--fn-ds-w-bold) !important;
+  color: var(--fn-text, var(--fn-ds-text)) !important;
+}
+
+html body #page-recap .recap-advice-group-head span {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--fn-muted, var(--fn-ds-muted)) !important;
+  padding: 0 !important;
+}
+
+
+html body #page-recap .recap-advice-card {
+  display: grid !important;
+  grid-template-columns: 30px minmax(0, 1fr) !important;
+  column-gap: 10px !important;
+  align-items: start !important;
+  background: var(--fn-recap-row-bg) !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 0 !important;
+  padding: 12px 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-card:last-child {
+  border-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+html body #page-recap .recap-advice-action {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-left: 2px solid rgba(91, 138, 97, .22) !important;
+  border-radius: 0 !important;
+  padding: 5px 0 5px 10px !important;
+  margin: 8px 0 0 !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .fn-panel[class*="is-"],
+html body #page-recap .fn-widget[class*="is-"],
+html body #page-recap .fn-row[class*="is-"],
+html body #page-recap .recap-advice-group[class*="is-"],
+html body #page-recap .recap-advice-card[class*="is-"],
+html body #page-recap .recap-trend-column[class*="is-"],
+html body #page-recap .recap-trend-panel[class*="is-"] {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body #page-recap .recap-trend-grid,
+  html body #page-recap .recap-advice-groups {
+    grid-template-columns: 1fr !important;
+  }
+
+  html body #page-recap .recap-advice-summary {
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+  }
+
+  html body #page-recap .recap-advice-summary-meta {
+    grid-column: 2 !important;
+    justify-self: start !important;
+    max-width: 100% !important;
+    text-align: left !important;
+    margin-top: 4px !important;
+  }
+}
+
+
+
+
+
+
+html body #page-recettes .recipe-page-hero {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid rgba(40, 45, 38, .12) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 8px 24px rgba(30, 35, 28, .035) !important;
+}
+
+html body #page-recettes .recipe-page-hero .recipe-badge {
+  background: #f8f7f2 !important;
+  border-color: rgba(40, 45, 38, .10) !important;
+}
+
+html body #page-recettes .recipe-layout > .card,
+html body #page-recettes .recipe-block-panel,
+html body #page-recettes .recipe-summary-panel,
+html body #page-recettes .recipe-card {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap {
+  --fn-recap-panel-bg: #ffffff;
+  --fn-recap-widget-bg: #ffffff;
+  --fn-recap-row-bg: #ffffff;
+  --fn-recap-border: rgba(40, 45, 38, .14);
+  --fn-recap-border-soft: rgba(40, 45, 38, .12);
+  --fn-recap-shadow-panel: 0 10px 30px rgba(30, 35, 28, .035);
+  --fn-recap-shadow-widget: 0 2px 0 rgba(40, 45, 38, .02), 0 8px 16px rgba(30, 35, 28, .028);
+}
+
+
+html body #page-recap > .card,
+html body #page-recap .fn-ui-page > .fn-ui-panel,
+html body #page-recap .fn-ui-page > .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section {
+  background: var(--fn-recap-panel-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border) !important;
+  box-shadow: var(--fn-recap-shadow-panel) !important;
+  border-radius: 22px !important;
+  padding: 24px !important;
+  margin: 0 0 26px !important;
+}
+
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-widget,
+html body #page-recap .fn-widget:not(.fn-metric):not(.fn-grid),
+html body #page-recap .recap-card:not(.fn-metric) {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--fn-recap-shadow-widget) !important;
+  padding: 16px !important;
+}
+
+
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list,
+html body #page-recap .fn-grid,
+html body #page-recap .fn-list {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+
+html body #page-recap .fn-metric,
+html body #page-recap .recap-trend-card {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--fn-recap-shadow-widget) !important;
+}
+
+
+html body #page-recap .recap-advice-card {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-recap-border-soft) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  padding: 12px 12px !important;
+  margin: 10px 0 0 !important;
+}
+
+html body #page-recap .recap-advice-card:first-child {
+  margin-top: 12px !important;
+}
+
+html body #page-recap .recap-advice-card:last-child {
+  margin-bottom: 0 !important;
+}
+
+html body #page-recap .recap-advice-action,
+html body #page-recap .recap-advice-card .recap-advice-action {
+  background: #fbfaf7 !important;
+  border: 1px solid rgba(91, 138, 97, .10) !important;
+  border-left: 3px solid rgba(91, 138, 97, .28) !important;
+  border-radius: 12px !important;
+  padding: 9px 10px !important;
+  margin-top: 9px !important;
+}
+
+
+html body #page-recap .recap-trend-column > .recap-trend-head,
+html body #page-recap .recap-trend-panel > .recap-trend-head,
+html body #page-recap .recap-advice-group-head {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--fn-recap-border-soft) !important;
+  padding: 0 0 10px !important;
+  margin: 0 0 10px !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .fn-ui-panel + .fn-ui-panel,
+html body #page-recap .recap-section + .recap-section,
+html body #page-recap .recap-panel + .recap-panel {
+  margin-top: 0 !important;
+}
+
+
+@media (max-width: 820px) {
+  html body #page-recap > .card,
+  html body #page-recap .fn-ui-page > .fn-ui-panel,
+  html body #page-recap .fn-ui-page > .card,
+  html body #page-recap .recap-panel,
+  html body #page-recap .recap-section {
+    padding: 18px !important;
+  }
+}
+
+
+
+
+
+
+:root {
+  --fn-page-bg: #f4f1ea;
+  --fn-panel-bg: #ffffff;
+  --fn-widget-bg: #fbfaf6;
+  --fn-row-bg: #ffffff;
+  --fn-border-main: rgba(40, 45, 38, .13);
+  --fn-border-soft-global: rgba(40, 45, 38, .09);
+}
+
+
+html body,
+html body .main-wrap,
+html body .content,
+html body main {
+  background: var(--fn-page-bg) !important;
+  background-image: none !important;
+}
+
+
+html body .page,
+html body .fn-page,
+html body #page-recap,
+html body #page-recettes {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+html body .fn-ui-page,
+html body .fn-page-body {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+
+html body .fn-panel,
+html body .fn-ui-panel,
+html body .page > .card,
+html body .fn-ui-page > .card,
+html body .fn-ui-page > .fn-ui-panel,
+html body .journal-main-card,
+html body .journal-section-card,
+html body .profile-summary-main,
+html body .database-explorer-card,
+html body .notification-card,
+html body #page-recettes .recipe-page-hero,
+html body #page-recettes .recipe-layout > .card,
+html body #page-recettes .card {
+  background: var(--fn-panel-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-main) !important;
+  box-shadow: 0 8px 24px rgba(30, 35, 28, .032) !important;
+}
+
+
+html body .fn-panel::before,
+html body .fn-panel::after,
+html body .fn-ui-panel::before,
+html body .fn-ui-panel::after,
+html body .page > .card::before,
+html body .page > .card::after,
+html body #page-recettes .recipe-page-hero::before,
+html body #page-recettes .recipe-page-hero::after {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+
+html body .fn-widget,
+html body .fn-ui-tile,
+html body .journal-foods-block,
+html body .journal-meals-card,
+html body .recipe-block-panel,
+html body .recipe-summary-panel,
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group {
+  background: var(--fn-widget-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-soft-global) !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-row,
+html body #page-recap .recap-advice-card,
+html body #page-journal .journal-meals-card .meal-card,
+html body #page-journal .journal-meals-card .journal-meal-row,
+html body #page-historique #hist-list > *,
+html body #page-stats #stats-daily-rows > * {
+  background: var(--fn-row-bg) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap .fn-ui-page {
+  gap: 24px !important;
+}
+
+
+html body #page-recap .fn-ui-page > .fn-ui-panel,
+html body #page-recap .fn-ui-page > .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--fn-border-main) !important;
+  box-shadow: 0 8px 24px rgba(30, 35, 28, .035) !important;
+}
+
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group {
+  background: #fbfaf6 !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list,
+html body #page-recap .fn-grid,
+html body #page-recap .fn-list {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recettes .recipe-page-hero {
+  background: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+html body #page-recettes .recipe-hero-actions,
+html body #page-recettes .recipe-badge {
+  background-image: none !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html body .main-wrap,
+  html body .content,
+  html body main {
+    background: var(--fn-page-bg) !important;
+  }
+}
+
+
+
+
+
+
+:root {
+  --fn-page-bg: #faf9f5;
+  --fn-panel-bg: #ffffff;
+  --fn-widget-bg: #ffffff;
+  --fn-row-bg: #ffffff;
+
+  --fn-border-main: rgba(33, 37, 31, .13);
+  --fn-border-soft-global: rgba(33, 37, 31, .09);
+
+  --fn-panel-shadow: 0 8px 24px rgba(25, 30, 24, .030);
+  --fn-widget-shadow: 0 1px 0 rgba(25, 30, 24, .018);
+}
+
+html,
+html body,
+html body .app,
+html body .app-shell,
+html body .main-wrap,
+html body .main-content,
+html body .content,
+html body main {
+  background: var(--fn-page-bg) !important;
+  background-image: none !important;
+}
+
+
+html body .page,
+html body .fn-page,
+html body .fn-ui-page,
+html body .fn-page-body,
+html body #page-recap,
+html body #page-recettes {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+
+html body .fn-panel,
+html body .fn-ui-panel,
+html body .page > .card,
+html body .fn-ui-page > .card,
+html body .fn-ui-page > .fn-ui-panel,
+html body .journal-main-card,
+html body .journal-section-card,
+html body .profile-summary-main,
+html body .database-explorer-card,
+html body .notification-card,
+html body #page-recap .fn-ui-page > .fn-ui-panel,
+html body #page-recap .fn-ui-page > .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section,
+html body #page-recettes .recipe-page-hero,
+html body #page-recettes .recipe-layout > .card,
+html body #page-recettes .card {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-main) !important;
+  box-shadow: var(--fn-panel-shadow) !important;
+}
+
+
+html body .fn-panel::before,
+html body .fn-panel::after,
+html body .fn-ui-panel::before,
+html body .fn-ui-panel::after,
+html body .page > .card::before,
+html body .page > .card::after,
+html body #page-recap .recap-panel::before,
+html body #page-recap .recap-panel::after,
+html body #page-recap .recap-section::before,
+html body #page-recap .recap-section::after,
+html body #page-recettes .recipe-page-hero::before,
+html body #page-recettes .recipe-page-hero::after {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+
+
+html body .fn-widget,
+html body .fn-ui-tile,
+html body .journal-foods-block,
+html body .journal-meals-card,
+html body .recipe-block-panel,
+html body .recipe-summary-panel,
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-card:not(.fn-metric),
+html body #page-recap .recap-widget {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-border-soft-global) !important;
+  box-shadow: var(--fn-widget-shadow) !important;
+}
+
+
+html body .fn-grid,
+html body .fn-list,
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list {
+  background: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+
+html body .fn-row,
+html body #page-recap .recap-advice-card,
+html body #page-journal .journal-meals-card .meal-card,
+html body #page-journal .journal-meals-card .journal-meal-row,
+html body #page-historique #hist-list > *,
+html body #page-stats #stats-daily-rows > * {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap {
+  --fn-recap-panel-bg: #ffffff;
+  --fn-recap-widget-bg: #ffffff;
+  --fn-recap-row-bg: #ffffff;
+  --fn-recap-border: var(--fn-border-main);
+  --fn-recap-border-soft: var(--fn-border-soft-global);
+}
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-advice-card,
+html body #page-recap .recap-advice-action {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .recap-advice-action,
+html body #page-recap .recap-advice-card .recap-advice-action {
+  border-left-color: rgba(91, 138, 97, .26) !important;
+}
+
+
+html body #page-recap .recap-advice-group-head,
+html body #page-recap .recap-trend-head {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recettes .recipe-page-hero,
+html body #page-recettes .recipe-page-hero * {
+  background-image: none !important;
+}
+
+html body #page-recettes .recipe-page-hero {
+  background-color: var(--fn-ds-surface) !important;
+}
+
+
+
+html body .fn-pill,
+html body .fn-mini-badge,
+html body .badge,
+html body [class*="badge"],
+html body [class*="chip"],
+html body [class*="pill"] {
+  box-shadow: none !important;
+}
+
+
+
+@media (max-width: 820px) {
+  html,
+  html body,
+  html body .main-wrap,
+  html body .main-content,
+  html body .content,
+  html body main {
+    background: var(--fn-page-bg) !important;
+  }
+}
+
+
+
+
+
+:root {
+  --fn-app-bg: #faf9f5;
+  --fn-recap-clean-bg: #ffffff;
+  --fn-recap-border-clean: rgba(33, 37, 31, .11);
+  --fn-recap-shadow-clean: 0 8px 24px rgba(25, 30, 24, .030);
+}
+
+
+html,
+html body,
+html body .app,
+html body .app-shell,
+html body .main-wrap,
+html body .main-content,
+html body main {
+  background: var(--fn-app-bg) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap,
+html body #page-recap.fn-page,
+html body #page-recap .fn-ui-page,
+html body #page-recap .fn-page-body,
+html body #page-recap .fn-ui-stack {
+  background: var(--fn-recap-clean-bg) !important;
+  background-color: var(--fn-recap-clean-bg) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap > *,
+html body #page-recap .fn-ui-page > *,
+html body #page-recap .recap-dashboard,
+html body #page-recap .recap-content,
+html body #page-recap .recap-grid,
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .fn-ui-panel,
+html body #page-recap .fn-panel,
+html body #page-recap .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-recap-border-clean) !important;
+  box-shadow: var(--fn-recap-shadow-clean) !important;
+}
+
+
+html body #page-recap .fn-widget,
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-card:not(.fn-metric) {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--fn-recap-border-clean) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .fn-metric,
+html body #page-recap .recap-trend-card,
+html body #page-recap .fn-ui-smart-badge:not(.fn-mini-badge) {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .recap-advice-card,
+html body #page-recap .recap-advice-action {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap *::before,
+html body #page-recap *::after {
+  box-shadow: none !important;
+}
+
+html body #page-recap .fn-metric::after,
+html body #page-recap .recap-trend-card::after,
+html body #page-recap .fn-progress-line::after {
+  box-shadow: none !important;
+}
+
+
+html body #page-recettes .recipe-page-hero,
+html body #page-recettes .recipe-page-hero * {
+  background-image: none !important;
+}
+
+html body #page-recettes .recipe-page-hero {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+}
+
+
+
+
+
+
+html body #page-recap,
+html body #page-recap.page,
+html body #page-recap.fn-page,
+html body #page-recap.page.fn-page,
+html body #page-recap .fn-ui-page,
+html body #page-recap .fn-ui-page.fn-ui-recap-page,
+html body #page-recap .fn-page-body,
+html body #page-recap .fn-ui-stack {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap .recap-trend-column,
+html body #page-recap .recap-trend-column.is-recent,
+html body #page-recap .recap-trend-column.is-long,
+html body #page-recap .recap-trend-panel,
+html body #page-recap .recap-trend-panel.is-recent,
+html body #page-recap .recap-trend-panel.is-long,
+html body #page-recap .recap-trend-card,
+html body #page-recap .recap-trend-card.is-ok,
+html body #page-recap .recap-trend-card.is-warn,
+html body #page-recap .recap-trend-card.is-up,
+html body #page-recap .recap-trend-card.is-down,
+html body #page-recap .recap-trend-card.is-stable,
+html body #page-recap .recap-trend-card.is-neutral {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: rgba(33, 37, 31, .11) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-trend-panels,
+html body #page-recap .recap-trends {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-board.is-bad,
+html body #page-recap .recap-advice-board.is-warn,
+html body #page-recap .recap-advice-board.is-ok,
+html body #page-recap .recap-advice-board.is-info,
+html body #page-recap .recap-advice-board.is-neutral,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #page-recap .recap-advice-summary,
+html body #page-recap .recap-advice-summary.is-bad,
+html body #page-recap .recap-advice-summary.is-warn,
+html body #page-recap .recap-advice-summary.is-ok,
+html body #page-recap .recap-advice-summary.is-info,
+html body #page-recap .recap-advice-summary.is-neutral,
+html body #page-recap .recap-advice-group,
+html body #page-recap .recap-advice-group.priority,
+html body #page-recap .recap-advice-group.positive,
+html body #page-recap .recap-advice-group.context,
+html body #page-recap .recap-advice-card,
+html body #page-recap .recap-advice-card.is-bad,
+html body #page-recap .recap-advice-card.is-warn,
+html body #page-recap .recap-advice-card.is-ok,
+html body #page-recap .recap-advice-card.is-info,
+html body #page-recap .recap-advice-card.is-neutral,
+html body #page-recap .recap-advice-action {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: rgba(33, 37, 31, .11) !important;
+  box-shadow: none !important;
+}
+
+
+html body #page-recap .recap-advice-icon,
+html body #page-recap .recap-advice-summary-icon,
+html body #page-recap .recap-trend-icon,
+html body #page-recap .fn-icon {
+  background-image: none !important;
+}
+
+html body #page-recap .recap-advice-summary-meta,
+html body #page-recap .recap-advice-title span,
+html body #page-recap .recap-advice-group-head span,
+html body #page-recap .recap-trend-head em,
+html body #page-recap .fn-pill,
+html body #page-recap .fn-mini-badge {
+  box-shadow: none !important;
+}
+
+
+
+html body #page-recap .fn-ui-panel,
+html body #page-recap .fn-panel,
+html body #page-recap .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+  border-color: rgba(33, 37, 31, .12) !important;
+}
+
+
+
+html body #page-recap .recap-advice-summary::before,
+html body #page-recap .recap-advice-summary::after,
+html body #page-recap .recap-advice-group::before,
+html body #page-recap .recap-advice-group::after,
+html body #page-recap .recap-advice-card::before,
+html body #page-recap .recap-advice-card::after,
+html body #page-recap .recap-trend-column::before,
+html body #page-recap .recap-trend-column::after,
+html body #page-recap .recap-trend-card::before {
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+
+
+
+
+html body .main-wrap > .page:not(.active),
+html body .page:not(.active),
+html body #page-onboarding:not(.active),
+html body #page-recap:not(.active),
+html body #page-journal:not(.active),
+html body #page-sport:not(.active),
+html body #page-historique:not(.active),
+html body #page-stats:not(.active),
+html body #page-objectif:not(.active),
+html body #page-ia:not(.active),
+html body #page-bases:not(.active),
+html body #page-donnees:not(.active),
+html body #page-profil:not(.active),
+html body #page-recettes:not(.active) {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+
+html body .main-wrap > .page.active,
+html body .page.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: min(100%, var(--fn-ds-content-width, 1280px)) !important;
+  max-width: var(--fn-ds-content-width, 1280px) !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  margin-inline: auto !important;
+  padding-top: 30px !important;
+  overflow: visible !important;
+}
+
+
+html body #page-onboarding.active {
+  width: min(100%, 520px) !important;
+  max-width: 520px !important;
+  background: transparent !important;
+}
+
+
+html body #page-recap.active {
+  width: min(100%, var(--fn-ds-content-width, 1280px)) !important;
+  max-width: var(--fn-ds-content-width, 1280px) !important;
+}
+
+
+
+
+
+:root {
+  --fn-page-bg: #f8f5ee;
+  --fn-app-bg: #f8f5ee;
+  --fn-recap-clean-bg: #ffffff;
+  --fn-ds-bg: #efe7da;
+  --fn-ds-bg-soft: #f8f1e7;
+}
+
+
+html,
+html body,
+html body .app,
+html body .app-shell,
+html body .app-layout,
+html body .main-wrap,
+html body .main-content,
+html body .content,
+html body main {
+  background: var(--fn-ds-bg) !important;
+  background-color: var(--fn-ds-bg) !important;
+  background-image: none !important;
+}
+
+
+html body .page,
+html body .fn-page,
+html body .fn-ui-page,
+html body .fn-page-body,
+html body #page-recap,
+html body #page-recap.active {
+  background: var(--fn-ds-bg) !important;
+  background-color: var(--fn-ds-bg) !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .recap-trends,
+html body #page-recap .recap-trend-panels,
+html body #page-recap .recap-trend-grid,
+html body #page-recap .recap-advice-board,
+html body #page-recap .recap-advice-groups,
+html body #page-recap .recap-advice-list,
+html body #page-recap .fn-grid,
+html body #page-recap .fn-list {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+
+html body #page-recap .fn-ui-panel,
+html body #page-recap .fn-panel,
+html body #page-recap .card,
+html body #page-recap .recap-panel,
+html body #page-recap .recap-section,
+html body .page.active > .card,
+html body .page.active > .fn-ui-panel {
+  background: var(--fn-ds-surface) !important;
+  background-color: var(--fn-ds-surface) !important;
+  background-image: none !important;
+}
+
+
+html body .page:not(.active),
+html body #page-onboarding:not(.active) {
+  background: transparent !important;
+  background-image: none !important;
+}

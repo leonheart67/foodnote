@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <!--
   FoodNote — document HTML principal.
-  Rôle : déclarer la structure des pages, la navigation, les feuilles de style et les scripts chargés par l’interface.
-  Gère : points d’ancrage UI, pages, modales, navigation et ordre de chargement frontend.
-  Ne doit pas gérer : logique métier longue, accès SQLite direct, imports CIQUAL/OpenFoodFacts ni calcul nutritionnel.
+
+  Rôle :
+  - Déclarer la structure des pages FoodNote, la navigation et les points d'ancrage UI.
+  - Charger les ressources frontend dans un ordre clair.
+  - Appliquer le thème clair/sombre via les classes et data-theme.
+
+  Ne doit pas gérer :
+  - Les calculs nutritionnels.
+  - Les données SQLite.
+  - Les imports CIQUAL/OpenFoodFacts.
+  - Le design détaillé des composants, organisé via assets/css/app.css et ses modules structurés.
 -->
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>FoodNote beta 0.22.179</title>
-<link rel="icon" type="image/png" href="assets/img/favicon.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/00-foodnote-calm.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/00-fn-ui-engine.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/31-mobile-bottom-nav.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/02-foodnote-energy-theme.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/04-theme-lab.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
+<link href="assets/img/favicon.png?v=foodnote_beta_0_24_js_syntax_fix_20260608" rel="icon" type="image/png"/>
+<link href="assets/css/app.css?v=foodnote_beta_0_24_js_syntax_fix_20260608" id="theme-css" rel="stylesheet"/>
+<!-- Theme Lab temporaire isolé : non chargé dans cette préversion design. -->
 <!-- Icônes Tabler chargées en différé : ne bloque plus le premier affichage. -->
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"></noscript>
-<script src="assets/js/02-theme-lab-runtime.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-  <link rel="stylesheet" href="assets/css/94-capture-workflow-core.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-capture-workflow="css">
-  <link rel="stylesheet" href="assets/css/96-food-add-modal-controller.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="css">
-<link rel="stylesheet" id="theme-css" href="assets/css/style-dark.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531">
-<link rel="stylesheet" href="assets/css/72-database-explorer.css?v=foodnote_beta_0_22_179_database_explorer_20260531">
-<link rel="stylesheet" href="assets/css/73-notification-inline.css?v=foodnote_beta_0_22_179_notification_inline_20260531">
+<link crossorigin="" href="https://cdn.jsdelivr.net" rel="preconnect"/>
+<link as="style" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
+<noscript></noscript>
+<!-- Theme Lab runtime temporaire isolé : non chargé dans cette préversion design. -->
 </head>
 <body>
 <script>
@@ -46,13 +46,11 @@
 </script>
 <script>
 (function(){
-  var saved = 'dark';
+  var saved = 'light';
   try {
-    saved = localStorage.getItem('foodnote_theme') || 'dark';
+    saved = localStorage.getItem('foodnote_theme') || 'light';
   } catch(e) {}
-  if (saved !== 'dark' && saved !== 'light') saved = 'dark';
-  var link = document.getElementById('theme-css');
-  if (link) link.href = 'assets/css/style-' + saved + '.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
+  if (saved !== 'dark' && saved !== 'light') saved = 'light';
   try {
     if (document.body) {
       document.body.dataset.theme = saved;
@@ -67,1203 +65,1106 @@
 })();
 </script>
 <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
-<button class="sb-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
-
+<button aria-label="Menu" class="sb-toggle fn-btn" onclick="toggleSidebar()">☰</button>
 <div class="app-layout">
 <aside class="sidebar" id="sidebar">
-  <div class="sb-header">
-    <div class="sb-logo">
-      <div class="sb-logo-icon">
-        <img src="assets/img/logo-icon.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" alt="FoodNote">
-      </div>
-      <div class="sb-logo-text">
-        <div class="sb-logo-name">foodnote</div>
-        <div class="sb-logo-phase" id="header-subtitle">Mon suivi</div>
-      </div>
-      <button class="sb-collapse-btn" type="button" onclick="toggleSidebarCollapsed()" title="Réduire le menu" aria-label="Réduire ou déplier le menu">
-        <i class="ti ti-layout-sidebar-left-collapse" aria-hidden="true"></i>
-      </button>
+<div class="sb-header">
+<div class="sb-logo">
+<div class="sb-logo-icon">
+<img alt="FoodNote" src="assets/img/logo-icon.png?v=foodnote_beta_0_24_js_syntax_fix_20260608"/>
+</div>
+<div class="sb-logo-text">
+<div class="sb-logo-name">foodnote</div>
+<div class="sb-logo-phase" id="header-subtitle">Mon suivi</div>
+</div>
+<button aria-label="Réduire ou déplier le menu" class="sb-collapse-btn fn-btn" onclick="toggleSidebarCollapsed()" title="Réduire le menu" type="button">
+<i aria-hidden="true" class="ti ti-layout-sidebar-left-collapse"></i>
+</button>
+</div>
+</div>
+<div class="sb-nav">
+<div class="sb-item active" id="nav-journal" onclick="showPage('journal',this)">
+<i aria-hidden="true" class="ti ti-pencil"></i> Saisie
     </div>
-  </div>
-
-  <div class="sb-nav">
-    <div class="sb-item active" onclick="showPage('journal',this)" id="nav-journal">
-      <i class="ti ti-pencil" aria-hidden="true"></i> Saisie du jour
+<div class="sb-item" id="nav-sport" onclick="showPage('sport',this)">
+<i aria-hidden="true" class="ti ti-bike"></i> Sport
     </div>
-    <div class="sb-item" onclick="showPage('sport',this)" id="nav-sport">
-      <i class="ti ti-bike" aria-hidden="true"></i> Sport & activité
+<div class="sb-item" id="nav-historique" onclick="showPage('historique',this)">
+<i aria-hidden="true" class="ti ti-history"></i> Historique
     </div>
-    <div class="sb-item" onclick="showPage('historique',this)" id="nav-historique">
-      <i class="ti ti-history" aria-hidden="true"></i> Historique
+<div class="sb-item" id="nav-stats" onclick="showPage('stats',this)">
+<i aria-hidden="true" class="ti ti-chart-bar"></i> Stats
     </div>
-    <div class="sb-item" onclick="showPage('stats',this)" id="nav-stats">
-      <i class="ti ti-chart-bar" aria-hidden="true"></i> Statistiques
+<div class="sb-item" id="nav-objectif" onclick="showPage('objectif',this)">
+<i aria-hidden="true" class="ti ti-target-arrow"></i> Objectif
     </div>
-    <div class="sb-item" onclick="showPage('objectif',this)" id="nav-objectif">
-      <i class="ti ti-target-arrow" aria-hidden="true"></i> Objectif
+<div class="sb-item" id="nav-recap" onclick="showPage('recap',this)">
+<i aria-hidden="true" class="ti ti-clipboard-check"></i> Récap
     </div>
-    <div class="sb-item" onclick="showPage('recap',this)" id="nav-recap">
-      <i class="ti ti-clipboard-check" aria-hidden="true"></i> Récap
-    </div>
-
-    <div class="sb-section">Paramètres</div>
-
-    <div class="sb-item" data-feature="ia" onclick="toggleSubMenu('sub-ia','chev-ia');showPage('ia',this)" id="nav-ia">
-      <i class="ti ti-robot" aria-hidden="true"></i> IA
-      <i class="ti ti-chevron-down sb-chevron" id="chev-ia" aria-hidden="true"></i>
-    </div>
-    <div class="sb-sub" data-feature="ia" id="sub-ia">
-      <div class="sb-sub-item active" onclick="showPageSection('ia','ia-estimation-panel',this)">Estimation repas</div>
-      <div class="sb-sub-item" onclick="showPageSection('ia','groq-card',this)">Clé API Groq</div>
-    </div>
-
-    <div class="sb-item" onclick="toggleSubMenu('sub-bdd','chev-bdd');showPage('bases',this)" id="nav-bases">
-      <i class="ti ti-database" aria-hidden="true"></i> Bases de données
-      <i class="ti ti-chevron-down sb-chevron" id="chev-bdd" aria-hidden="true"></i>
-    </div>
-    <div class="sb-sub" id="sub-bdd">
-      <div class="sb-sub-item" onclick="showPageSection('bases','database-explorer-card',this);document.getElementById('database-explorer-card')?.setAttribute('open','')">Explorer</div>
-      <div class="sb-sub-item" onclick="showPageSection('bases','ciqual-card',this)">CIQUAL</div>
-      <div class="sb-sub-item" onclick="showPageSection('bases','off-card',this)">OpenFoodFacts</div>
-      <div class="sb-sub-item" onclick="showPageSection('bases','aliments-card',this);document.getElementById('aliments-card')?.setAttribute('open','')">Mes aliments</div>
-      <div class="sb-sub-item" onclick="showPageSection('bases','unit-weights-card',this)">Poids par unité</div>
-    </div>
-
-    <div class="sb-item" onclick="toggleSubMenu('sub-data','chev-data');showPage('donnees',this)" id="nav-donnees">
-      <i class="ti ti-folder" aria-hidden="true"></i> Données
-      <i class="ti ti-chevron-down sb-chevron" id="chev-data" aria-hidden="true"></i>
-    </div>
-    <div class="sb-sub" id="sub-data">
-      <div class="sb-sub-item" onclick="showPageSection('donnees','fn-diagnostics-card',this)">Diagnostic</div>
-      <div class="sb-sub-item" onclick="showPageSection('donnees','data-backup-card',this)">Sauvegarde</div>
-      <div class="sb-sub-item" onclick="showPageSection('donnees','data-export-card',this)">Import / Export</div>
-    </div>
-
-    <div class="sb-item" onclick="showPage('themelab',this)" id="nav-themelab">
-      <i class="ti ti-palette" aria-hidden="true"></i> Laboratoire couleurs
-    </div>
-
-    <div class="sb-item" onclick="showPage('profil',this)" id="nav-profil">
-      <i class="ti ti-user" aria-hidden="true"></i> Mon profil
-    </div>
-  </div>
-
-  <div class="sb-footer">
-      <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Changer le thème" aria-label="Changer le thème"></button>
-    <div class="sb-user">
-      <div class="sb-avatar" id="sb-avatar">FN</div>
-      <div id="sb-prenom" class="fn-ui-sidebar-name">FoodNote</div>
-      <div id="header-macros" class="fn-ui-sidebar-macros"></div>
-    </div>
-  </div>
+<!-- Pages techniques déplacées dans le menu profil (footer) -->
+</div>
+<div class="sb-footer">
+<div class="fn-profile-wrap">
+<button class="fn-profile-trigger fn-btn" id="fn-profile-trigger" onclick="toggleProfileMenu(event)" aria-haspopup="true" aria-expanded="false" aria-label="Menu profil et outils">
+<span class="sb-avatar" id="sb-avatar">FN</span>
+</button>
+<div class="fn-profile-menu" id="fn-profile-menu" hidden role="menu" aria-label="Profil et outils">
+<div class="fn-pm-head">
+<div class="fn-pm-avatar" id="sb-avatar-lg">FN</div>
+<div class="fn-pm-name" id="sb-prenom">FoodNote</div>
+<div class="fn-pm-sub">FoodNote</div>
+<div class="fn-ui-sidebar-macros" id="header-macros"></div>
+</div>
+<div class="fn-pm-item" id="nav-profil" role="menuitem" onclick="closeProfileMenu();showPage('profil',this)"><i aria-hidden="true" class="ti ti-user"></i> Mon profil &amp; cibles</div>
+<div class="fn-pm-section">Outils</div>
+<div class="fn-pm-item" data-feature="ia" id="nav-ia" role="menuitem" onclick="closeProfileMenu();showPage('ia',this)"><i aria-hidden="true" class="ti ti-robot"></i> IA — estimation repas</div>
+<div class="fn-pm-item" id="nav-bases" role="menuitem" onclick="closeProfileMenu();showPage('bases',this)"><i aria-hidden="true" class="ti ti-database"></i> Bases de données</div>
+<div class="fn-pm-item" id="nav-donnees" role="menuitem" onclick="closeProfileMenu();showPage('donnees',this)"><i aria-hidden="true" class="ti ti-folder"></i> Données &amp; diagnostic</div>
+<div class="fn-pm-divider"></div>
+<button class="fn-pm-item" id="theme-toggle" role="menuitem" onclick="toggleTheme()"><i aria-hidden="true" class="ti ti-moon"></i> Thème clair / sombre</button>
+</div>
+</div>
+</div>
 </aside>
-
 <div class="main-wrap">
 <header class="app-header">
-  <div class="app-header-inner">
-    <div class="app-header-text fn-header-title-wrap">
-      <span class="fn-page-title-icon" id="page-title-icon" aria-hidden="true">🍽</span>
-      <div class="app-title" id="page-title">Saisie du jour</div>
-    </div>
-  </div>
+<div class="app-header-inner">
+<div class="app-header-text fn-header-title-wrap">
+<span aria-hidden="true" class="fn-page-title-icon" id="page-title-icon">🍽</span>
+<div class="app-title" id="page-title">Saisie</div>
+</div>
+</div>
 </header>
-
-<div id="page-onboarding" class="page fn-ui-page-narrow">
-  <div class="onboarding-brand">
-    <img class="onboarding-logo" src="assets/img/logo-wide.png?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" alt="FoodNote — Journal nutrition">
-    <div class="fn-ui-brand-title">Bienvenue sur foodnote</div>
-    <div class="fn-ui-brand-sub">Quelques infos pour personnaliser ton suivi</div>
-  </div>
-
-  <!-- Étape 1 : Infos de base -->
-  <div id="ob-step-1" class="card fn-ui-surface">
-    <div class="card-title fn-ui-section-title-legacy">1 / 3 — Ton profil</div>
-    <div class="row2 fn-ui-form-grid-gap">
-      <div class="field"><label>Prénom</label><input type="text" id="ob-prenom" placeholder="Alex"></div>
-      <div class="field">
-        <label>Sexe</label>
-        <select id="ob-sexe">
-          <option value="H">Homme</option>
-          <option value="F">Femme</option>
-        </select>
-      </div>
-    </div>
-    <div class="row2 fn-ui-form-grid-gap">
-      <div class="field"><label>Âge</label><input type="number" id="ob-age" min="10" max="99" placeholder="30"></div>
-      <div class="field"><label>Poids (kg)</label><input type="number" id="ob-poids" min="30" max="300" step="0.5" placeholder="70"></div>
-    </div>
-    <div class="row2 fn-ui-form-grid-gap">
-      <div class="field"><label>Taille (cm)</label><input type="number" id="ob-taille" min="100" max="250" placeholder="175"></div>
-      <div class="field">
-        <label>Activité</label>
-        <select id="ob-activite">
-          <option value="sedentaire">Sédentaire (bureau)</option>
-          <option value="leger">Léger (1-2x/sem)</option>
-          <option value="modere" selected>Modéré (3-5x/sem)</option>
-          <option value="actif">Actif (6-7x/sem)</option>
-          <option value="tres_actif">Très actif (2x/jour)</option>
-        </select>
-      </div>
-    </div>
-    <button onclick="obNextStep(2)" class="btn-primary fn-ui-button-block">Suivant →</button>
-  </div>
-
-  <!-- Étape 2 : Objectif -->
-  <div id="ob-step-2" class="card fn-ui-surface" style="display:none">
-    <div class="card-title fn-ui-section-title-legacy">2 / 3 — Ton objectif</div>
-    <div id="ob-phases-grid" class="fn-ui-grid-2 fn-ui-grid-tight fn-ui-mb-md"></div>
-    <button onclick="obNextStep(3)" class="btn-primary fn-ui-button-block">Suivant →</button>
-    <button onclick="obNextStep(1)" class="fn-ui-button-block fn-ui-button-secondary-block">← Retour</button>
-  </div>
-
-  <!-- Étape 3 : Cibles calculées -->
-  <div id="ob-step-3" class="card fn-ui-surface" style="display:none">
-    <div class="card-title fn-ui-section-title-legacy">3 / 3 — Tes cibles personnalisées</div>
-    <div id="ob-cibles-result" class="fn-ui-mb-md"></div>
-    <p class="fn-ui-note fn-ui-mb-md">Ces valeurs sont calculées selon ton profil. Tu pourras les ajuster à tout moment dans Mon profil.</p>
-    <button onclick="obFinish()" class="btn-primary fn-ui-button-block">C'est parti ! 🚀</button>
-    <button onclick="obNextStep(2)" class="fn-ui-button-block fn-ui-button-secondary-block">← Retour</button>
-  </div>
+<div class="page fn-ui-page-narrow fn-page" id="page-onboarding">
+<div class="onboarding-brand">
+<img alt="FoodNote — Journal nutrition" class="onboarding-logo" src="assets/img/logo-wide.png?v=foodnote_beta_0_24_js_syntax_fix_20260608"/>
+<div class="fn-ui-brand-title">Bienvenue sur foodnote</div>
+<div class="fn-ui-brand-sub">Quelques infos pour personnaliser ton suivi</div>
 </div>
-
-<div id="page-journal" class="page active journal-premium-page">
-  <div class="journal-hero card fn-ui-surface journal-sticky-summary">
-    <div class="journal-page-heading">
-      <h1 class="journal-page-title">Aujourd'hui</h1>
-      <div class="journal-date-actions" aria-label="Actions de date du journal">
-        <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
-          <label>Date</label>
-          <input type="date" id="f-date" onchange="selectJournalDate(this.value)">
-        </div>
-        <button type="button" class="journal-date-launch journal-date-launch-heading" onclick="openJournalDatePicker()" aria-label="Choisir une date">📅</button>
-      </div>
-    </div>
-
-    <div class="journal-day-row journal-day-row-carousel">
-      <button type="button" class="journal-day-nav journal-day-nav-prev" onclick="shiftJournalDate(-1)" aria-label="Jour précédent">‹</button>
-      <div class="journal-day-carousel-wrap">
-        <div class="journal-day-carousel" id="journal-day-carousel" aria-label="Changer de journée"></div>
-      </div>
-      <button type="button" class="journal-day-nav journal-day-nav-next" onclick="shiftJournalDate(1)" aria-label="Jour suivant">›</button>
-    </div>
-
-    <section id="fn-notification-inline" class="fn-daily-status-panel" aria-live="polite" hidden></section>
-
-    <div class="journal-floating-macro-card card fn-ui-surface fn-ui-surface-soft fn-orbit-nutrition-card fn-home-nutrition-panel" aria-label="Résumé nutrition du jour">
-      <div class="fn-orbit-card-top fn-home-panel-head">
-        <div>
-          <div class="fn-orbit-kicker">Objectif du jour</div>
-          <div class="fn-orbit-title">Calories &amp; nutriments</div>
-        </div>
-        <div class="fn-orbit-status" id="fn-orbit-status">Suivi actif</div>
-      </div>
-
-      <div class="fn-home-nutrition-layout" aria-label="Objectif du jour calories et nutriments">
-        <div class="macro-cell macro-cell-kcal fn-calorie-summary-card" data-macro="kcal" style="--macro-pct:0%">
-          <div class="fn-calorie-ring-wrap" aria-hidden="true">
-            <div class="fn-calorie-ring-visual">
-              <div class="fn-calorie-ring-core">
-                <div class="fn-calorie-flame fn-ui-smart-dot fn-ui-macro-kcal fn-home-objectif-icon" aria-hidden="true">🔥</div>
-                <div class="macro-val" id="m-kcal">0</div>
-                <div class="fn-calorie-unit">KCAL</div>
-              </div>
-            </div>
-          </div>
-          <div class="fn-calorie-copy">
-            <div class="macro-lbl">Calories</div>
-            <div class="fn-calorie-target-line">cible <strong id="m-kcal-target">2200</strong> kcal</div>
-            <div class="fn-calorie-percent" id="m-kcal-percent">0%</div>
-            <div class="fn-calorie-state-line" id="m-kcal-state-line">Suivi actif</div>
-          </div>
-          <span class="macro-status-badge" data-state="neutral" aria-label="Statut calories">•</span>
-        </div>
-
-        <div class="macro-bar journal-main-macros journal-main-macros-compact journal-main-macros-four fn-orbit-macros fn-home-macro-grid fn-home-macro-list" aria-label="Cartes nutriments du jour">
-          <div class="macro-cell macro-cell-prot fn-macro-home-card fn-home-macro-row" data-macro="prot" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-prot fn-home-objectif-icon" aria-hidden="true">💪</div>
-            <div class="fn-macro-copy">
-              <div class="macro-head"><span class="macro-lbl">Protéines</span></div>
-              <div class="macro-val" id="m-prot">0g</div>
-              <div class="macro-target">cible 120g</div>
-            </div>
-            <span class="macro-status-badge" data-state="neutral" aria-label="Statut protéines">•</span>
-          </div>
-
-          <div class="macro-cell macro-cell-gluc fn-macro-home-card fn-home-macro-row" data-macro="gluc" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-gluc fn-home-objectif-icon" aria-hidden="true">🍞</div>
-            <div class="fn-macro-copy">
-              <div class="macro-head"><span class="macro-lbl">Glucides</span></div>
-              <div class="macro-val" id="m-gluc">0g</div>
-              <div class="macro-target">cible 270g</div>
-            </div>
-            <span class="macro-status-badge" data-state="neutral" aria-label="Statut glucides">•</span>
-          </div>
-
-          <div class="macro-cell macro-cell-lip fn-macro-home-card fn-home-macro-row" data-macro="lip" style="--macro-pct:0%">
-            <div class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-lip fn-home-objectif-icon" aria-hidden="true">💧</div>
-            <div class="fn-macro-copy">
-              <div class="macro-head"><span class="macro-lbl">Lipides</span></div>
-              <div class="macro-val" id="m-lip">0g</div>
-              <div class="macro-target">cible 71g</div>
-            </div>
-            <span class="macro-status-badge" data-state="neutral" aria-label="Statut lipides">•</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <input type="hidden" id="f-poids" value="">
-  </div>
-
-
-  <div class="card fn-ui-surface journal-main-card journal-section-card">
-    <div class="journal-card-head">
-      <div>
-        <div class="card-title fn-section-title fn-ui-mb-xs" id="food-search-card"><span class="fn-section-icon">🍽</span><span>Alimentation</span></div>
-      </div>
-    </div>
-
-    <div id="food-add-modal" class="food-add-modal" aria-hidden="true" data-fn-overlay-close="1">
-      <div class="food-add-dialog" role="dialog" aria-modal="true" aria-label="Ajouter à ma journée">
-        <div class="food-add-head food-add-head-compact">
-          <button type="button" class="food-add-close" data-food-add-close="1" aria-label="Fermer">×</button>
-        </div>
-        <div class="food-add-body">
-          <div class="food-add-main">
-        <div class="food-add-intro">
-          <div class="food-add-kicker" id="food-add-mode-badge">🍽 Aliment</div>
-        </div>
-        <div class="food-add-panel fn-ui-surface">
-        <div id="food-current-meal-card" class="food-current-meal-card fn-ui-surface fn-ui-surface-soft" aria-live="polite"></div>
-        <div class="db-row journal-add-row">
-          <div class="db-autocomplete">
-            <div class="db-search-wrap">
-              <input type="text" id="db-search" class="db-search-input" placeholder="Recherche : pain, yaourt, poulet..." autocomplete="off"
-                     data-food-add-search-input="1">
-              <input type="number" id="db-qty" class="db-qty-input" value="100" min="1" step="1" title="Quantité (g ou unité selon aliment)">
-            </div>
-            <div class="food-inline-filters" aria-label="Filtres de recherche">
-              <span class="food-inline-filters-label">Sources</span>
-              <button type="button" class="food-source-chip active" data-source-filter="base" data-food-add-action="toggle-source"><span>💾</span><b>Base</b></button>
-              <button type="button" class="food-source-chip active" data-source-filter="off" data-food-add-action="toggle-source"><span>🛒</span><b>OpenFoodFacts</b></button>
-              <button type="button" class="food-source-chip active" data-source-filter="ciq" data-food-add-action="toggle-source"><span>🌿</span><b>CIQUAL</b></button>
-            </div>
-            <input type="hidden" id="db-selected-id">
-            <div id="db-suggestions" class="db-suggestions"></div>
-            <div id="db-selected-card" class="db-selected-card"></div>
-          </div>
-          <div class="food-add-actions">
-            <button type="button" id="food-main-action-btn" data-food-add-action="main" class="btn-primary journal-add-btn">Ajouter</button>
-            <div class="food-add-controls" aria-label="Repas de destination">
-              <div class="food-control-section food-meal-section">
-                <div class="food-control-label">Ajouter dans</div>
-                <div class="food-meal-inline">
-                  <button type="button" class="food-meal-chip" data-food-meal="breakfast" data-food-add-action="set-meal"><span>☕</span><b>Petit-déj</b></button>
-                  <button type="button" class="food-meal-chip active" data-food-meal="lunch" data-food-add-action="set-meal"><span>🍽</span><b>Déjeuner</b></button>
-                  <button type="button" class="food-meal-chip" data-food-meal="dinner" data-food-add-action="set-meal"><span>🌙</span><b>Dîner</b></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="journal-last-added" class="journal-last-added" aria-live="polite"></div>
-        <div id="groq-response" class="food-ia-response inline-ia-response" style="display:none"></div>
-        <div id="ia-parse-status" class="food-ia-status"></div>
-        <div id="ia-preview" class="food-ia-preview" style="display:none"></div>
-        <div id="ocr-panel" class="ocr-panel fn-ui-surface fn-ui-surface-soft" style="display:none">
-          <div class="ocr-panel-head">
-            <strong>Lecture étiquette</strong>
-            <button type="button" data-food-add-action="close-ocr" aria-label="Fermer">×</button>
-          </div>
-          <div id="ocr-status" class="ocr-status"></div>
-          <div class="ocr-unified-note">La caméra scanne automatiquement les codes-barres/QR. L’OCR tableau ne part au serveur que si le déclencheur est activé.</div>
-          <div id="ocr-camera-box" class="ocr-camera-box" style="display:none">
-            <div class="ocr-video-wrap">
-              <video id="ocr-video" playsinline muted></video>
-              <div class="ocr-frame"></div>
-            </div>
-            <div class="ocr-camera-actions">
-              <button type="button" id="ocr-auto-btn" data-food-add-action="toggle-nutrition-auto">Déclencheur OCR OFF</button>
-              <button type="button" class="btn-primary" id="ocr-read-table-btn" data-food-add-action="nutrition-ocr-read">Lire tableau</button>
-              <button type="button" class="btn-primary" id="recipe-ocr-read-btn" data-food-add-action="recipe-ocr-read" style="display:none">📸 Prendre la photo</button>
-              <button type="button" data-food-add-action="stop-nutrition-camera">Fermer caméra</button>
-            </div>
-          </div>
-          <canvas id="ocr-canvas" style="display:none"></canvas>
-          <div id="recipe-crop-box" class="recipe-crop-box" style="display:none">
-            <div class="recipe-crop-head">
-              <strong>Recadrer la liste</strong>
-              <span>Déplace le cadre sur les ingrédients, puis lis uniquement cette zone.</span>
-            </div>
-            <div id="recipe-crop-stage" class="recipe-crop-stage">
-              <img id="recipe-crop-img" alt="Photo recette à recadrer">
-              <div id="recipe-crop-selection" class="recipe-crop-selection">
-                <span class="recipe-crop-handle nw" data-handle="nw"></span>
-                <span class="recipe-crop-handle ne" data-handle="ne"></span>
-                <span class="recipe-crop-handle sw" data-handle="sw"></span>
-                <span class="recipe-crop-handle se" data-handle="se"></span>
-              </div>
-            </div>
-            <div class="recipe-crop-actions">
-              <button type="button" data-food-add-action="retake-recipe-photo">↩ Reprendre photo</button>
-              <button type="button" data-food-add-action="recipe-ocr-full">Lire toute l’image</button>
-              <button type="button" class="btn-primary" id="recipe-crop-read-btn" data-food-add-action="recipe-ocr-crop">📖 Lire cette zone</button>
-            </div>
-          </div>
-          <div id="ocr-result" class="ocr-result" style="display:none">
-            <div class="ocr-grid">
-              <label>Nom<input id="ocr-food-name" type="text" placeholder="Nom de l’aliment"></label>
-              <label>Kcal /100g<input id="ocr-kcal" type="number" step="1"></label>
-              <label>Prot. /100g<input id="ocr-prot" type="number" step="0.1"></label>
-              <label>Gluc. /100g<input id="ocr-gluc" type="number" step="0.1"></label>
-              <label>Lip. /100g<input id="ocr-lip" type="number" step="0.1"></label>
-              <label>Fibres /100g<input id="ocr-fibres" type="number" step="0.1"></label>
-            </div>
-            <div class="ocr-actions">
-              <button type="button" class="btn-primary" data-food-add-action="ocr-save-personal">Enregistrer comme aliment perso</button>
-              <button type="button" data-food-add-action="ocr-add-day">Ajouter à la journée</button>
-            </div>
-            <details class="ocr-raw"><summary>Texte OCR</summary><pre id="ocr-raw-text"></pre></details>
-          </div>
-          <div id="recipe-ocr-result" class="recipe-ocr-result" style="display:none">
-            <div class="recipe-ocr-head">
-              <strong>Plat détecté</strong>
-              <span>Estimation ponctuelle : tu valides avant ajout à la journée. Tu peux aussi en faire une recette réutilisable.</span>
-            </div>
-            <label class="recipe-ocr-text-label">Liste d’ingrédients reconnue
-              <textarea id="recipe-ocr-text" rows="7" placeholder="Ex : 500 g viande hachée&#10;2 oignons&#10;100 g chapelure&#10;20 cl crème..."></textarea>
-            </label>
-            <div class="recipe-ocr-actions">
-              <button type="button" class="btn-primary" data-food-add-action="recipe-ai-estimate">Envoyer à l’IA</button>
-              <button type="button" data-food-add-action="focus-recipe-text">Corriger la liste</button>
-            </div>
-            <div id="recipe-ai-status" class="recipe-ai-status"></div>
-            <div id="recipe-ai-result" class="recipe-ai-result fn-ui-surface fn-ui-surface-soft" style="display:none">
-              <div class="recipe-ai-note">Choisis : ajout ponctuel dans le journal ou création d’une recette réutilisable. Vérifie avant sauvegarde.</div>
-              <div class="ocr-grid recipe-ai-grid">
-                <label>Nom du plat<input id="recipe-food-name" type="text" placeholder="Nom du plat"></label>
-                <label>Poids final estimé<input id="recipe-weight" type="number" step="1" placeholder="g"></label>
-                <label>Kcal /100g<input id="recipe-kcal" type="number" step="1"></label>
-                <label>Prot. /100g<input id="recipe-prot" type="number" step="0.1"></label>
-                <label>Gluc. /100g<input id="recipe-gluc" type="number" step="0.1"></label>
-                <label>Lip. /100g<input id="recipe-lip" type="number" step="0.1"></label>
-              </div>
-              <div id="recipe-ai-totals" class="recipe-ai-totals"></div>
-              <div class="ocr-actions recipe-save-actions">
-                <button type="button" class="btn-primary" data-food-add-action="recipe-create">Créer une recette enregistrée</button>
-                <button type="button" data-food-add-action="recipe-save-personal">Enregistrer comme plat perso</button>
-                <button type="button" data-food-add-action="recipe-add-day">Ajouter à la journée</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-          </div>
-        </div>
-
-        <div class="barcode-scan-panel barcode-inline-panel" id="barcode-scan-panel" style="display:none">
-          <div class="barcode-scan-actions barcode-scan-actions-ocr">
-            <div class="barcode-inline-title">📷 Scanner aliment</div>
-            <button type="button" id="barcode-ocr-btn" class="barcode-ocr-btn barcode-ocr-fab" data-food-add-action="barcode-nutrition-from-camera" title="Lire le tableau nutritionnel" aria-label="Lire le tableau nutritionnel">📸</button>
-            <button type="button" id="barcode-stop-btn" data-food-add-action="barcode-close" style="display:none">Fermer</button>
-          </div>
-          <div class="barcode-camera-wrap" id="barcode-camera-wrap" style="display:none">
-            <video id="barcode-video" playsinline muted></video>
-            <div id="barcode-html5-reader" class="barcode-html5-reader" style="display:none"></div>
-            <div class="barcode-frame"></div>
-          </div>
-          <div id="barcode-status" class="barcode-status">Ouverture de la caméra…</div>
-          <div class="barcode-ocr-hint">Le code-barres/QR est scanné automatiquement. Pour un tableau nutritionnel, cadre-le puis touche <b>Lire tableau</b>.</div>
-          <div id="barcode-result" class="barcode-result fn-ui-surface fn-ui-surface-soft" style="display:none"></div>
-        </div>
-      </div>
-    </div>
-
-    <section class="journal-foods-block journal-meals-card fn-ui-surface" id="food-entries-card">
-      <div class="journal-meals-head">
-        <div class="journal-meals-icon fn-section-icon">🍱</div>
-        <div>
-          <div class="journal-meals-title fn-section-title fn-section-title-plain"><span>Repas</span></div>
-          <div class="journal-meals-subtitle">Petit-déj, déjeuner et souper restent repliés avec leur résumé.</div>
-        </div>
-      </div>
-      <div class="aliment-list meal-collapsible-list" id="list-custom"></div>
-    </section>
-  </div>
-
-  <div class="journal-extra-grid">
-
-  <details class="journal-advanced card fn-ui-surface journal-tile-card">
-    <summary>
-      <span class="fn-section-title fn-section-title-summary"><span class="fn-section-icon">📝</span><span>Ressenti et notes</span></span>
-      <small>Énergie, faim et notes</small>
-    </summary>
-    <div class="row2" style="margin-top:14px">
-      <div class="field"><label>Énergie</label>
-        <select id="f-energie"><option value="">— choisir —</option><option>Bonne énergie</option><option>Fatigue modérée</option><option>Fatigue importante</option></select>
-      </div>
-      <div class="field"><label>Faim</label>
-        <select id="f-faim"><option value="">— choisir —</option><option>Rassasié</option><option>Faim gérable</option><option>Faim difficile à contrôler</option></select>
-      </div>
-    </div>
-    <div class="field"><label>Notes libres</label><textarea id="f-notes" placeholder="Sommeil, douleurs, humeur..."></textarea></div>
-    <div class="field"><label>Notes libres alimentation</label><textarea id="f-extras" placeholder="Repas au restaurant, recette spéciale..."></textarea></div>
-  </details>
-  </div>
-
+<!-- Étape 1 : Infos de base -->
+<div class="card fn-ui-surface" id="ob-step-1">
+<div class="card-title fn-ui-section-title">1 / 3 — Ton profil</div>
+<div class="row2 fn-ui-form-grid-gap">
+<div class="field"><label>Prénom</label><input class="fn-field" id="ob-prenom" placeholder="Alex" type="text"/></div>
+<div class="field">
+<label>Sexe</label>
+<select class="fn-field" id="ob-sexe">
+<option value="H">Homme</option>
+<option value="F">Femme</option>
+</select>
 </div>
-
-
-<div id="page-sport" class="page sport-page-premium">
-  <div class="fn-ui-page fn-ui-stack">
-    <section class="fn-ui-panel fn-ui-panel-pad">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">🏃</span>
-          <div>
-            <span class="fn-ui-kicker">Sport</span>
-            <h1 class="fn-ui-title">Activité du jour</h1>
-            <p class="fn-ui-sub">Choisis une journée, saisis tes activités et FoodNote ajuste automatiquement ton bilan.</p>
-          </div>
-        </div>
-        <div class="fn-ui-actions sport-date-actions">
-          <span class="fn-ui-chip fn-ui-chip-sport" id="sport-date-pill">0 kcal sport</span>
-          <div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
-            <label>Date sport</label>
-            <input type="date" id="sport-f-date" onchange="selectSportDate(this.value)">
-          </div>
-          <button type="button" class="journal-date-launch journal-date-launch-heading" onclick="openSportDatePicker()" aria-label="Choisir une date sport">📅</button>
-        </div>
-      </div>
-
-      <div class="journal-day-row journal-day-row-carousel sport-day-row-carousel" aria-label="Carrousel des journées sport">
-        <button type="button" class="journal-day-nav journal-day-nav-prev sport-day-nav-prev" onclick="shiftSportDate(-1)" aria-label="Jour sport précédent">‹</button>
-        <div class="journal-day-carousel-wrap sport-day-carousel-wrap">
-          <div class="journal-day-carousel sport-day-carousel" id="sport-day-carousel" aria-label="Changer de journée sport"></div>
-        </div>
-        <button type="button" class="journal-day-nav journal-day-nav-next sport-day-nav-next" onclick="shiftSportDate(1)" aria-label="Jour sport suivant">›</button>
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="sport-card">
-      <div class="fn-ui-section-head">
-        <b>Activités</b>
-        <em><span id="sport-summary-count">0</span> ligne(s) · <span id="sport-summary-duration">0 h</span></em>
-      </div>
-      <div id="sport-list" class="fn-ui-stack sport-list-modern"></div>
-      <div class="fn-ui-actions">
-        <button onclick="addSportRow()" class="fn-ui-button fn-ui-button-primary sport-add-btn">＋ Ajouter une activité</button>
-      </div>
-    </section>
-  </div>
 </div>
-
-<div id="page-historique" class="page"><div id="hist-list" class="fn-ui-page fn-ui-stack"></div></div>
-
-
-<div id="page-profil" class="page">
-  <div class="fn-ui-page fn-ui-stack">
-    <section class="fn-ui-panel fn-ui-panel-pad">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">👤</span>
-          <div>
-            <span class="fn-ui-kicker">Profil actif</span>
-            <h1 class="fn-ui-title" id="profile-summary-name">FoodNote</h1>
-            <p class="fn-ui-sub" id="profile-summary-desc">Configure ton objectif, tes calories et ton programme.</p>
-          </div>
-        </div>
-        <div class="fn-ui-actions">
-          <button type="button" class="fn-ui-button fn-ui-button-primary" onclick="scrollTo('profil-cibles')">Modifier les cibles</button>
-          <button type="button" class="fn-ui-button" onclick="showPage('objectif', document.getElementById('nav-objectif'))">Objectif & phases</button>
-        </div>
-      </div>
-      <div class="fn-ui-feature-grid" aria-label="Résumé du profil">
-        <div class="fn-ui-feature"><span>🎯</span><div><b>Objectifs SQL</b><small>Cibles restaurées depuis SQLite, localStorage seulement cache.</small></div></div>
-        <div class="fn-ui-feature"><span>⚡</span><div><b>Calcul automatique</b><small>Mifflin-St Jeor, activité et objectif personnel.</small></div></div>
-        <div class="fn-ui-feature"><span>🧭</span><div><b>Phases nutrition</b><small>Le programme pilote les objectifs affichés.</small></div></div>
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="profil-cibles">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">🧮</span>
-          <div>
-            <span class="fn-ui-kicker">Configuration</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Mon profil & calcul automatique</h2>
-            <p class="fn-ui-sub">Renseigne ton profil, calcule tes cibles, puis sauvegarde en SQLite.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="fn-ui-form-grid-2">
-        <label class="fn-ui-field">Prénom<input type="text" id="cfg-prenom" placeholder="Ex: Alex"></label>
-        <label class="fn-ui-field">Description libre<input type="text" id="cfg-phase-label" placeholder="Ex: Sèche été / programme 2026"></label>
-      </div>
-
-      <div class="fn-ui-form-grid-3">
-        <label class="fn-ui-field">Sexe<select id="cfg-sexe"><option value="homme">Homme</option><option value="femme">Femme</option></select></label>
-        <label class="fn-ui-field">Âge<input type="number" id="cfg-age" min="12" max="100" step="1" placeholder="35"></label>
-        <label class="fn-ui-field">Taille (cm)<input type="number" id="cfg-taille" min="120" max="230" step="1" placeholder="171"></label>
-      </div>
-
-      <div class="fn-ui-form-grid-3">
-        <label class="fn-ui-field">Poids actuel (kg)<input type="number" id="cfg-poids" min="30" max="250" step="0.1" placeholder="63.0"></label>
-        <label class="fn-ui-field">Activité
-          <select id="cfg-activite">
-            <option value="1.2">Sédentaire</option>
-            <option value="1.375">Légère</option>
-            <option value="1.55">Modérée</option>
-            <option value="1.725">Élevée</option>
-            <option value="1.9">Très élevée</option>
-          </select>
-        </label>
-        <label class="fn-ui-field">Objectif
-          <select id="cfg-objectif" onchange="previewProfilAuto()">
-            <option value="perte">Perte de poids</option>
-            <option value="recomp">Recomposition</option>
-            <option value="sechage">Séchage</option>
-            <option value="prise">Prise de masse</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="fn-ui-alert fn-ui-alert-warn" id="profil-auto-preview">
-        <div class="fn-ui-alert-icon">⚡</div>
-        <div><b>Calcul automatique</b><p>Renseigne poids, taille et âge puis clique sur “Calculer mes cibles”.</p></div>
-      </div>
-
-      <div class="fn-ui-section-head"><b>Cibles nutritionnelles quotidiennes</b><em>Calories et macros</em></div>
-      <div class="fn-ui-form-grid-4">
-        <label class="fn-ui-field">Calories (kcal/j)<input type="number" id="cfg-kcal" min="800" max="6000" step="50"></label>
-        <label class="fn-ui-field">Protéines min (g/j)<input type="number" id="cfg-prot" min="30" max="400" step="5"></label>
-        <label class="fn-ui-field">Glucides (g/j)<input type="number" id="cfg-gluc" min="20" max="600" step="5"></label>
-        <label class="fn-ui-field">Lipides (g/j)<input type="number" id="cfg-lip" min="20" max="300" step="5"></label>
-      </div>
-
-      <div class="fn-ui-actions">
-        <button type="button" class="fn-ui-button" onclick="applyProfilAuto()">⚡ Calculer mes cibles</button>
-        <button type="button" class="fn-ui-button fn-ui-button-primary" onclick="saveCfgProfil()">💾 Sauvegarder le profil</button>
-        <div id="cfg-save-status" class="fn-ui-save-status">✓ Profil sauvegardé</div>
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="features-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">⚙️</span>
-          <div>
-            <span class="fn-ui-kicker">Application</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Options de l’application</h2>
-            <p class="fn-ui-sub">Active ou masque les fonctions avancées sans toucher aux données.</p>
-          </div>
-        </div>
-      </div>
-      <div class="fn-ui-tile fn-ui-tile-pad fn-ui-toggle-tile feature-toggle-row">
-        <div>
-          <strong>Fonctions IA</strong>
-          <p>Active ou masque les fonctions Groq/IA. Désactivé = FoodNote reste 100% suivi calories/macros classique.</p>
-        </div>
-        <label class="switch" title="Activer ou désactiver les fonctions IA">
-          <input type="checkbox" id="feature-ai-toggle" onchange="toggleAIFeature(this.checked)">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <div id="feature-ai-status" class="feature-status fn-ui-muted"></div>
-    </section>
-  </div>
+<div class="row2 fn-ui-form-grid-gap">
+<div class="field"><label>Âge</label><input class="fn-field" id="ob-age" max="99" min="10" placeholder="30" type="number"/></div>
+<div class="field"><label>Poids (kg)</label><input class="fn-field" id="ob-poids" max="300" min="30" placeholder="70" step="0.5" type="number"/></div>
 </div>
-
-<div id="page-objectif" class="page objectif-page">
-  <div class="card fn-ui-surface profile-summary profile-summary-main fn-ui-mb-lg">
-      <div class="profile-chip">🎯 Objectif actif</div>
-      <div class="profile-name">Objectif & phases</div>
-      <div class="profile-muted fn-ui-mt-xs">Le plan, la phase actuelle et le suivi du programme. Les statistiques restent dédiées aux résultats.</div>
-      <div class="profile-actions fn-ui-mt-md">
-        <button class="btn-primary fn-ui-button fn-ui-button-compact" onclick="showPage('profil', document.getElementById('nav-profil'))">Modifier mes cibles</button>
-        <button class="fn-ui-button fn-ui-button-compact" onclick="scrollTo('objectif-programme')">Programme phases</button>
-      </div>
-  </div>
-
-  <details class="card fn-ui-surface fn-ui-details objectif-method-card objectif-method-details" id="objectif-methode">
-    <summary class="fn-ui-details-summary objectif-method-summary">
-      <span>
-        <span class="card-title fn-section-title fn-ui-m-0"><span class="fn-section-icon">🧮</span><span>Méthode de calcul</span></span>
-        <span class="objectif-method-summary-text">Formule, facteur d’activité et règles par phase</span>
-      </span>
-      <span class="fn-ui-chevron objectif-method-summary-icon">▾</span>
-    </summary>
-    <div class="fn-ui-details-body objectif-method-content">
-    <div class="objectif-method-grid">
-      <div class="fn-ui-calc-box objectif-method-box">
-        <div class="objectif-method-title">1. Métabolisme de base</div>
-        <div class="objectif-method-text">
-          Calcul Mifflin-St Jeor :<br>
-          <strong>Homme</strong> = 10 × poids + 6,25 × taille − 5 × âge + 5<br>
-          <strong>Femme</strong> = 10 × poids + 6,25 × taille − 5 × âge − 161
+<div class="row2 fn-ui-form-grid-gap">
+<div class="field"><label>Taille (cm)</label><input class="fn-field" id="ob-taille" max="250" min="100" placeholder="175" type="number"/></div>
+<div class="field">
+<label>Activité</label>
+<select class="fn-field" id="ob-activite">
+<option value="sedentaire">Sédentaire (bureau)</option>
+<option value="leger">Léger (1-2x/sem)</option>
+<option selected="" value="modere">Modéré (3-5x/sem)</option>
+<option value="actif">Actif (6-7x/sem)</option>
+<option value="tres_actif">Très actif (2x/jour)</option>
+</select>
+</div>
+</div>
+<button class="btn-primary fn-ui-button-block fn-btn" onclick="obNextStep(2)">Suivant →</button>
+</div>
+<!-- Étape 2 : Objectif -->
+<div class="card fn-ui-surface" id="ob-step-2" style="display:none">
+<div class="card-title fn-ui-section-title">2 / 3 — Ton objectif</div>
+<div class="fn-ui-grid-2 fn-ui-grid-tight fn-ui-mb-md" id="ob-phases-grid"></div>
+<button class="btn-primary fn-ui-button-block fn-btn" onclick="obNextStep(3)">Suivant →</button>
+<button class="fn-ui-button-block fn-ui-button-secondary-block fn-btn" onclick="obNextStep(1)">← Retour</button>
+</div>
+<!-- Étape 3 : Cibles calculées -->
+<div class="card fn-ui-surface" id="ob-step-3" style="display:none">
+<div class="card-title fn-ui-section-title">3 / 3 — Tes cibles personnalisées</div>
+<div class="fn-ui-mb-md" id="ob-cibles-result"></div>
+<p class="fn-ui-note fn-ui-mb-md">Ces valeurs sont calculées selon ton profil. Tu pourras les ajuster à tout moment dans Profil.</p>
+<button class="btn-primary fn-ui-button-block fn-btn" onclick="obFinish()">C'est parti ! 🚀</button>
+<button class="fn-ui-button-block fn-ui-button-secondary-block fn-btn" onclick="obNextStep(2)">← Retour</button>
+</div>
+</div>
+<div class="page active journal-premium-page fn-page" id="page-journal">
+<div class="journal-hero card fn-ui-surface journal-sticky-summary fn-page-header fn-page-header-journal">
+<div class="journal-page-heading">
+<h1 class="journal-page-title fn-page-title">Aujourd'hui</h1>
+<div aria-label="Actions de date du journal" class="journal-date-actions">
+<div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
+<label>Date</label>
+<input class="fn-field" id="f-date" onchange="selectJournalDate(this.value)" type="date"/>
+</div>
+<button aria-label="Choisir une date" class="journal-date-launch journal-date-launch-heading fn-btn" onclick="openJournalDatePicker()" type="button">📅</button>
+</div>
+</div>
+<div class="journal-day-row journal-day-row-carousel fn-carousel-zone">
+<button aria-label="Jour précédent" class="journal-day-nav journal-day-nav-prev fn-btn" onclick="shiftJournalDate(-1)" type="button">‹</button>
+<div class="journal-day-carousel-wrap fn-carousel-zone">
+<div aria-label="Changer de journée" class="journal-day-carousel fn-carousel-zone" id="journal-day-carousel"></div>
+</div>
+<button aria-label="Jour suivant" class="journal-day-nav journal-day-nav-next fn-btn" onclick="shiftJournalDate(1)" type="button">›</button>
+</div>
+<section aria-live="polite" class="fn-daily-status-panel" hidden="" id="fn-notification-inline"></section>
+<div aria-label="Résumé nutrition du jour" class="journal-floating-macro-card card fn-ui-surface fn-ui-surface-soft fn-orbit-nutrition-card fn-home-nutrition-panel fn-panel">
+<div class="fn-orbit-card-top fn-home-panel-head">
+<div>
+<div class="fn-orbit-kicker">Objectif du jour</div>
+<div class="fn-orbit-title">Calories &amp; nutriments</div>
+</div>
+<div class="fn-orbit-status fn-pill" id="fn-orbit-status">Suivi actif</div>
+</div>
+<div aria-label="Objectif du jour calories et nutriments" class="fn-home-nutrition-layout">
+<div class="macro-cell macro-cell-kcal fn-calorie-summary-card fn-metric fn-accent-kcal" data-macro="kcal" style="--macro-pct:0%">
+<div aria-hidden="true" class="fn-calorie-ring-wrap">
+<div class="fn-calorie-ring-visual">
+<div class="fn-calorie-ring-core">
+<div aria-hidden="true" class="fn-calorie-flame fn-ui-smart-dot fn-ui-macro-kcal fn-home-objectif-icon">🔥</div>
+<div class="macro-val" id="m-kcal">0</div>
+<div class="fn-calorie-unit">KCAL</div>
+</div>
+</div>
+</div>
+<div class="fn-calorie-copy">
+<div class="macro-lbl">Calories</div>
+<div class="fn-calorie-target-line">cible <strong id="m-kcal-target">2200</strong> kcal</div>
+<div class="fn-calorie-percent" id="m-kcal-percent">0%</div>
+<div class="fn-calorie-state-line" id="m-kcal-state-line">Suivi actif</div>
+</div>
+<span aria-label="Statut calories" class="macro-status-badge" data-state="neutral">•</span>
+</div>
+<div aria-label="Cartes nutriments du jour" class="macro-bar journal-main-macros journal-main-macros-compact journal-main-macros-four fn-orbit-macros fn-home-macro-grid fn-home-macro-list">
+<div class="macro-cell macro-cell-prot fn-macro-home-card fn-home-macro-row fn-metric fn-accent-protein" data-macro="prot" style="--macro-pct:0%">
+<div aria-hidden="true" class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-prot fn-home-objectif-icon fn-icon">💪</div>
+<div class="fn-macro-copy">
+<div class="macro-head"><span class="macro-lbl">Protéines</span></div>
+<div class="macro-val" id="m-prot">0g</div>
+<div class="macro-target">cible 120g</div>
+</div>
+<span aria-label="Statut protéines" class="macro-status-badge" data-state="neutral">•</span>
+</div>
+<div class="macro-cell macro-cell-gluc fn-macro-home-card fn-home-macro-row fn-metric fn-accent-carbs" data-macro="gluc" style="--macro-pct:0%">
+<div aria-hidden="true" class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-gluc fn-home-objectif-icon fn-icon">🍞</div>
+<div class="fn-macro-copy">
+<div class="macro-head"><span class="macro-lbl">Glucides</span></div>
+<div class="macro-val" id="m-gluc">0g</div>
+<div class="macro-target">cible 270g</div>
+</div>
+<span aria-label="Statut glucides" class="macro-status-badge" data-state="neutral">•</span>
+</div>
+<div class="macro-cell macro-cell-lip fn-macro-home-card fn-home-macro-row fn-metric fn-accent-fat" data-macro="lip" style="--macro-pct:0%">
+<div aria-hidden="true" class="fn-mini-ring fn-macro-icon-bubble fn-nutri-home-icon fn-ui-smart-dot fn-ui-macro-lip fn-home-objectif-icon fn-icon">💧</div>
+<div class="fn-macro-copy">
+<div class="macro-head"><span class="macro-lbl">Lipides</span></div>
+<div class="macro-val" id="m-lip">0g</div>
+<div class="macro-target">cible 71g</div>
+</div>
+<span aria-label="Statut lipides" class="macro-status-badge" data-state="neutral">•</span>
+</div>
+</div>
+</div>
+</div>
+<input class="fn-field" id="f-poids" type="hidden" value=""/>
+</div>
+<div class="card fn-ui-surface journal-main-card journal-section-card fn-panel">
+<div class="journal-card-head">
+<div>
+<div class="card-title fn-section-title fn-ui-mb-xs" id="food-search-card"><span class="fn-section-icon fn-icon">🍽</span><span>Alimentation</span></div>
+</div>
+</div>
+<div aria-hidden="true" class="food-add-modal" data-fn-overlay-close="1" id="food-add-modal">
+<div aria-label="Ajouter à ma journée" aria-modal="true" class="food-add-dialog fn-panel" role="dialog">
+<div class="food-add-head food-add-head-compact">
+<button aria-label="Fermer" class="food-add-close fn-btn" data-food-add-close="1" type="button">×</button>
+</div>
+<div class="food-add-body">
+<div class="food-add-main">
+<div class="food-add-intro">
+<div class="food-add-kicker" id="food-add-mode-badge">🍽 Aliment</div>
+</div>
+<div class="food-add-panel fn-ui-surface">
+<div aria-live="polite" class="food-current-meal-card fn-ui-surface fn-ui-surface-soft fn-widget" id="food-current-meal-card"></div>
+<div class="db-row journal-add-row fn-row">
+<div class="db-autocomplete">
+<div class="db-search-wrap">
+<input autocomplete="off" class="db-search-input fn-field" data-food-add-search-input="1" id="db-search" placeholder="Recherche : pain, yaourt, poulet..." type="text"/>
+<input class="db-qty-input fn-field" id="db-qty" min="1" step="1" title="Quantité (g ou unité selon aliment)" type="number" value="100"/>
+</div>
+<div aria-label="Filtres de recherche" class="food-inline-filters">
+<span class="food-inline-filters-label">Sources</span>
+<button class="food-source-chip active fn-pill fn-btn" data-food-add-action="toggle-source" data-source-filter="base" type="button"><span>💾</span><b>Base</b></button>
+<button class="food-source-chip active fn-pill fn-btn" data-food-add-action="toggle-source" data-source-filter="off" type="button"><span>🛒</span><b>OpenFoodFacts</b></button>
+<button class="food-source-chip active fn-pill fn-btn" data-food-add-action="toggle-source" data-source-filter="ciq" type="button"><span>🌿</span><b>CIQUAL</b></button>
+</div>
+<input class="fn-field" id="db-selected-id" type="hidden"/>
+<div class="db-suggestions" id="db-suggestions"></div>
+<div class="db-selected-card" id="db-selected-card"></div>
+</div>
+<div class="food-add-actions">
+<button class="btn-primary journal-add-btn fn-btn" data-food-add-action="main" id="food-main-action-btn" type="button">Ajouter</button>
+<div aria-label="Repas de destination" class="food-add-controls">
+<div class="food-control-section food-meal-section">
+<div class="food-control-label">Ajouter dans</div>
+<div class="food-meal-inline">
+<button class="food-meal-chip fn-pill fn-btn" data-food-add-action="set-meal" data-food-meal="breakfast" type="button"><span>☕</span><b>Petit-déj</b></button>
+<button class="food-meal-chip active fn-pill fn-btn" data-food-add-action="set-meal" data-food-meal="lunch" type="button"><span>🍽</span><b>Déjeuner</b></button>
+<button class="food-meal-chip fn-pill fn-btn" data-food-add-action="set-meal" data-food-meal="dinner" type="button"><span>🌙</span><b>Dîner</b></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="journal-last-added" id="journal-last-added"></div>
+<div class="food-ia-response inline-ia-response" id="groq-response" style="display:none"></div>
+<div class="food-ia-status" id="ia-parse-status"></div>
+<div class="food-ia-preview" id="ia-preview" style="display:none"></div>
+<div class="ocr-panel fn-ui-surface fn-ui-surface-soft fn-widget" id="ocr-panel" style="display:none">
+<div class="ocr-panel-head">
+<strong>Lecture étiquette</strong>
+<button aria-label="Fermer" class="fn-btn" data-food-add-action="close-ocr" type="button">×</button>
+</div>
+<div class="ocr-status" id="ocr-status"></div>
+<div class="ocr-unified-note">La caméra scanne automatiquement les codes-barres/QR. L’OCR tableau ne part au serveur que si le déclencheur est activé.</div>
+<div class="ocr-camera-box" id="ocr-camera-box" style="display:none">
+<div class="ocr-video-wrap">
+<video id="ocr-video" muted="" playsinline=""></video>
+<div class="ocr-frame"></div>
+</div>
+<div class="ocr-camera-actions">
+<button class="fn-btn" data-food-add-action="toggle-nutrition-auto" id="ocr-auto-btn" type="button">Déclencheur OCR OFF</button>
+<button class="btn-primary fn-btn" data-food-add-action="nutrition-ocr-read" id="ocr-read-table-btn" type="button">Lire tableau</button>
+<button class="btn-primary fn-btn" data-food-add-action="recipe-ocr-read" id="recipe-ocr-read-btn" style="display:none" type="button">📸 Prendre la photo</button>
+<button class="fn-btn" data-food-add-action="stop-nutrition-camera" type="button">Fermer caméra</button>
+</div>
+</div>
+<canvas id="ocr-canvas" style="display:none"></canvas>
+<div class="recipe-crop-box" id="recipe-crop-box" style="display:none">
+<div class="recipe-crop-head">
+<strong>Recadrer la liste</strong>
+<span>Déplace le cadre sur les ingrédients, puis lis uniquement cette zone.</span>
+</div>
+<div class="recipe-crop-stage" id="recipe-crop-stage">
+<img alt="Photo recette à recadrer" id="recipe-crop-img"/>
+<div class="recipe-crop-selection" id="recipe-crop-selection">
+<span class="recipe-crop-handle nw" data-handle="nw"></span>
+<span class="recipe-crop-handle ne" data-handle="ne"></span>
+<span class="recipe-crop-handle sw" data-handle="sw"></span>
+<span class="recipe-crop-handle se" data-handle="se"></span>
+</div>
+</div>
+<div class="recipe-crop-actions">
+<button class="fn-btn" data-food-add-action="retake-recipe-photo" type="button">↩ Reprendre photo</button>
+<button class="fn-btn" data-food-add-action="recipe-ocr-full" type="button">Lire toute l’image</button>
+<button class="btn-primary fn-btn" data-food-add-action="recipe-ocr-crop" id="recipe-crop-read-btn" type="button">📖 Lire cette zone</button>
+</div>
+</div>
+<div class="ocr-result" id="ocr-result" style="display:none">
+<div class="ocr-grid">
+<label>Nom<input class="fn-field" id="ocr-food-name" placeholder="Nom de l’aliment" type="text"/></label>
+<label>Kcal /100g<input class="fn-field" id="ocr-kcal" step="1" type="number"/></label>
+<label>Prot. /100g<input class="fn-field" id="ocr-prot" step="0.1" type="number"/></label>
+<label>Gluc. /100g<input class="fn-field" id="ocr-gluc" step="0.1" type="number"/></label>
+<label>Lip. /100g<input class="fn-field" id="ocr-lip" step="0.1" type="number"/></label>
+<label>Fibres /100g<input class="fn-field" id="ocr-fibres" step="0.1" type="number"/></label>
+</div>
+<div class="ocr-actions">
+<button class="btn-primary fn-btn" data-food-add-action="ocr-save-personal" type="button">Enregistrer comme aliment perso</button>
+<button class="fn-btn" data-food-add-action="ocr-add-day" type="button">Ajouter à la journée</button>
+</div>
+<details class="ocr-raw"><summary>Texte OCR</summary><pre id="ocr-raw-text"></pre></details>
+</div>
+<div class="recipe-ocr-result" id="recipe-ocr-result" style="display:none">
+<div class="recipe-ocr-head">
+<strong>Plat détecté</strong>
+<span>Estimation ponctuelle : tu valides avant ajout à la journée. Tu peux aussi en faire une recette réutilisable.</span>
+</div>
+<label class="recipe-ocr-text-label">Liste d’ingrédients reconnue
+              <textarea class="fn-field" id="recipe-ocr-text" placeholder="Ex : 500 g viande hachée
+2 oignons
+100 g chapelure
+20 cl crème..." rows="7"></textarea>
+</label>
+<div class="recipe-ocr-actions">
+<button class="btn-primary fn-btn" data-food-add-action="recipe-ai-estimate" type="button">Envoyer à l’IA</button>
+<button class="fn-btn" data-food-add-action="focus-recipe-text" type="button">Corriger la liste</button>
+</div>
+<div class="recipe-ai-status" id="recipe-ai-status"></div>
+<div class="recipe-ai-result fn-ui-surface fn-ui-surface-soft fn-widget" id="recipe-ai-result" style="display:none">
+<div class="recipe-ai-note">Choisis : ajout ponctuel dans le journal ou création d’une recette réutilisable. Vérifie avant sauvegarde.</div>
+<div class="ocr-grid recipe-ai-grid">
+<label>Nom du plat<input class="fn-field" id="recipe-food-name" placeholder="Nom du plat" type="text"/></label>
+<label>Poids final estimé<input class="fn-field" id="recipe-weight" placeholder="g" step="1" type="number"/></label>
+<label>Kcal /100g<input class="fn-field" id="recipe-kcal" step="1" type="number"/></label>
+<label>Prot. /100g<input class="fn-field" id="recipe-prot" step="0.1" type="number"/></label>
+<label>Gluc. /100g<input class="fn-field" id="recipe-gluc" step="0.1" type="number"/></label>
+<label>Lip. /100g<input class="fn-field" id="recipe-lip" step="0.1" type="number"/></label>
+</div>
+<div class="recipe-ai-totals" id="recipe-ai-totals"></div>
+<div class="ocr-actions recipe-save-actions">
+<button class="btn-primary fn-btn" data-food-add-action="recipe-create" type="button">Créer une recette enregistrée</button>
+<button class="fn-btn" data-food-add-action="recipe-save-personal" type="button">Enregistrer comme plat perso</button>
+<button class="fn-btn" data-food-add-action="recipe-add-day" type="button">Ajouter à la journée</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="barcode-scan-panel barcode-inline-panel" id="barcode-scan-panel" style="display:none">
+<div class="barcode-scan-actions barcode-scan-actions-ocr">
+<div class="barcode-inline-title">📷 Scanner aliment</div>
+<button aria-label="Lire le tableau nutritionnel" class="barcode-ocr-btn barcode-ocr-fab fn-btn" data-food-add-action="barcode-nutrition-from-camera" id="barcode-ocr-btn" title="Lire le tableau nutritionnel" type="button">📸</button>
+<button class="fn-btn" data-food-add-action="barcode-close" id="barcode-stop-btn" style="display:none" type="button">Fermer</button>
+</div>
+<div class="barcode-camera-wrap" id="barcode-camera-wrap" style="display:none">
+<video id="barcode-video" muted="" playsinline=""></video>
+<div class="barcode-html5-reader" id="barcode-html5-reader" style="display:none"></div>
+<div class="barcode-frame"></div>
+</div>
+<div class="barcode-status" id="barcode-status">Ouverture de la caméra…</div>
+<div class="barcode-ocr-hint">Le code-barres/QR est scanné automatiquement. Pour un tableau nutritionnel, cadre-le puis touche <b>Lire tableau</b>.</div>
+<div class="barcode-result fn-ui-surface fn-ui-surface-soft fn-widget" id="barcode-result" style="display:none"></div>
+</div>
+</div>
+</div>
+<section class="journal-foods-block journal-meals-card fn-ui-surface fn-widget" id="food-entries-card">
+<div class="journal-meals-head">
+<div class="journal-meals-icon fn-section-icon fn-icon">🍱</div>
+<div>
+<div class="journal-meals-title fn-section-title fn-section-title-plain"><span>Repas</span></div>
+<div class="journal-meals-subtitle">Petit-déj, déjeuner et souper restent repliés avec leur résumé.</div>
+</div>
+</div>
+<div class="aliment-list meal-collapsible-list" id="list-custom"></div>
+</section>
+</div>
+<div class="journal-extra-grid fn-grid">
+<details class="journal-advanced card fn-ui-surface journal-tile-card fn-panel">
+<summary>
+<span class="fn-section-title fn-section-title-summary"><span class="fn-section-icon fn-icon">📝</span><span>Ressenti et notes</span></span>
+<small>Énergie, faim et notes</small>
+</summary>
+<div class="row2" style="margin-top:14px">
+<div class="field"><label>Énergie</label>
+<select class="fn-field" id="f-energie"><option value="">— choisir —</option><option>Bonne énergie</option><option>Fatigue modérée</option><option>Fatigue importante</option></select>
+</div>
+<div class="field"><label>Faim</label>
+<select class="fn-field" id="f-faim"><option value="">— choisir —</option><option>Rassasié</option><option>Faim gérable</option><option>Faim difficile à contrôler</option></select>
+</div>
+</div>
+<div class="field"><label>Notes libres</label><textarea class="fn-field" id="f-notes" placeholder="Sommeil, douleurs, humeur..."></textarea></div>
+<div class="field"><label>Notes libres alimentation</label><textarea class="fn-field" id="f-extras" placeholder="Repas au restaurant, recette spéciale..."></textarea></div>
+</details>
+</div>
+</div>
+<div class="page sport-page-premium fn-page" id="page-sport">
+<div class="fn-ui-page fn-ui-stack">
+<section class="fn-ui-panel fn-ui-panel-pad fn-page-header fn-page-header-sport">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🏃</span>
+<div>
+<span class="fn-ui-kicker">Sport</span>
+<h1 class="fn-ui-title fn-page-title">Activité du jour</h1>
+<p class="fn-ui-sub fn-page-subtitle">Choisis une journée, saisis tes activités et FoodNote ajuste automatiquement ton bilan.</p>
+</div>
+</div>
+<div class="fn-ui-actions sport-date-actions">
+<span class="fn-ui-chip fn-ui-chip-sport fn-pill" id="sport-date-pill">0 kcal sport</span>
+<div class="journal-date-box journal-date-box-compact journal-date-box-hidden">
+<label>Date sport</label>
+<input class="fn-field" id="sport-f-date" onchange="selectSportDate(this.value)" type="date"/>
+</div>
+<button aria-label="Choisir une date sport" class="journal-date-launch journal-date-launch-heading fn-btn" onclick="openSportDatePicker()" type="button">📅</button>
+</div>
+</div>
+<div aria-label="Carrousel des journées sport" class="journal-day-row journal-day-row-carousel sport-day-row-carousel fn-carousel-zone">
+<button aria-label="Jour sport précédent" class="journal-day-nav journal-day-nav-prev sport-day-nav-prev fn-btn" onclick="shiftSportDate(-1)" type="button">‹</button>
+<div class="journal-day-carousel-wrap sport-day-carousel-wrap fn-carousel-zone">
+<div aria-label="Changer de journée sport" class="journal-day-carousel sport-day-carousel fn-carousel-zone" id="sport-day-carousel"></div>
+</div>
+<button aria-label="Jour sport suivant" class="journal-day-nav journal-day-nav-next sport-day-nav-next fn-btn" onclick="shiftSportDate(1)" type="button">›</button>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="sport-card">
+<div class="fn-ui-section-head">
+<b>Activités</b>
+<em><span id="sport-summary-count">0</span> ligne(s) · <span id="sport-summary-duration">0 h</span></em>
+</div>
+<div class="fn-ui-stack sport-list-modern" id="sport-list"></div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-ui-button-primary sport-add-btn fn-btn" onclick="addSportRow()">＋ Ajouter une activité</button>
+</div>
+</section>
+</div>
+</div>
+<div class="page fn-page" id="page-historique"><div class="fn-ui-page fn-ui-stack fn-list" id="hist-list"></div></div>
+<div class="page fn-page" id="page-profil">
+<div class="fn-ui-page fn-ui-stack">
+<section class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">👤</span>
+<div>
+<span class="fn-ui-kicker">Profil actif</span>
+<h1 class="fn-ui-title" id="profile-summary-name">FoodNote</h1>
+<p class="fn-ui-sub" id="profile-summary-desc">Configure ton objectif, tes calories et ton programme.</p>
+</div>
+</div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="scrollTo('profil-cibles')" type="button">Modifier les cibles</button>
+<button class="fn-ui-button fn-btn" onclick="showPage('objectif', document.getElementById('nav-objectif'))" type="button">Objectif &amp; phases</button>
+</div>
+</div>
+<div aria-label="Résumé du profil" class="fn-ui-feature-grid fn-grid">
+<div class="fn-ui-feature fn-widget"><span>🎯</span><div><b>Objectifs SQL</b><small>Cibles restaurées depuis SQLite, localStorage seulement cache.</small></div></div>
+<div class="fn-ui-feature fn-widget"><span>⚡</span><div><b>Calcul automatique</b><small>Mifflin-St Jeor, activité et objectif personnel.</small></div></div>
+<div class="fn-ui-feature fn-widget"><span>🧭</span><div><b>Phases nutrition</b><small>Le programme pilote les objectifs affichés.</small></div></div>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="profil-cibles">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🧮</span>
+<div>
+<span class="fn-ui-kicker">Configuration</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Profil &amp; calcul automatique</h2>
+<p class="fn-ui-sub">Renseigne ton profil, calcule tes cibles, puis sauvegarde en SQLite.</p>
+</div>
+</div>
+</div>
+<div class="fn-ui-form-grid-2">
+<label class="fn-ui-field">Prénom<input class="fn-field" id="cfg-prenom" placeholder="Ex: Alex" type="text"/></label>
+<label class="fn-ui-field">Description libre<input class="fn-field" id="cfg-phase-label" placeholder="Ex: Sèche été / programme 2026" type="text"/></label>
+</div>
+<div class="fn-ui-form-grid-3">
+<label class="fn-ui-field">Sexe<select class="fn-field" id="cfg-sexe"><option value="homme">Homme</option><option value="femme">Femme</option></select></label>
+<label class="fn-ui-field">Âge<input class="fn-field" id="cfg-age" max="100" min="12" placeholder="35" step="1" type="number"/></label>
+<label class="fn-ui-field">Taille (cm)<input class="fn-field" id="cfg-taille" max="230" min="120" placeholder="171" step="1" type="number"/></label>
+</div>
+<div class="fn-ui-form-grid-3">
+<label class="fn-ui-field">Poids actuel (kg)<input class="fn-field" id="cfg-poids" max="250" min="30" placeholder="63.0" step="0.1" type="number"/></label>
+<label class="fn-ui-field">Activité
+          <select class="fn-field" id="cfg-activite">
+<option value="1.2">Sédentaire</option>
+<option value="1.375">Légère</option>
+<option value="1.55">Modérée</option>
+<option value="1.725">Élevée</option>
+<option value="1.9">Très élevée</option>
+</select>
+</label>
+<label class="fn-ui-field">Objectif
+          <select class="fn-field" id="cfg-objectif" onchange="previewProfilAuto()">
+<option value="perte">Perte de poids</option>
+<option value="recomp">Recomposition</option>
+<option value="sechage">Séchage</option>
+<option value="prise">Prise de masse</option>
+<option value="maintenance">Maintenance</option>
+</select>
+</label>
+</div>
+<div class="fn-ui-alert fn-ui-alert-warn fn-widget" id="profil-auto-preview">
+<div class="fn-ui-alert-icon">⚡</div>
+<div><b>Calcul automatique</b><p>Renseigne poids, taille et âge puis clique sur “Calculer mes cibles”.</p></div>
+</div>
+<div class="fn-ui-section-head"><b>Cibles nutritionnelles quotidiennes</b><em>Calories et macros</em></div>
+<div class="fn-ui-form-grid-4">
+<label class="fn-ui-field">Calories (kcal/j)<input class="fn-field" id="cfg-kcal" max="6000" min="800" step="50" type="number"/></label>
+<label class="fn-ui-field">Protéines min (g/j)<input class="fn-field" id="cfg-prot" max="400" min="30" step="5" type="number"/></label>
+<label class="fn-ui-field">Glucides (g/j)<input class="fn-field" id="cfg-gluc" max="600" min="20" step="5" type="number"/></label>
+<label class="fn-ui-field">Lipides (g/j)<input class="fn-field" id="cfg-lip" max="300" min="20" step="5" type="number"/></label>
+</div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-btn" onclick="applyProfilAuto()" type="button">⚡ Calculer mes cibles</button>
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="saveCfgProfil()" type="button">💾 Sauvegarder le profil</button>
+<div class="fn-ui-save-status" id="cfg-save-status">✓ Profil sauvegardé</div>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="features-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">⚙️</span>
+<div>
+<span class="fn-ui-kicker">Application</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Options de l’application</h2>
+<p class="fn-ui-sub">Active ou masque les fonctions avancées sans toucher aux données.</p>
+</div>
+</div>
+</div>
+<div class="fn-ui-tile fn-ui-tile-pad fn-ui-toggle-tile feature-toggle-row fn-widget">
+<div>
+<strong>Fonctions IA</strong>
+<p>Active ou masque les fonctions Groq/IA. Désactivé = FoodNote reste 100% suivi calories/macros classique.</p>
+</div>
+<label class="switch" title="Activer ou désactiver les fonctions IA">
+<input class="fn-field" id="feature-ai-toggle" onchange="toggleAIFeature(this.checked)" type="checkbox"/>
+<span class="slider"></span>
+</label>
+</div>
+<div class="feature-status fn-ui-muted" id="feature-ai-status"></div>
+</section>
+</div>
+</div>
+<div class="page objectif-page fn-page" id="page-objectif">
+<div class="card fn-ui-surface profile-summary profile-summary-main fn-ui-mb-lg fn-panel">
+<div class="profile-chip fn-pill">🎯 Objectif actif</div>
+<div class="profile-name">Objectif &amp; phases</div>
+<div class="profile-muted fn-ui-mt-xs">Le plan, la phase actuelle et le suivi du programme. Les statistiques restent dédiées aux résultats.</div>
+<div class="profile-actions fn-ui-mt-md">
+<button class="btn-primary fn-ui-button fn-ui-button-compact fn-btn" onclick="showPage('profil', document.getElementById('nav-profil'))">Modifier mes cibles</button>
+<button class="fn-ui-button fn-ui-button-compact fn-btn" onclick="scrollTo('objectif-programme')">Programme phases</button>
+</div>
+</div>
+<details class="card fn-ui-surface fn-ui-details objectif-method-card objectif-method-details fn-panel" id="objectif-methode">
+<summary class="fn-ui-details-summary objectif-method-summary">
+<span>
+<span class="card-title fn-section-title fn-ui-m-0"><span class="fn-section-icon fn-icon">🧮</span><span>Méthode de calcul</span></span>
+<span class="objectif-method-summary-text">Formule, facteur d’activité et règles par phase</span>
+</span>
+<span class="fn-ui-chevron objectif-method-summary-icon">▾</span>
+</summary>
+<div class="fn-ui-details-body objectif-method-content">
+<div class="objectif-method-grid">
+<div class="fn-ui-calc-box objectif-method-box">
+<div class="objectif-method-title">1. Métabolisme de base</div>
+<div class="objectif-method-text">
+          Calcul Mifflin-St Jeor :<br/>
+<strong>Homme</strong> = 10 × poids + 6,25 × taille − 5 × âge + 5<br/>
+<strong>Femme</strong> = 10 × poids + 6,25 × taille − 5 × âge − 161
         </div>
-      </div>
-      <div class="fn-ui-calc-box objectif-method-box">
-        <div class="objectif-method-title">2. Dépense journalière</div>
-        <div class="objectif-method-text">
-          <strong>TDEE</strong> = métabolisme de base × facteur d’activité.<br>
+</div>
+<div class="fn-ui-calc-box objectif-method-box">
+<div class="objectif-method-title">2. Dépense journalière</div>
+<div class="objectif-method-text">
+<strong>TDEE</strong> = métabolisme de base × facteur d’activité.<br/>
           Ton facteur actuel est affiché ci-dessous.
         </div>
-      </div>
-      <div class="fn-ui-calc-box objectif-method-box">
-        <div class="objectif-method-title">3. Calories par phase</div>
-        <div class="objectif-method-text">
+</div>
+<div class="fn-ui-calc-box objectif-method-box">
+<div class="objectif-method-title">3. Calories par phase</div>
+<div class="objectif-method-text">
           Les calories sont ajustées selon la phase : déficit, maintenance ou surplus.
         </div>
-      </div>
-      <div class="fn-ui-calc-box objectif-method-box">
-        <div class="objectif-method-title">4. Macros</div>
-        <div class="objectif-method-text">
+</div>
+<div class="fn-ui-calc-box objectif-method-box">
+<div class="objectif-method-title">4. Macros</div>
+<div class="objectif-method-text">
           Protéines et lipides sont calculés par kg de poids. Les glucides complètent les calories restantes.
         </div>
-      </div>
-    </div>
-
-    <div id="objectif-current-calc" class="objectif-current-calc"></div>
-
-    <div class="fn-ui-table-wrap objectif-rules-table-wrap">
-      <table class="fn-ui-table objectif-rules-table">
-        <thead>
-          <tr><th>Phase</th><th>Calories</th><th>Protéines</th><th>Lipides</th><th>Glucides</th></tr>
-        </thead>
-        <tbody id="objectif-rules-table"></tbody>
-      </table>
-    </div>
-    <p class="fn-ui-note objectif-method-note">
+</div>
+</div>
+<div class="objectif-current-calc" id="objectif-current-calc"></div>
+<div class="fn-ui-table-wrap objectif-rules-table-wrap">
+<table class="fn-ui-table objectif-rules-table">
+<thead>
+<tr><th>Phase</th><th>Calories</th><th>Protéines</th><th>Lipides</th><th>Glucides</th></tr>
+</thead>
+<tbody id="objectif-rules-table"></tbody>
+</table>
+</div>
+<p class="fn-ui-note objectif-method-note">
       Ces objectifs sont des estimations basées sur l’équation de <strong>Mifflin–St Jeor</strong>, un facteur d’activité, puis des règles nutritionnelles pratiques par phase. Ils servent de point de départ : ajuste-les selon l’évolution réelle du poids, l’énergie, la faim, l’entraînement et les résultats observés sur plusieurs semaines.
     </p>
-    </div>
-  </details>
-
-  <div class="stats-commercial-grid">
-    <div class="card fn-ui-surface stats-commercial-card">
-      <div class="card-title fn-section-title"><span class="fn-section-icon">🎯</span><span>Phase actuelle</span></div>
-      <div id="stats-phase"></div>
-    </div>
-    <div class="card fn-ui-surface stats-commercial-card">
-      <div class="card-title fn-section-title"><span class="fn-section-icon">📈</span><span>Suivi des phases</span></div>
-      <div id="stats-phases-suivi"></div>
-    </div>
-  </div>
-
-    <div class="card fn-ui-surface" id="objectif-programme">
-    <div class="card-title fn-section-title"><span class="fn-section-icon">🗓</span><span>Mon programme de phases</span></div>
-    <p class="fn-ui-note fn-ui-mb-sm">Glisse les phases dans l’ordre de ton programme. Sur mobile, garde le doigt appuyé puis déplace. Tu peux aussi utiliser ↑ ↓.</p>
-    <div class="fn-ui-program-builder">
-      <div class="fn-ui-section-label">Phases disponibles</div>
-      <div id="phases-pool" class="fn-ui-phase-zone fn-ui-phase-pool"></div>
-      <div class="fn-ui-section-label">Mon programme</div>
-      <div id="phases-timeline" class="fn-ui-phase-zone fn-ui-phase-timeline">
-        <div id="phases-hint" class="fn-ui-empty">Glisse tes phases ici</div>
-      </div>
-      <div id="phases-bar" class="fn-ui-phase-bar"></div>
-    </div>
-    <div class="profile-actions">
-      <button onclick="applyPhaseTemplate('cut')" class="fn-ui-button fn-ui-button-compact">Template sèche</button>
-      <button onclick="applyPhaseTemplate('recomp')" class="fn-ui-button fn-ui-button-compact">Template recomposition</button>
-      <button onclick="resetPhases()" class="fn-ui-button fn-ui-button-compact">Réinitialiser</button>
-      <button onclick="savePhases()" class="fn-ui-button fn-ui-button-compact fn-ui-button-primary">💾 Sauvegarder le programme</button>
-    </div>
-    <div id="phases-save-status" class="fn-ui-save-status">✓ Programme sauvegardé</div>
-  </div>
 </div>
-
-<div id="page-ia" class="page" data-feature="ia">
-  <div class="fn-ui-page fn-ui-stack fn-ui-ia-page">
-    <section class="fn-ui-panel fn-ui-panel-pad fn-ui-ia-hero" id="ia-estimation-panel" aria-label="Estimation repas IA">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">🤖</span>
-          <div>
-            <span class="fn-ui-kicker">Assistant nutrition</span>
-            <h1 class="fn-ui-title fn-ui-title-inline">IA / estimation repas</h1>
-            <p class="fn-ui-sub">Estime un repas de restaurant, une recette ou une assiette libre, puis valide les lignes avant ajout à ta journée.</p>
-          </div>
-        </div>
-        <div class="fn-ui-actions fn-ui-actions-tight">
-          <span class="fn-ui-chip fn-ui-chip-prot">Groq</span>
-          <span class="fn-ui-chip">Prévisualisation</span>
-        </div>
-      </div>
-      <div class="fn-ui-alert fn-ui-alert-warn fn-ui-ia-note">
-        <div class="fn-ui-alert-icon">⚠️</div>
-        <div><b>À contrôler avant import</b><p>L’IA donne une estimation réaliste, mais FoodNote te laisse toujours valider les quantités et les macros avant ajout.</p></div>
-      </div>
-    </section>
-
-    <div class="fn-ui-two-col fn-ui-ia-layout">
-      <section class="fn-ui-panel fn-ui-panel-pad" id="ia-meal-card">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">🍽️</span>
-            <div>
-              <span class="fn-ui-kicker">Estimation</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">Repas à analyser</h2>
-              <p class="fn-ui-sub">Texte libre, tableau copié ou réponse IA déjà obtenue.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="fn-ui-field">
-          <label for="ia-estimate-text">Description du repas</label>
-          <textarea id="ia-estimate-text" class="fn-ui-ia-textarea" rows="7" placeholder="Ex : Boeuf grillé 120g, pommes sautées 150g, choux de Bruxelles 100g"></textarea>
-        </div>
-
-        <div class="fn-ui-form-grid-2 fn-ui-ia-form-grid">
-          <div class="fn-ui-field">
-            <label for="ia-meal-select">Repas de destination</label>
-            <select id="ia-meal-select">
-              <option value="breakfast">☕ Petit-déj</option>
-              <option value="lunch" selected>🍽️ Déjeuner</option>
-              <option value="dinner">🌙 Souper</option>
-            </select>
-          </div>
-          <div class="fn-ui-field">
-            <label for="groq-model-input">Modèle Groq</label>
-            <input type="text" id="groq-model-input" placeholder="llama-3.3-70b-versatile" autocomplete="off">
-          </div>
-        </div>
-
-        <div class="fn-ui-actions fn-ui-ia-actions">
-          <button type="button" class="fn-ui-button fn-ui-button-primary" id="btn-page-groq" onclick="estimerGroq('page')">⚡ Estimer avec Groq</button>
-          <button type="button" class="fn-ui-button" onclick="parseIAPaste('page')">Parser le texte</button>
-          <button type="button" class="fn-ui-button" onclick="clearIAEstimator('page')">Effacer</button>
-        </div>
-        <div id="ia-page-parse-status" class="fn-ui-inline-status" aria-live="polite"></div>
-        <div id="groq-page-response" class="fn-ui-ia-response" style="display:none"></div>
-        <div id="ia-page-preview" class="fn-ui-ia-preview" style="display:none"></div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" id="groq-card">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">🔑</span>
-            <div>
-              <span class="fn-ui-kicker">Configuration</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">Clé API Groq</h2>
-              <p class="fn-ui-sub">Proxy serveur conseillé. Par défaut GitHub/self-host propre : clé via Docker. La persistance SQLite depuis l’interface est optionnelle.</p>
-            </div>
-          </div>
-          <span class="fn-ui-chip fn-ui-chip-sport" id="groq-mode-chip">Auto</span>
-        </div>
-
-        <div class="fn-ui-field">
-          <label for="groq-key-input">Clé API Groq serveur</label>
-          <div class="fn-ui-input-action">
-            <input type="password" id="groq-key-input" autocomplete="off" placeholder="gsk_...">
-            <button type="button" class="fn-ui-button" id="groq-key-save-btn" onclick="saveGroqKey()">Sauvegarder</button>
-          </div>
-          <p class="fn-ui-muted">Méthode recommandée : <code>GROQ_API_KEY</code> dans Docker. La sauvegarde SQLite depuis l’interface est désactivée par défaut et s’active avec <code>FOODNOTE_ALLOW_UI_SECRET_STORAGE=1</code>.</p>
-          <div id="groq-key-status" class="fn-ui-inline-status" aria-live="polite"></div>
-        </div>
-
-        <div class="fn-ui-feature-grid fn-ui-ia-feature-grid">
-          <div class="fn-ui-feature"><span>✅</span><div><b>Import validé</b><small>Ajout ligne par ligne ou total.</small></div></div>
-          <div class="fn-ui-feature"><span>🧾</span><div><b>Format souple</b><small>Tableau Markdown, pipes ou texte simple.</small></div></div>
-          <div class="fn-ui-feature"><span>🧱</span><div><b>Moteur UI</b><small>Briques communes fn-ui, pas de CSS page par page.</small></div></div>
-        </div>
-      </section>
-    </div>
-  </div>
+</details>
+<div class="stats-commercial-grid fn-widget fn-grid">
+<div class="card fn-ui-surface stats-commercial-card fn-metric fn-accent-neutral">
+<div class="card-title fn-section-title"><span class="fn-section-icon fn-icon">🎯</span><span>Phase actuelle</span></div>
+<div id="stats-phase"></div>
 </div>
-
-
-
-<div id="page-bases" class="page">
-  <div class="fn-ui-page fn-ui-stack">
-    <section class="fn-ui-panel fn-ui-panel-pad" id="anomalies-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">⚠️</span>
-          <div>
-            <span class="fn-ui-kicker">Contrôle données</span>
-            <h1 class="fn-ui-title fn-ui-title-inline">Anomalies détectées</h1>
-            <p class="fn-ui-sub">FoodNote signale les lignes suspectes sans bloquer l’app.</p>
-          </div>
-        </div>
-        <div class="fn-ui-actions">
-          <span class="fn-ui-chip fn-ui-chip-sport">Données</span>
-        </div>
-      </div>
-      <div class="fn-ui-tile fn-ui-tile-pad" id="anomalies-status-box">Vérification...</div>
-      <div class="fn-ui-actions">
-        <button type="button" class="fn-ui-button fn-ui-button-primary" onclick="FoodNoteAnomalies.rescan()" id="btn-anomalies-rescan">🔍 Rescanner</button>
-        <button type="button" class="fn-ui-button" onclick="FoodNoteAnomalies.open()">↗ Ouvrir le centre</button>
-      </div>
-      <div id="anomalies-list-box" class="fn-ui-stack"></div>
-      <div class="fn-ui-muted">Une anomalie ne bloque pas FoodNote : elle signale une ligne suspecte pour correction. Les lignes ignorées ne sont plus notifiées.</div>
-    </section>
-
-    <div class="fn-ui-two-col">
-      <section class="fn-ui-panel fn-ui-panel-pad" id="ciqual-card">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">🌿</span>
-            <div>
-              <span class="fn-ui-kicker">XML locaux</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">Base CIQUAL</h2>
-              <p class="fn-ui-sub">Import ANSES depuis les fichiers placés dans <code>/data</code>.</p>
-            </div>
-          </div>
-          <span class="fn-ui-chip fn-ui-chip-prot">ANSES</span>
-        </div>
-        <div class="fn-ui-tile fn-ui-tile-pad" id="ciqual-status-box">Vérification...</div>
-        <div class="fn-ui-actions">
-          <button type="button" class="fn-ui-button fn-ui-button-primary" onclick="lancerImportCIQUAL()" id="btn-ciqual-import">🌿 Importer CIQUAL</button>
-          <button type="button" class="fn-ui-button" onclick="checkCIQUALStatus()">↻ Vérifier</button>
-        </div>
-        <div class="fn-ui-alert fn-ui-alert-warn">
-          <div class="fn-ui-alert-icon">ℹ️</div>
-          <div><b>Source générée</b><p>Les XML CIQUAL sont à placer dans <code>/data</code>. <code>ciqual_data.json</code> est généré par l’import.</p></div>
-        </div>
-        <div id="ciqual-log-box" style="display:none;margin-top:1rem">
-          <pre id="ciqual-log" class="fn-ui-code-log"></pre>
-        </div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" id="off-card">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">🛒</span>
-            <div>
-              <span class="fn-ui-kicker">Produits</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">OpenFoodFacts local</h2>
-              <p class="fn-ui-sub">Cache produits, scan code-barres et réimport local.</p>
-            </div>
-          </div>
-          <span class="fn-ui-chip fn-ui-chip-gluc">OpenFoodFacts</span>
-        </div>
-        <div class="fn-ui-tile fn-ui-tile-pad" id="off-status-box">Vérification...</div>
-        <div class="fn-ui-actions">
-          <button type="button" class="fn-ui-button fn-ui-button-primary" onclick="triggerOFFUpdate()" id="btn-off-update">🔄 Mettre à jour</button>
-          <button type="button" class="fn-ui-button" onclick="checkOFFStatus()">↻ Vérifier</button>
-        </div>
-        <div class="fn-ui-muted">Le réimport conserve le champ <code>code</code> d’OpenFoodFacts, utilisé pour le scan code-barres local.</div>
-        <div id="off-log-box" style="display:none;margin-top:1rem">
-          <pre id="off-log" class="fn-ui-code-log"></pre>
-        </div>
-      </section>
-    </div>
-
-
-    <details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database fn-collapsible-panel--explorer" id="database-explorer-card">
-      <summary class="fn-collapsible-summary">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">🔎</span>
-            <div>
-              <span class="fn-ui-kicker">Exploration</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">Explorer les bases alimentaires</h2>
-              <p class="fn-ui-sub">Starter, CIQUAL et OpenFoodFacts restent repliés par défaut. Ouvre seulement la source dont tu as besoin.</p>
-            </div>
-          </div>
-          <span class="fn-ui-chip">Lecture seule</span>
-          <span class="fn-collapsible-chevron" aria-hidden="true">⌄</span>
-        </div>
-      </summary>
-      <div class="fn-collapsible-body">
-        <div id="database-explorer-root" class="fn-db-explorer-host">Chargement de l’explorateur…</div>
-      </div>
-    </details>
-
-    <details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database" id="aliments-card">
-      <summary class="fn-collapsible-summary">
-        <div class="fn-ui-title-row">
-          <div class="fn-ui-title-left">
-            <span class="fn-ui-icon" aria-hidden="true">📦</span>
-            <div>
-              <span class="fn-ui-kicker">SQLite</span>
-              <h2 class="fn-ui-title fn-ui-title-inline">Mes aliments / ingrédients</h2>
-              <p class="fn-ui-sub">Aliments enregistrés localement. Ouvre seulement si tu veux les consulter ou les corriger.</p>
-            </div>
-          </div>
-          <span class="fn-ui-chip fn-ui-chip-kcal">Base locale</span>
-          <span class="fn-collapsible-chevron" aria-hidden="true">⌄</span>
-        </div>
-      </summary>
-      <div class="fn-collapsible-body">
-        <div class="fn-ui-actions">
-          <button type="button" class="fn-ui-button" onclick="restoreStarterAliments()">↺ Restaurer les ingrédients de base</button>
-          <button type="button" class="fn-ui-button" onclick="rebuildFoodsFromEntriesUI()">🧩 Récupérer depuis l’historique</button>
-        </div>
-        <div id="bdd-recovery-note" class="fn-ui-muted"></div>
-        <div class="fn-ui-table-wrap">
-          <table class="fn-ui-table">
-            <thead><tr><th>Nom</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th><th></th></tr></thead>
-            <tbody id="bdd-table"></tbody>
-          </table>
-        </div>
-      </div>
-    </details>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="unit-weights-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">⚖️</span>
-          <div>
-            <span class="fn-ui-kicker">Unités</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Poids par unité</h2>
-            <p class="fn-ui-sub">Correspondances utilisées quand on parle en unités plutôt qu’en grammes.</p>
-          </div>
-        </div>
-      </div>
-      <div class="fn-ui-alert">
-        <div class="fn-ui-alert-icon">⚖️</div>
-        <div><b>Principe</b><p>Les grammes restent la vérité nutritionnelle. Les unités servent de raccourci : 1 banane ≈ 120 g, 1 pot ≈ 100 g.</p></div>
-      </div>
-      <div id="unit-weights-box" class="fn-ui-stack"></div>
-    </section>
-  </div>
+<div class="card fn-ui-surface stats-commercial-card fn-metric fn-accent-neutral">
+<div class="card-title fn-section-title"><span class="fn-section-icon fn-icon">📈</span><span>Suivi des phases</span></div>
+<div id="stats-phases-suivi"></div>
 </div>
-
-<div id="page-donnees" class="page">
-  <div class="fn-ui-page fn-ui-stack">
-    <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Données et sauvegardes FoodNote">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">💾</span>
-          <div>
-            <span class="fn-ui-kicker">SQLite</span>
-            <h1 class="fn-ui-title">Données &amp; sauvegardes</h1>
-            <p class="fn-ui-sub">SQLite est la sauvegarde réelle. Le JSON sert surtout à l’export ou à une migration manuelle.</p>
-          </div>
-        </div>
-        <span class="fn-ui-chip fn-ui-chip-kcal">SQLite persistant</span>
-      </div>
-      <div id="donnees-summary" class="fn-ui-metric-grid"></div>
-      <div id="donnees-status" class="fn-ui-muted">Prêt.</div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="fn-diagnostics-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">✓</span>
-          <div>
-            <span class="fn-ui-kicker">Diagnostic</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Version &amp; santé de l’app</h2>
-            <p class="fn-ui-sub">Recharge forcée, sauvegarde SQLite et checklist quotidienne.</p>
-          </div>
-        </div>
-        <span class="fn-ui-chip" title="Build cache-busting">FoodNote</span>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button fn-ui-button-primary" type="button" onclick="FoodNoteDiagnostics.forceReload()">↻ Forcer recharge app</button>
-        <button class="fn-ui-button" type="button" onclick="FoodNoteDiagnostics.checkSQLiteBackup(true)">💾 Vérifier sauvegarde SQLite</button>
-        <button class="fn-ui-button" type="button" onclick="FoodNoteDiagnostics.runDailyChecklist()">✅ Checklist parcours quotidien</button>
-      </div>
-      <div class="fn-ui-code-log fn-diagnostics-result" id="fn-diagnostics-result"></div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="fn-mqtt-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">🏠</span>
-          <div>
-            <span class="fn-ui-kicker">Maison connectée</span>
-            <h2 class="fn-ui-title fn-ui-title-inline">Home Assistant &amp; MQTT</h2>
-            <p class="fn-ui-sub">Publication optionnelle des calories, macros, sport et poids du jour vers Home Assistant.</p>
-          </div>
-        </div>
-        <span id="fn-mqtt-pill" class="fn-ui-chip">Vérification...</span>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button fn-ui-button-primary" type="button" onclick="FoodNoteMQTT.refresh(true)">↻ Vérifier MQTT</button>
-        <button class="fn-ui-button" type="button" onclick="FoodNoteMQTT.publishDiscovery()">🏠 Découverte Home Assistant</button>
-        <button class="fn-ui-button" type="button" onclick="FoodNoteMQTT.publishToday()">📡 Publier journée</button>
-        <button class="fn-ui-button" type="button" onclick="FoodNoteMQTT.test()">🧪 Test MQTT</button>
-      </div>
-      <div id="fn-mqtt-grid" class="fn-ui-feature-grid"></div>
-      <div id="fn-mqtt-result" class="fn-ui-code-log fn-mqtt-result"></div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-backup-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">💾</span><div><span class="fn-ui-kicker">Sauvegarde principale</span><h2 class="fn-ui-title fn-ui-title-inline">Sauvegarde réelle SQLite</h2><p class="fn-ui-sub">La vraie base FoodNote est <strong>data/foodnote.db</strong>. C’est ce fichier qu’il faut sauvegarder.</p></div></div>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button fn-ui-button-primary" onclick="downloadSQLiteBackup()">⬇ Télécharger foodnote.db</button>
-        <button class="fn-ui-button" onclick="document.getElementById('sqlite-restore-file').click()">⬆ Restaurer foodnote.db</button>
-        <input type="file" id="sqlite-restore-file" accept=".db,.sqlite,.sqlite3,application/octet-stream" style="display:none" onchange="importSQLiteBackup(event)">
-        <button class="fn-ui-button" onclick="showSQLiteBackupHelp()">Où est la base ?</button>
-      </div>
-      <div id="sqlite-restore-preview" class="fn-ui-alert-list"></div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-auto-backup-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">🕒</span><div><span class="fn-ui-kicker">Automatique</span><h2 class="fn-ui-title fn-ui-title-inline">Auto backup journalier</h2><p class="fn-ui-sub">Crée une copie de <strong>foodnote.db</strong> dans <code>data/auto_backups</code>.</p></div></div>
-      </div>
-      <div class="fn-ui-tile fn-ui-tile-pad">
-        <label class="fn-ui-toggle-tile">
-          <input type="checkbox" id="auto-backup-enabled" onchange="saveAutoBackupSettings()">
-          <span><strong>Activer l’auto backup journalier</strong><p>FoodNote crée une sauvegarde selon l’heure et la rétention choisies.</p></span>
-        </label>
-        <div class="fn-ui-form-grid-2">
-          <label class="fn-ui-field">Heure<input type="time" id="auto-backup-time" value="03:00" onchange="saveAutoBackupSettings()"></label>
-          <label class="fn-ui-field">Garder<select id="auto-backup-keep" onchange="saveAutoBackupSettings()"><option value="7">7 sauvegardes</option><option value="14" selected>14 sauvegardes</option><option value="30">30 sauvegardes</option><option value="60">60 sauvegardes</option></select></label>
-        </div>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button fn-ui-button-primary" onclick="runAutoBackupNow()">💾 Sauvegarder maintenant</button>
-        <button class="fn-ui-button" onclick="refreshAutoBackupStatus(true)">🔄 Actualiser</button>
-      </div>
-      <div id="auto-backup-status" class="fn-ui-code-log">Lecture de la configuration...</div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-diagnostic-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">🩺</span><div><span class="fn-ui-kicker">Contrôle</span><h2 class="fn-ui-title fn-ui-title-inline">Diagnostic sauvegarde</h2><p class="fn-ui-sub">Contrôle rapide de ce qui est réellement présent dans SQLite avant export/restauration.</p></div></div>
-      </div>
-      <div id="backup-status-panel" class="fn-ui-code-log">Clique sur actualiser pour vérifier la base.</div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button" onclick="refreshBackupStatus(true)">🔎 Actualiser le diagnostic</button>
-        <button class="fn-ui-button" onclick="rebuildProfileFromUI()">🧩 Reconstruire profil/objectifs</button>
-        <button class="fn-ui-button" onclick="rebuildDaysFromUI()">↺ Reconstruire journées</button>
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-json-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">📤</span><div><span class="fn-ui-kicker">Migration</span><h2 class="fn-ui-title fn-ui-title-inline">Export JSON</h2><p class="fn-ui-sub">Export lisible utile pour contrôle, transfert manuel ou dépannage. La sauvegarde principale reste foodnote.db.</p></div></div>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button" onclick="exportJSON()">⬇ Exporter JSON</button>
-        <button class="fn-ui-button" onclick="copyBackupJSON()">Copier JSON</button>
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-export-card">
-      <div id="data-export-advanced" class="fn-ui-export-root"></div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad" id="data-import-card">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">📥</span><div><span class="fn-ui-kicker">Restauration</span><h2 class="fn-ui-title fn-ui-title-inline">Restaurer JSON</h2><p class="fn-ui-sub">Import de migration/dépannage restauré dans SQLite côté serveur.</p></div></div>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button class="fn-ui-button" onclick="document.getElementById('import-file').click()">⬆ Importer JSON</button>
-        <input type="file" id="import-file" accept=".json,application/json" style="display:none" onchange="importJSON(event)">
-      </div>
-    </section>
-
-    <section class="fn-ui-panel fn-ui-panel-pad danger-zone">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left"><span class="fn-ui-icon" aria-hidden="true">🧹</span><div><span class="fn-ui-kicker">Zone sensible</span><h2 class="fn-ui-title fn-ui-title-inline">Nettoyage</h2><p class="fn-ui-sub">Actions irréversibles. Sauvegarde d’abord le fichier SQLite <strong>data/foodnote.db</strong>.</p></div></div>
-      </div>
-      <div class="fn-ui-actions fn-ui-wrap">
-        <button onclick="resetJournalOnly()" class="fn-ui-button fn-ui-button-critical">Vider le journal</button>
-        <button onclick="resetFoodDatabaseOnly()" class="fn-ui-button fn-ui-button-critical">Supprimer mes aliments</button>
-        <button onclick="resetAllData()" class="fn-ui-button fn-ui-button-critical">Réinitialiser toute l’app</button>
-      </div>
-    </section>
-  </div>
 </div>
-
-<div id="page-recap" class="page"></div>
-
-<div id="page-themelab" class="page">
-  <div id="theme-lab-root"></div>
+<div class="card fn-ui-surface fn-panel" id="objectif-programme">
+<div class="card-title fn-section-title"><span class="fn-section-icon fn-icon">🗓</span><span>Mon programme de phases</span></div>
+<p class="fn-ui-note fn-ui-mb-sm">Glisse les phases dans l’ordre de ton programme. Sur mobile, garde le doigt appuyé puis déplace. Tu peux aussi utiliser ↑ ↓.</p>
+<div class="fn-ui-program-builder">
+<div class="fn-ui-section-label">Phases disponibles</div>
+<div class="fn-ui-phase-zone fn-ui-phase-pool" id="phases-pool"></div>
+<div class="fn-ui-section-label">Mon programme</div>
+<div class="fn-ui-phase-zone fn-ui-phase-timeline" id="phases-timeline">
+<div class="fn-ui-empty" id="phases-hint">Glisse tes phases ici</div>
 </div>
-
-<div id="page-stats" class="page">
-  <div class="fn-ui-page fn-ui-stack fn-ui-stats-page">
-    <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Navigation statistiques FoodNote">
-      <div class="fn-ui-title-row">
-        <div class="fn-ui-title-left">
-          <span class="fn-ui-icon" aria-hidden="true">📊</span>
-          <div>
-            <span class="fn-ui-kicker">Analyse</span>
-            <h1 class="fn-ui-title">Statistiques</h1>
-            <p class="fn-ui-sub">Les statistiques sont séparées en panneaux lisibles avec les mêmes briques UI que le reste de l’app.</p>
-          </div>
-        </div>
-        <div class="fn-ui-tabs" role="tablist" aria-label="Période des statistiques">
-          <button type="button" class="fn-ui-tab stats-tab active" id="stats-tab-journalier" onclick="setStatsPanel('journalier')">Journalier</button>
-          <button type="button" class="fn-ui-tab stats-tab" id="stats-tab-hebdo" onclick="setStatsPanel('hebdo')">Hebdo</button>
-          <button type="button" class="fn-ui-tab stats-tab" id="stats-tab-mensuel" onclick="setStatsPanel('mensuel')">Mensuel</button>
-        </div>
-      </div>
-    </section>
-
-    <div id="stats-panel-journalier" class="stats-panel fn-ui-stack active">
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Courbes jour par jour">
-        <div class="fn-ui-section-head"><b>Courbes jour par jour</b><em>31 derniers points</em></div>
-        <div class="fn-ui-chart-grid fn-ui-chart-grid-daily">
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories avant sport</div><canvas id="chart-day-kcal"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Net après sport</div><canvas id="chart-day-net"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines</div><canvas id="chart-day-prot"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍞 Glucides</div><canvas id="chart-day-gluc"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🥑 Lipides</div><canvas id="chart-day-lip"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🚴 Sport</div><canvas id="chart-day-sport"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids</div><canvas id="chart-day-poids"></canvas></div>
-        </div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Derniers jours">
-        <div class="fn-ui-section-head"><b>Derniers jours</b><em>journal nutritionnel résumé</em></div>
-        <div id="stats-daily-rows" class="fn-ui-list"></div>
-      </section>
-    </div>
-
-    <div id="stats-panel-hebdo" class="stats-panel fn-ui-stack">
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Comparatif semaine par semaine">
-        <div class="fn-ui-section-head"><b>Comparatif semaine par semaine</b><em>moyennes et progression</em></div>
-        <div id="stats-week-compare" class="fn-ui-list"></div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Graphiques hebdomadaires">
-        <div class="fn-ui-section-head"><b>Graphiques hebdomadaires</b><em>tendances</em></div>
-        <div class="fn-ui-chart-grid">
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories moyennes</div><canvas id="chart-week-kcal"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines moyennes</div><canvas id="chart-week-prot"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids moyen</div><canvas id="chart-week-poids"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">📅 Jours saisis</div><canvas id="chart-week-days"></canvas></div>
-        </div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Historique macros hebdomadaire">
-        <div class="fn-ui-section-head"><b>Historique macros</b><em>net calorique</em></div>
-        <div class="fn-ui-chart-tile fn-ui-chart-wide"><canvas id="chart-macros"></canvas></div>
-      </section>
-    </div>
-
-    <div id="stats-panel-mensuel" class="stats-panel fn-ui-stack">
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Comparatif mois par mois">
-        <div class="fn-ui-section-head"><b>Comparatif mois par mois</b><em>vue longue période</em></div>
-        <div id="stats-month-compare" class="fn-ui-list"></div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Graphiques mensuels">
-        <div class="fn-ui-section-head"><b>Graphiques mensuels</b><em>tendances</em></div>
-        <div class="fn-ui-chart-grid">
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories moyennes</div><canvas id="chart-month-kcal"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines moyennes</div><canvas id="chart-month-prot"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids moyen</div><canvas id="chart-month-poids"></canvas></div>
-          <div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">📅 Jours saisis</div><canvas id="chart-month-days"></canvas></div>
-        </div>
-      </section>
-
-      <section class="fn-ui-panel fn-ui-panel-pad" aria-label="Historique macros mensuel">
-        <div class="fn-ui-section-head"><b>Historique macros mensuel</b><em>net calorique</em></div>
-        <div class="fn-ui-chart-tile fn-ui-chart-wide"><canvas id="chart-month-net"></canvas></div>
-      </section>
-    </div>
-  </div>
+<div class="fn-ui-phase-bar" id="phases-bar"></div>
 </div>
-
+<div class="profile-actions">
+<button class="fn-ui-button fn-ui-button-compact fn-btn" onclick="applyPhaseTemplate('cut')">Template sèche</button>
+<button class="fn-ui-button fn-ui-button-compact fn-btn" onclick="applyPhaseTemplate('recomp')">Template recomposition</button>
+<button class="fn-ui-button fn-ui-button-compact fn-btn" onclick="resetPhases()">Réinitialiser</button>
+<button class="fn-ui-button fn-ui-button-compact fn-ui-button-primary fn-btn" onclick="savePhases()">💾 Sauvegarder le programme</button>
+</div>
+<div class="fn-ui-save-status" id="phases-save-status">✓ Programme sauvegardé</div>
+</div>
+</div>
+<div class="page fn-page" data-feature="ia" id="page-ia">
+<div class="fn-ui-page fn-ui-stack fn-ui-ia-page">
+<section aria-label="Estimation repas IA" class="fn-ui-panel fn-ui-panel-pad fn-ui-ia-hero" id="ia-estimation-panel">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🤖</span>
+<div>
+<span class="fn-ui-kicker">Assistant nutrition</span>
+<h1 class="fn-ui-title fn-ui-title-inline">IA / estimation repas</h1>
+<p class="fn-ui-sub">Estime un repas de restaurant, une recette ou une assiette libre, puis valide les lignes avant ajout à ta journée.</p>
+</div>
+</div>
+<div class="fn-ui-actions fn-ui-actions-tight">
+<span class="fn-ui-chip fn-ui-chip-prot fn-pill">Groq</span>
+<span class="fn-ui-chip fn-pill">Prévisualisation</span>
+</div>
+</div>
+<div class="fn-ui-alert fn-ui-alert-warn fn-ui-ia-note fn-widget">
+<div class="fn-ui-alert-icon">⚠️</div>
+<div><b>À contrôler avant import</b><p>L’IA donne une estimation réaliste, mais FoodNote te laisse toujours valider les quantités et les macros avant ajout.</p></div>
+</div>
+</section>
+<div class="fn-ui-two-col fn-ui-ia-layout">
+<section class="fn-ui-panel fn-ui-panel-pad" id="ia-meal-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🍽️</span>
+<div>
+<span class="fn-ui-kicker">Estimation</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Repas à analyser</h2>
+<p class="fn-ui-sub">Texte libre, tableau copié ou réponse IA déjà obtenue.</p>
+</div>
+</div>
+</div>
+<div class="fn-ui-field">
+<label for="ia-estimate-text">Description du repas</label>
+<textarea class="fn-ui-ia-textarea fn-field" id="ia-estimate-text" placeholder="Ex : Boeuf grillé 120g, pommes sautées 150g, choux de Bruxelles 100g" rows="7"></textarea>
+</div>
+<div class="fn-ui-form-grid-2 fn-ui-ia-form-grid">
+<div class="fn-ui-field">
+<label for="ia-meal-select">Repas de destination</label>
+<select class="fn-field" id="ia-meal-select">
+<option value="breakfast">☕ Petit-déj</option>
+<option selected="" value="lunch">🍽️ Déjeuner</option>
+<option value="dinner">🌙 Souper</option>
+</select>
+</div>
+<div class="fn-ui-field">
+<label for="groq-model-input">Modèle Groq</label>
+<input autocomplete="off" class="fn-field" id="groq-model-input" placeholder="llama-3.3-70b-versatile" type="text"/>
+</div>
+</div>
+<div class="fn-ui-actions fn-ui-ia-actions">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" id="btn-page-groq" onclick="estimerGroq('page')" type="button">⚡ Estimer avec Groq</button>
+<button class="fn-ui-button fn-btn" onclick="parseIAPaste('page')" type="button">Parser le texte</button>
+<button class="fn-ui-button fn-btn" onclick="clearIAEstimator('page')" type="button">Effacer</button>
+</div>
+<div aria-live="polite" class="fn-ui-inline-status" id="ia-page-parse-status"></div>
+<div class="fn-ui-ia-response" id="groq-page-response" style="display:none"></div>
+<div class="fn-ui-ia-preview" id="ia-page-preview" style="display:none"></div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="groq-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🔑</span>
+<div>
+<span class="fn-ui-kicker">Configuration</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Clé API Groq</h2>
+<p class="fn-ui-sub">Proxy serveur conseillé. Par défaut GitHub/self-host propre : clé via Docker. La persistance SQLite depuis l’interface est optionnelle.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-ui-chip-sport fn-pill" id="groq-mode-chip">Auto</span>
+</div>
+<div class="fn-ui-field">
+<label for="groq-key-input">Clé API Groq serveur</label>
+<div class="fn-ui-input-action">
+<input autocomplete="off" class="fn-field" id="groq-key-input" placeholder="gsk_..." type="password"/>
+<button class="fn-ui-button fn-btn" id="groq-key-save-btn" onclick="saveGroqKey()" type="button">Sauvegarder</button>
+</div>
+<p class="fn-ui-muted">Méthode recommandée : <code>GROQ_API_KEY</code> dans Docker. La sauvegarde SQLite depuis l’interface est désactivée par défaut et s’active avec <code>FOODNOTE_ALLOW_UI_SECRET_STORAGE=1</code>.</p>
+<div aria-live="polite" class="fn-ui-inline-status" id="groq-key-status"></div>
+</div>
+<div aria-label="Consommation et limites Groq" class="fn-ui-tile fn-ui-tile-pad fn-widget" id="groq-usage-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">📊</span>
+<div>
+<span class="fn-ui-kicker">Paramètres IA</span>
+<h3 class="fn-ui-title fn-ui-title-inline">Consommation Groq</h3>
+<p class="fn-ui-sub">Compteur serveur partagé entre appareils, avec les limites Groq affichées dans la configuration IA.</p>
+</div>
+</div>
+</div>
+<div aria-live="polite" class="fn-ui-stack" id="groq-token-counter">
+<div class="fn-ui-muted">Chargement consommation Groq…</div>
+</div>
+</div>
+<div class="fn-ui-feature-grid fn-ui-ia-feature-grid fn-grid">
+<div class="fn-ui-feature fn-widget"><span>✅</span><div><b>Import validé</b><small>Ajout ligne par ligne ou total.</small></div></div>
+<div class="fn-ui-feature fn-widget"><span>🧾</span><div><b>Format souple</b><small>Tableau Markdown, pipes ou texte simple.</small></div></div>
+<div class="fn-ui-feature fn-widget"><span>🧱</span><div><b>Moteur UI</b><small>Briques communes fn-ui, pas de CSS page par page.</small></div></div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<div class="page fn-page" id="page-bases">
+<div class="fn-ui-page fn-ui-stack">
+<section class="fn-ui-panel fn-ui-panel-pad" id="anomalies-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">⚠️</span>
+<div>
+<span class="fn-ui-kicker">Contrôle données</span>
+<h1 class="fn-ui-title fn-ui-title-inline">Anomalies détectées</h1>
+<p class="fn-ui-sub">FoodNote signale les lignes suspectes sans bloquer l’app.</p>
+</div>
+</div>
+<div class="fn-ui-actions">
+<span class="fn-ui-chip fn-ui-chip-sport fn-pill">Données</span>
+</div>
+</div>
+<div class="fn-ui-tile fn-ui-tile-pad fn-widget" id="anomalies-status-box">Vérification...</div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" id="btn-anomalies-rescan" onclick="FoodNoteAnomalies.rescan()" type="button">🔍 Rescanner</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteAnomalies.open()" type="button">↗ Ouvrir le centre</button>
+</div>
+<div class="fn-ui-stack" id="anomalies-list-box"></div>
+<div class="fn-ui-muted">Une anomalie ne bloque pas FoodNote : elle signale une ligne suspecte pour correction. Les lignes ignorées ne sont plus notifiées.</div>
+</section>
+<div class="fn-ui-two-col">
+<section class="fn-ui-panel fn-ui-panel-pad" id="ciqual-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🌿</span>
+<div>
+<span class="fn-ui-kicker">XML locaux</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Base CIQUAL</h2>
+<p class="fn-ui-sub">Import ANSES depuis les fichiers placés dans <code>/data</code>.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-ui-chip-prot fn-pill">ANSES</span>
+</div>
+<div class="fn-ui-tile fn-ui-tile-pad fn-widget" id="ciqual-status-box">Vérification...</div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" id="btn-ciqual-import" onclick="lancerImportCIQUAL()" type="button">🌿 Importer CIQUAL</button>
+<button class="fn-ui-button fn-btn" onclick="checkCIQUALStatus()" type="button">↻ Vérifier</button>
+</div>
+<div class="fn-ui-alert fn-ui-alert-warn fn-widget">
+<div class="fn-ui-alert-icon">ℹ️</div>
+<div><b>Source générée</b><p>Les XML CIQUAL sont à placer dans <code>/data</code>. <code>ciqual_data.json</code> est généré par l’import.</p></div>
+</div>
+<div id="ciqual-log-box" style="display:none;margin-top:1rem">
+<pre class="fn-ui-code-log" id="ciqual-log"></pre>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="off-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🛒</span>
+<div>
+<span class="fn-ui-kicker">Produits</span>
+<h2 class="fn-ui-title fn-ui-title-inline">OpenFoodFacts local</h2>
+<p class="fn-ui-sub">Cache produits, scan code-barres et réimport local.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-ui-chip-gluc fn-pill">OpenFoodFacts</span>
+</div>
+<div class="fn-ui-tile fn-ui-tile-pad fn-widget" id="off-status-box">Vérification...</div>
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" id="btn-off-update" onclick="triggerOFFUpdate()" type="button">🔄 Mettre à jour</button>
+<button class="fn-ui-button fn-btn" onclick="checkOFFStatus()" type="button">↻ Vérifier</button>
+</div>
+<div class="fn-ui-muted">Le réimport conserve le champ <code>code</code> d’OpenFoodFacts, utilisé pour le scan code-barres local.</div>
+<div id="off-log-box" style="display:none;margin-top:1rem">
+<pre class="fn-ui-code-log" id="off-log"></pre>
+</div>
+</section>
+</div>
+<details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database fn-collapsible-panel--explorer" id="database-explorer-card">
+<summary class="fn-collapsible-summary">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🔎</span>
+<div>
+<span class="fn-ui-kicker">Exploration</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Explorer les bases alimentaires</h2>
+<p class="fn-ui-sub">Starter, CIQUAL et OpenFoodFacts restent repliés par défaut. Ouvre seulement la source dont tu as besoin.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-pill">Lecture seule</span>
+<span aria-hidden="true" class="fn-collapsible-chevron">⌄</span>
+</div>
+</summary>
+<div class="fn-collapsible-body">
+<div class="fn-db-explorer-host" id="database-explorer-root">Chargement de l’explorateur…</div>
+</div>
+</details>
+<details class="fn-ui-panel fn-ui-panel-pad fn-collapsible-panel fn-collapsible-panel--database" id="aliments-card">
+<summary class="fn-collapsible-summary">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">📦</span>
+<div>
+<span class="fn-ui-kicker">SQLite</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Mes aliments / ingrédients</h2>
+<p class="fn-ui-sub">Aliments enregistrés localement. Ouvre seulement si tu veux les consulter ou les corriger.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-ui-chip-kcal fn-pill">Base locale</span>
+<span aria-hidden="true" class="fn-collapsible-chevron">⌄</span>
+</div>
+</summary>
+<div class="fn-collapsible-body">
+<div class="fn-ui-actions">
+<button class="fn-ui-button fn-btn" onclick="restoreStarterAliments()" type="button">↺ Restaurer les ingrédients de base</button>
+<button class="fn-ui-button fn-btn" onclick="rebuildFoodsFromEntriesUI()" type="button">🧩 Récupérer depuis l’historique</button>
+</div>
+<div class="fn-ui-muted" id="bdd-recovery-note"></div>
+<div class="fn-ui-table-wrap">
+<table class="fn-ui-table">
+<thead><tr><th>Nom</th><th class="num">Kcal</th><th class="num">Prot.</th><th class="num">Gluc.</th><th class="num">Lip.</th><th></th></tr></thead>
+<tbody id="bdd-table"></tbody>
+</table>
+</div>
+</div>
+</details>
+<section class="fn-ui-panel fn-ui-panel-pad" id="unit-weights-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">⚖️</span>
+<div>
+<span class="fn-ui-kicker">Unités</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Poids par unité</h2>
+<p class="fn-ui-sub">Correspondances utilisées quand on parle en unités plutôt qu’en grammes.</p>
+</div>
+</div>
+</div>
+<div class="fn-ui-alert fn-widget">
+<div class="fn-ui-alert-icon">⚖️</div>
+<div><b>Principe</b><p>Les grammes restent la vérité nutritionnelle. Les unités servent de raccourci : 1 banane ≈ 120 g, 1 pot ≈ 100 g.</p></div>
+</div>
+<div class="fn-ui-stack" id="unit-weights-box"></div>
+</section>
+</div>
+</div>
+<div class="page fn-page" id="page-donnees">
+<div class="fn-ui-page fn-ui-stack">
+<section aria-label="Données et sauvegardes FoodNote" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">💾</span>
+<div>
+<span class="fn-ui-kicker">SQLite</span>
+<h1 class="fn-ui-title">Données &amp; sauvegardes</h1>
+<p class="fn-ui-sub">SQLite est la sauvegarde réelle. Le JSON sert surtout à l’export ou à une migration manuelle.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-ui-chip-kcal fn-pill">SQLite persistant</span>
+</div>
+<div class="fn-ui-metric-grid" id="donnees-summary"></div>
+<div class="fn-ui-muted" id="donnees-status">Prêt.</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="fn-diagnostics-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">✓</span>
+<div>
+<span class="fn-ui-kicker">Diagnostic</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Version &amp; santé de l’app</h2>
+<p class="fn-ui-sub">Recharge forcée, sauvegarde SQLite et checklist quotidienne.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-pill" title="Build cache-busting">FoodNote</span>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="FoodNoteDiagnostics.forceReload()" type="button">↻ Forcer recharge app</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteDiagnostics.checkSQLiteBackup(true)" type="button">💾 Vérifier sauvegarde SQLite</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteDiagnostics.runDailyChecklist()" type="button">✅ Checklist parcours quotidien</button>
+</div>
+<div class="fn-ui-code-log fn-diagnostics-result" id="fn-diagnostics-result"></div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="fn-mqtt-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">🏠</span>
+<div>
+<span class="fn-ui-kicker">Maison connectée</span>
+<h2 class="fn-ui-title fn-ui-title-inline">Home Assistant &amp; MQTT</h2>
+<p class="fn-ui-sub">Publication optionnelle des calories, macros, sport et poids du jour vers Home Assistant.</p>
+</div>
+</div>
+<span class="fn-ui-chip fn-pill" id="fn-mqtt-pill">Vérification...</span>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="FoodNoteMQTT.refresh(true)" type="button">↻ Vérifier MQTT</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteMQTT.publishDiscovery()" type="button">🏠 Découverte Home Assistant</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteMQTT.publishToday()" type="button">📡 Publier journée</button>
+<button class="fn-ui-button fn-btn" onclick="FoodNoteMQTT.test()" type="button">🧪 Test MQTT</button>
+</div>
+<div class="fn-ui-feature-grid fn-grid" id="fn-mqtt-grid"></div>
+<div class="fn-ui-code-log fn-mqtt-result" id="fn-mqtt-result"></div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-backup-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">💾</span><div><span class="fn-ui-kicker">Sauvegarde principale</span><h2 class="fn-ui-title fn-ui-title-inline">Sauvegarde réelle SQLite</h2><p class="fn-ui-sub">La vraie base FoodNote est <strong>data/foodnote.db</strong>. C’est ce fichier qu’il faut sauvegarder.</p></div></div>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="downloadSQLiteBackup()">⬇ Télécharger foodnote.db</button>
+<button class="fn-ui-button fn-btn" onclick="document.getElementById('sqlite-restore-file').click()">⬆ Restaurer foodnote.db</button>
+<input accept=".db,.sqlite,.sqlite3,application/octet-stream" class="fn-field" id="sqlite-restore-file" onchange="importSQLiteBackup(event)" style="display:none" type="file"/>
+<button class="fn-ui-button fn-btn" onclick="showSQLiteBackupHelp()">Où est la base ?</button>
+</div>
+<div class="fn-ui-alert-list" id="sqlite-restore-preview"></div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-auto-backup-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">🕒</span><div><span class="fn-ui-kicker">Automatique</span><h2 class="fn-ui-title fn-ui-title-inline">Auto backup journalier</h2><p class="fn-ui-sub">Crée une copie de <strong>foodnote.db</strong> dans <code>data/auto_backups</code>.</p></div></div>
+</div>
+<div class="fn-ui-tile fn-ui-tile-pad fn-widget">
+<label class="fn-ui-toggle-tile">
+<input class="fn-field" id="auto-backup-enabled" onchange="saveAutoBackupSettings()" type="checkbox"/>
+<span><strong>Activer l’auto backup journalier</strong><p>FoodNote crée une sauvegarde selon l’heure et la rétention choisies.</p></span>
+</label>
+<div class="fn-ui-form-grid-2">
+<label class="fn-ui-field">Heure<input class="fn-field" id="auto-backup-time" onchange="saveAutoBackupSettings()" type="time" value="03:00"/></label>
+<label class="fn-ui-field">Garder<select class="fn-field" id="auto-backup-keep" onchange="saveAutoBackupSettings()"><option value="7">7 sauvegardes</option><option selected="" value="14">14 sauvegardes</option><option value="30">30 sauvegardes</option><option value="60">60 sauvegardes</option></select></label>
+</div>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-ui-button-primary fn-btn" onclick="runAutoBackupNow()">💾 Sauvegarder maintenant</button>
+<button class="fn-ui-button fn-btn" onclick="refreshAutoBackupStatus(true)">🔄 Actualiser</button>
+</div>
+<div class="fn-ui-code-log" id="auto-backup-status">Lecture de la configuration...</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-diagnostic-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">🩺</span><div><span class="fn-ui-kicker">Contrôle</span><h2 class="fn-ui-title fn-ui-title-inline">Diagnostic sauvegarde</h2><p class="fn-ui-sub">Contrôle rapide de ce qui est réellement présent dans SQLite avant export/restauration.</p></div></div>
+</div>
+<div class="fn-ui-code-log" id="backup-status-panel">Clique sur actualiser pour vérifier la base.</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-btn" onclick="refreshBackupStatus(true)">🔎 Actualiser le diagnostic</button>
+<button class="fn-ui-button fn-btn" onclick="rebuildProfileFromUI()">🧩 Reconstruire profil/objectifs</button>
+<button class="fn-ui-button fn-btn" onclick="rebuildDaysFromUI()">↺ Reconstruire journées</button>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-json-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">📤</span><div><span class="fn-ui-kicker">Migration</span><h2 class="fn-ui-title fn-ui-title-inline">Export JSON</h2><p class="fn-ui-sub">Export lisible utile pour contrôle, transfert manuel ou dépannage. La sauvegarde principale reste foodnote.db.</p></div></div>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-btn" onclick="exportJSON()">⬇ Exporter JSON</button>
+<button class="fn-ui-button fn-btn" onclick="copyBackupJSON()">Copier JSON</button>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-export-card">
+<div class="fn-ui-export-root" id="data-export-advanced"></div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad" id="data-import-card">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">📥</span><div><span class="fn-ui-kicker">Restauration</span><h2 class="fn-ui-title fn-ui-title-inline">Restaurer JSON</h2><p class="fn-ui-sub">Import de migration/dépannage restauré dans SQLite côté serveur.</p></div></div>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-btn" onclick="document.getElementById('import-file').click()">⬆ Importer JSON</button>
+<input accept=".json,application/json" class="fn-field" id="import-file" onchange="importJSON(event)" style="display:none" type="file"/>
+</div>
+</section>
+<section class="fn-ui-panel fn-ui-panel-pad danger-zone">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left"><span aria-hidden="true" class="fn-ui-icon fn-icon">🧹</span><div><span class="fn-ui-kicker">Zone sensible</span><h2 class="fn-ui-title fn-ui-title-inline">Nettoyage</h2><p class="fn-ui-sub">Actions irréversibles. Sauvegarde d’abord le fichier SQLite <strong>data/foodnote.db</strong>.</p></div></div>
+</div>
+<div class="fn-ui-actions fn-ui-wrap">
+<button class="fn-ui-button fn-ui-button-critical fn-btn" onclick="resetJournalOnly()">Vider le journal</button>
+<button class="fn-ui-button fn-ui-button-critical fn-btn" onclick="resetFoodDatabaseOnly()">Supprimer mes aliments</button>
+<button class="fn-ui-button fn-ui-button-critical fn-btn" onclick="resetAllData()">Réinitialiser toute l’app</button>
+</div>
+</section>
+</div>
+</div>
+<div class="page fn-page" id="page-recap"></div>
+<div class="page fn-page" id="page-stats">
+<div class="fn-ui-page fn-ui-stack fn-ui-stats-page">
+<section aria-label="Navigation statistiques FoodNote" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-title-row">
+<div class="fn-ui-title-left">
+<span aria-hidden="true" class="fn-ui-icon fn-icon">📊</span>
+<div>
+<span class="fn-ui-kicker">Analyse</span>
+<h1 class="fn-ui-title">Stats</h1>
+<p class="fn-ui-sub">Les statistiques sont séparées en panneaux lisibles avec les mêmes briques UI que le reste de l’app.</p>
+</div>
+</div>
+<div aria-label="Période des statistiques" class="fn-ui-tabs" role="tablist">
+<button class="fn-ui-tab stats-tab active fn-btn" id="stats-tab-journalier" onclick="setStatsPanel('journalier')" type="button">Journalier</button>
+<button class="fn-ui-tab stats-tab fn-btn" id="stats-tab-hebdo" onclick="setStatsPanel('hebdo')" type="button">Hebdo</button>
+<button class="fn-ui-tab stats-tab fn-btn" id="stats-tab-mensuel" onclick="setStatsPanel('mensuel')" type="button">Mensuel</button>
+</div>
+</div>
+</section>
+<div class="stats-panel fn-ui-stack active" id="stats-panel-journalier">
+<section aria-label="Courbes jour par jour" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Courbes jour par jour</b><em>31 derniers points</em></div>
+<div class="fn-ui-chart-grid fn-ui-chart-grid-daily">
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories avant sport</div><canvas id="chart-day-kcal"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Net après sport</div><canvas id="chart-day-net"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines</div><canvas id="chart-day-prot"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍞 Glucides</div><canvas id="chart-day-gluc"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🥑 Lipides</div><canvas id="chart-day-lip"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🚴 Sport</div><canvas id="chart-day-sport"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids</div><canvas id="chart-day-poids"></canvas></div>
+</div>
+</section>
+<section aria-label="Derniers jours" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Derniers jours</b><em>journal nutritionnel résumé</em></div>
+<div class="fn-ui-list" id="stats-daily-rows"></div>
+</section>
+</div>
+<div class="stats-panel fn-ui-stack" id="stats-panel-hebdo">
+<section aria-label="Comparatif semaine par semaine" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Comparatif semaine par semaine</b><em>moyennes et progression</em></div>
+<div class="fn-ui-list" id="stats-week-compare"></div>
+</section>
+<section aria-label="Graphiques hebdomadaires" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Graphiques hebdomadaires</b><em>tendances</em></div>
+<div class="fn-ui-chart-grid">
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories moyennes</div><canvas id="chart-week-kcal"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines moyennes</div><canvas id="chart-week-prot"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids moyen</div><canvas id="chart-week-poids"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">📅 Jours saisis</div><canvas id="chart-week-days"></canvas></div>
+</div>
+</section>
+<section aria-label="Historique macros hebdomadaire" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Historique macros</b><em>net calorique</em></div>
+<div class="fn-ui-chart-tile fn-ui-chart-wide"><canvas id="chart-macros"></canvas></div>
+</section>
+</div>
+<div class="stats-panel fn-ui-stack" id="stats-panel-mensuel">
+<section aria-label="Comparatif mois par mois" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Comparatif mois par mois</b><em>vue longue période</em></div>
+<div class="fn-ui-list" id="stats-month-compare"></div>
+</section>
+<section aria-label="Graphiques mensuels" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Graphiques mensuels</b><em>tendances</em></div>
+<div class="fn-ui-chart-grid">
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🔥 Calories moyennes</div><canvas id="chart-month-kcal"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">🍖 Protéines moyennes</div><canvas id="chart-month-prot"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">⚖️ Poids moyen</div><canvas id="chart-month-poids"></canvas></div>
+<div class="fn-ui-chart-tile"><div class="fn-ui-chart-title">📅 Jours saisis</div><canvas id="chart-month-days"></canvas></div>
+</div>
+</section>
+<section aria-label="Historique macros mensuel" class="fn-ui-panel fn-ui-panel-pad">
+<div class="fn-ui-section-head"><b>Historique macros mensuel</b><em>net calorique</em></div>
+<div class="fn-ui-chart-tile fn-ui-chart-wide"><canvas id="chart-month-net"></canvas></div>
+</section>
+</div>
+</div>
+</div>
 </div></div>
-<script src="assets/js/00-utils-storage.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/00-utils-storage.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
 <script>
 function getCurrentTheme() {
   try {
-    const t = localStorage.getItem('foodnote_theme') || 'dark';
+    const t = localStorage.getItem('foodnote_theme') || 'light';
     return (t === 'light' || t === 'dark') ? t : 'dark';
   } catch (e) {
     return 'dark';
@@ -1271,8 +1172,6 @@ function getCurrentTheme() {
 }
 function applyTheme(theme) {
   theme = (theme === 'light') ? 'light' : 'dark';
-  const link = document.getElementById('theme-css');
-  if (link) link.href = 'assets/css/style-' + theme + '.css?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
   try { localStorage.setItem('foodnote_theme', theme); } catch (e) {}
   if (typeof saveSettingRemote === 'function') saveSettingRemote('theme', theme);
   document.body.classList.toggle('dark', theme === 'dark');
@@ -1300,32 +1199,30 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
 });
 </script>
-<script src="assets/js/05-ui-components.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/11-starter-foods.js?v=foodnote_beta_0_22_179_starter_foods_150_20260531"></script>
-<script src="assets/js/10-data.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/20-profile-state.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/30-nutrition-foods.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/40-ia-integrations.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/50-profile-phases-settings.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/60-navigation.js?v=foodnote_beta_0_22_179_remove_reference_page_20260531"></script>
-<script src="assets/js/61-mobile-bottom-nav.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/62-theme-lab.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_22_179_remove_reference_page_20260531"></script>
-<script src="assets/js/72-database-explorer.js?v=foodnote_beta_0_22_179_database_explorer_20260531"></script>
-<script src="assets/js/80-stats-onboarding-init.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/81-stats-unified.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/82-recap.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-<script src="assets/js/99-recap-badges-compact.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
+<script src="assets/js/05-ui-components.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/11-starter-foods.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/10-data.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/20-profile-state.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/30-nutrition-foods.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/40-ia-integrations.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/50-profile-phases-settings.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/60-navigation.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/61-mobile-bottom-nav.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<!-- Theme Lab JS temporaire isolé : non chargé dans cette préversion design. -->
+<script src="assets/js/70-history-export-storage.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/72-database-explorer.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/80-stats-onboarding-init.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/81-stats-unified.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/82-recap.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
 <script>
 // Le popup Ajouter est piloté par FoodAddModalController.
 // Le contrôleur possède le cycle de vie popup ET les actions principales du modal.
 window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
 </script>
-<script src="assets/js/95-food-add-clean.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531"></script>
-
+<script src="assets/js/95-food-add-clean.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
 <script>
 (function(){
-  const BUILD = 'foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
+  const BUILD = 'foodnote_beta_0_24_js_syntax_fix_20260608';
   const deferred = [
     '/vendor/html5-qrcode.min.js',
     'assets/js/90-diagnostics.js',
@@ -1364,42 +1261,53 @@ window.__FoodNoteFoodAddModalControllerOwnsPopup = true;
   else window.addEventListener('load', schedule, {once:true});
 })();
 </script>
-<script src="assets/js/94-capture-workflow-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-capture-workflow="js"></script>
-<script src="assets/js/96-food-add-modal-controller.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-modal-controller="js"></script>
-<script src="assets/js/97-food-add-domain-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-domain="js"></script>
-<script src="assets/js/98-food-capture-flows-core.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-capture-flows="js"></script>
-<script src="assets/js/101-food-add-hardening-checkpoint.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-food-add-hardening="js"></script>
-<script src="assets/js/00-foodnote-smoke-tests.js?v=foodnote_beta_0_22_179_journal_title_visual_fix_20260531" data-foodnote-smoke-tests="js"></script>
+<script data-foodnote-capture-workflow="js" src="assets/js/94-capture-workflow-core.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script data-foodnote-food-add-modal-controller="js" src="assets/js/96-food-add-modal-controller.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script data-foodnote-food-add-domain="js" src="assets/js/97-food-add-domain-core.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script data-foodnote-food-capture-flows="js" src="assets/js/98-food-capture-flows-core.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script data-foodnote-food-add-health="js" src="assets/js/101-food-add-health-diagnostics.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script data-foodnote-smoke-tests="js" src="assets/js/00-foodnote-smoke-tests.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
 <script>
-// FoodNote beta 0.22.179 — sécurité de diagnostic : fallback autonome si le fichier 101 ne s'est pas chargé.
+// FoodNote beta 0.24 préversion — sécurité de diagnostic : fallback autonome si le diagnostic Ajouter ne s'est pas chargé.
 (function(){
-  const BUILD = 'foodnote_beta_0_22_179_journal_title_visual_fix_20260531';
+  const BUILD = 'foodnote_beta_0_24_js_syntax_fix_20260608';
   function fallbackHealth(){
-    var real = window.FoodNoteFoodAddHardening;
+    var real = window.FoodNoteFoodAddDiagnostics || window.FoodNoteFoodAddHardening;
     if (real && real.loaded && typeof real.health === 'function') return real.health();
     return {
       version: BUILD,
       installed: false,
       ok: false,
       fallback: true,
+      healthDiagnosticsLoaded: !!window.__FoodNoteFoodAddHealthDiagnosticsLoaded,
       hardeningScriptLoaded: !!window.__FoodNoteFoodAddHardeningScriptLoaded,
-      issues: ['hardening_module_not_loaded_or_cached_index'],
+      issues: ['food_add_health_module_not_loaded_or_cached_index'],
       modules: {
         modal: !!window.FoodNoteFoodAddModalController,
         domain: !!window.FoodNoteFoodAddDomain,
         capture: !!window.FoodNoteFoodCaptureFlows,
-        searchResults: 'disabled_legacy_module',
+        integratedSearch: !!(window.handleDBSearchInput && window.pickDBSuggestion),
         ux: !!window.FoodNoteFoodAddModalUX
       },
-      advice: 'Recharge forcée navigateur/WebView, vérifier que public/assets/js/101-food-add-hardening-checkpoint.js existe et que index.html correspond bien au ZIP installé.'
+      advice: 'Recharge forcée navigateur/WebView, vérifier que public/assets/js/101-food-add-health-diagnostics.js existe et que index.html correspond bien au ZIP installé.'
     };
   }
-  if (!window.FoodNoteFoodAddHardening) {
-    window.FoodNoteFoodAddHardening = { version: BUILD, loaded: false, health: fallbackHealth, audit: fallbackHealth, print: fallbackHealth };
+  if (!window.FoodNoteFoodAddDiagnostics) {
+    window.FoodNoteFoodAddDiagnostics = { version: BUILD, loaded: false, health: fallbackHealth, audit: fallbackHealth, print: fallbackHealth };
   }
+  if (!window.FoodNoteFoodAddHardening) window.FoodNoteFoodAddHardening = window.FoodNoteFoodAddDiagnostics;
   if (!window.FoodNoteFoodAddHealth) window.FoodNoteFoodAddHealth = fallbackHealth;
   if (!window.FoodAddHealth) window.FoodAddHealth = fallbackHealth;
 })();
 </script>
+<script>
+function toggleProfileMenu(ev){ if(ev){ev.stopPropagation();} var m=document.getElementById('fn-profile-menu'); var t=document.getElementById('fn-profile-trigger'); if(!m)return; if(m.hasAttribute('hidden')){ if(m.parentElement!==document.body) document.body.appendChild(m); var r=t.getBoundingClientRect(); m.style.position='fixed'; m.style.top=(r.bottom+8)+'px'; m.style.right=Math.max(8,(window.innerWidth-r.right))+'px'; m.style.left='auto'; m.style.zIndex='13000'; m.removeAttribute('hidden'); t.setAttribute('aria-expanded','true'); } else { m.setAttribute('hidden',''); t.setAttribute('aria-expanded','false'); } }
+function closeProfileMenu(){ var m=document.getElementById('fn-profile-menu'); var t=document.getElementById('fn-profile-trigger'); if(m)m.setAttribute('hidden',''); if(t)t.setAttribute('aria-expanded','false'); }
+document.addEventListener('click', function(e){ var w=document.getElementById('fn-profile-trigger'); var m=document.getElementById('fn-profile-menu'); if(!m||m.hasAttribute('hidden'))return; if(w&&w.contains(e.target))return; if(m.contains(e.target))return; closeProfileMenu(); });
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeProfileMenu(); });
+</script>
+<script src="assets/js/120-quick-create-food.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/121-frequent-foods.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
+<script src="assets/js/122-swipe-nav.js?v=foodnote_beta_0_24_js_syntax_fix_20260608"></script>
 </body>
 </html>
